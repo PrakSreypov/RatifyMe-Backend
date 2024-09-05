@@ -6,6 +6,7 @@ const cors = require("cors");
 // Error handling
 const AppError = require('./utils/appError')
 const catchAsync = require('./utils/catchAsync')
+const globalErrorHandling = require('./controllers/errorControllers')
 
 const app = express();
 
@@ -26,6 +27,6 @@ app.all('*', (req, res, next) => {
 })
 
 // Global Error Handling Middleware
-app.use()
+app.use(globalErrorHandling)
 
 module.exports = app;
