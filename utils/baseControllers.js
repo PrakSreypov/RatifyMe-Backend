@@ -1,11 +1,11 @@
 // Utils module
-const AppError = require("../utils/appError");
-const catchAsync = require("../utils/catchAsync");
+const AppError = require("./appError");
+const catchAsync = require("./catchAsync");
 
 /**
  *
  * @class BaseController : Crud default controller
- * @param Model : model name 
+ * @param Model : model name
  */
 class BaseController {
     constructor(Model) {
