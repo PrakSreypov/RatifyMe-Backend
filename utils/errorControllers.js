@@ -1,5 +1,5 @@
 const { Sequelize } = require("sequelize");
-const AppError = require("../utils/appError");
+const AppError = require("./appError");
 
 // Error handling func
 const handleUniqueConstraintError = (err) => {

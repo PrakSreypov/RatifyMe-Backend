@@ -4,9 +4,9 @@ const helmet = require("helmet");
 const cors = require("cors");
 
 // Error handling
-const AppError = require('./utils/appError')
-const catchAsync = require('./utils/catchAsync')
-const globalErrorHandling = require('./controllers/errorControllers')
+const AppError = require("./utils/appError");
+const catchAsync = require("./utils/catchAsync");
+const globalErrorHandling = require("./utils/errorControllers");
 
 const app = express();
 
@@ -22,11 +22,11 @@ if (process.env.NODE_ENV === "development") {
 // Routes
 
 // Handling Unhandled Routes
-app.all('*', (req, res, next) => {
-    next(new AppError(`Can't find ${req.originalUrl} on this server`))
-})
+app.all("*", (req, res, next) => {
+    next(new AppError(`Can't find ${req.originalUrl} on this server`));
+});
 
 // Global Error Handling Middleware
-app.use(globalErrorHandling)
+app.use(globalErrorHandling);
 
 module.exports = app;
