@@ -18,8 +18,8 @@ const Genders = sequelize.define(
                     msg: "Gender cannot be empty",
                 },
                 isIn: {
-                    args: [["Male", "Female", "Prefer not to say"]],
-                    msg: 'Gender must be Male, Female or Prefer not to say.'
+                    args: [["male", "female"]],
+                    msg: 'Gender must be male or female'
                 },
             },
         },
