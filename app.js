@@ -5,8 +5,10 @@ const cors = require("cors");
 
 // Error handling
 const AppError = require("./utils/appError");
-const catchAsync = require("./utils/catchAsync");
 const globalErrorHandling = require("./utils/errorControllers");
+
+// Import the dynamic route loader
+const routers = require('./routers');
 
 const app = express();
 
@@ -19,7 +21,8 @@ if (process.env.NODE_ENV === "development") {
     app.use(morgan("dev"));
 }
 
-// Routes
+// Use the dynamically loaded routes
+app.use('/api/v1', routers);
 
 // Handling Unhandled Routes
 app.all("*", (req, res, next) => {
