@@ -9,9 +9,10 @@ const catchAsync = require("./catchAsync");
  * @param {Array} [uniqueFields=[]] - Array of unique fields to check for uniqueness
  */
 class BaseController {
-    constructor(Model, uniqueFields = []) {
+    constructor(Model, uniqueFields = [], associations = []) {
         this.Model = Model;
         this.uniqueFields = Array.isArray(uniqueFields) ? uniqueFields : [];
+        this.associations = associations;
     }
 
     // Check for existing unique fields
@@ -32,7 +33,7 @@ class BaseController {
 
     // Check if a record exists by ID
     async checkRecordExists(id) {
-        const record = await this.Model.findByPk(id);
+        const record = await this.Model.findByPk(id, { include: this.associations });
         if (!record) {
             throw new AppError("No record found with this ID", 404);
         }
@@ -41,7 +42,7 @@ class BaseController {
 
     // Fetch all records
     getAll = catchAsync(async (req, res, next) => {
-        const records = await this.Model.findAll();
+        const records = await this.Model.findAll({ include: this.associations });
         res.status(200).json({
             status: "success",
             data: records,
@@ -60,6 +61,7 @@ class BaseController {
         const newRecord = await this.Model.create(req.body);
         res.status(201).json({
             status: "success",
+            message: `${this.Model.name} successfully created`,
             data: newRecord,
         });
     });
@@ -89,7 +91,7 @@ class BaseController {
         const isDataIdentical = Object.keys(req.body).every((field) => req.body[field] === record[field]);
 
         if (isDataIdentical) {
-            return next(new AppError("Nothing to update. The values provided are the same.", 400));
+            return next(new AppError("No new changes detected!", 400));
         }
 
         // Check for existing fields during update
@@ -102,10 +104,11 @@ class BaseController {
         });
 
         // Retrieve the updated record
-        const updatedRecord = await this.Model.findByPk(id);
+        const updatedRecord = await this.Model.findByPk(id, { include: this.associations });
 
         res.status(200).json({
             status: "success",
+            message: `${this.Model.name} successfully updated`,
             data: updatedRecord,
         });
     });
@@ -120,7 +123,7 @@ class BaseController {
         });
         res.status(200).json({
             status: "success",
-            message: "Record successfully deleted.",
+            message: `${this.Model.name} successfully deleted`,
         });
     });
 
@@ -132,7 +135,7 @@ class BaseController {
         });
         res.status(200).json({
             status: "success",
-            message: "Records successfully deleted.",
+            message: "All Records successfully deleted.",
         });
     });
 }
