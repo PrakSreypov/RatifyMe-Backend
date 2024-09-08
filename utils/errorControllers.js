@@ -7,7 +7,7 @@ const handleForeignKeyConstraintError = (err) => {
     return new AppError(message, 400);
 };
 
-// Error handling func
+// Handle unique constraint error (e.g., unique fields)
 const handleUniqueConstraintError = (err) => {
     const field = Object.keys(err.fields)[0]; // Get the field name that caused the error
     const value = err.fields[field]; // Get the value of the field
@@ -15,20 +15,27 @@ const handleUniqueConstraintError = (err) => {
     return new AppError(message, 400);
 };
 
-// Error validation func
+// Handle validation errors from Sequelize
 const handleValidationErrorDB = (err) => {
     const errors = Object.values(err.errors).map((el) => el.message);
     const message = `Invalid input data. ${errors.join(". ")}`;
     return new AppError(message, 400);
 };
 
-// Error cast func
+// Handle casting errors (invalid type provided)
 const handleCastErrorDB = (err) => {
     const message = `Invalid ${err.path}: ${err.value}. Please provide a valid value.`;
     return new AppError(message, 400);
 };
 
-// Development Error Handler
+// Handle JWT Error
+const handleJWTError = () => new AppError("Invalid token. Please log in again", 401);
+
+// Handle JWT expire error
+const handleJWTExpiredError = () => new AppError("Your Token has expired! Please login again!!!", 401);
+
+// ========== Start Development environment Error Handler ==========
+// Send error in development
 const sendErrorDev = (err, req, res) => {
     res.status(err.statusCode).json({
         status: err.status,
@@ -37,8 +44,10 @@ const sendErrorDev = (err, req, res) => {
         stack: err.stack,
     });
 };
+// ========== End Development environment Error Handler ==========
 
-// Production Error Handler
+// ========== Start Production environment Error Handler ==========
+// Send error in production
 const sendErrorProd = (err, req, res) => {
     if (req.originalUrl.startsWith("/api")) {
         // API responses
@@ -69,22 +78,20 @@ const sendErrorProd = (err, req, res) => {
         });
     }
 };
+// ========== End Production environment Error Handler ==========
 
-// Handle JWT Error func
-const handleJWTError = () => new AppError("Invalid token. Please log in again", 401);
-
-// handle JWT expire error func
-const handleJWTExpiredError = () => new AppError("Your Token has expired! Please login again!!!", 401);
-
-// Centralized Error Middleware
+// ========== Start Centralized Error Middleware ==========
 module.exports = (err, req, res, next) => {
     err.statusCode = err.statusCode || 500;
     err.status = err.status || "error";
 
-    // Handle errors based on environment
+    // Handle errors based on development environment
     if (process.env.NODE_ENV === "development") {
         sendErrorDev(err, req, res);
-    } else if (process.env.NODE_ENV === "production") {
+    }
+
+    // Handle errors based on production environment
+    else if (process.env.NODE_ENV === "production") {
         // create new instance or shallow copy of err
         let error = Object.create(err);
 
@@ -122,3 +129,4 @@ module.exports = (err, req, res, next) => {
         sendErrorProd(error, req, res);
     }
 };
+// ========== End Centralized Error Middleware ==========
