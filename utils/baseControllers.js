@@ -7,6 +7,7 @@ const catchAsync = require("./catchAsync");
  * @class BaseController : CRUD default controller
  * @param {Object} Model - Sequelize model
  * @param {Array} [uniqueFields=[]] - Array of unique fields to check for uniqueness
+ * @param {Array} [associations=[]] - Array of associated models to include in queries
  */
 class BaseController {
     constructor(Model, uniqueFields = [], associations = []) {
