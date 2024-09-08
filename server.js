@@ -8,7 +8,7 @@ dotenv.config({ path: `${process.cwd()}/.env` });
 // Sync models with database
 const syncDb = async () => {
     try {
-        await sequelize.sync({ force: true, logging: false, alter: true });
+        await sequelize.sync({ force: false, logging: false, alter: true });
         console.log("Database synced successfully");
     } catch (err) {
         console.log("Database synced failed", err);

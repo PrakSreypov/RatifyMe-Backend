@@ -31,9 +31,9 @@ const Roles = sequelize.define(
                     msg: "Role title must contain only letters",
                 },
                 isIn: {
-                    args: ['admin', 'institutionOwner, issuer, earner'],
-                    msg: 'Role in must admin, institutionOwner, issuer or earner.'
-                }
+                    args: [["admin", "institutionOwner", "issuer", "earner"]],
+                    msg: "Role in must admin, institutionOwner, issuer or earner.",
+                },
             },
         },
     },
@@ -41,8 +41,8 @@ const Roles = sequelize.define(
         indexes: [
             {
                 unique: true,
-                fields: ['name'],
-            }
+                fields: ["name"],
+            },
         ],
         timestamps: false,
     },
