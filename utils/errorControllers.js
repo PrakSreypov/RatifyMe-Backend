@@ -1,6 +1,12 @@
 const { Sequelize } = require("sequelize");
 const AppError = require("./appError");
 
+// Error handling functions
+const handleForeignKeyConstraintError = (err) => {
+    const message = `Invalid reference: The related record with ${err.fields} '${err.value}' does not exist.`;
+    return new AppError(message, 400);
+};
+
 // Error handling func
 const handleUniqueConstraintError = (err) => {
     const field = Object.keys(err.fields)[0]; // Get the field name that caused the error
@@ -65,12 +71,10 @@ const sendErrorProd = (err, req, res) => {
 };
 
 // Handle JWT Error func
-const handleJWTError = () =>
-    new AppError("Invalid token. Please log in again", 401);
+const handleJWTError = () => new AppError("Invalid token. Please log in again", 401);
 
 // handle JWT expire error func
-const handleJWTExpiredError = () =>
-    new AppError("Your Token has expired! Please login again!!!", 401);
+const handleJWTExpiredError = () => new AppError("Your Token has expired! Please login again!!!", 401);
 
 // Centralized Error Middleware
 module.exports = (err, req, res, next) => {
@@ -83,6 +87,11 @@ module.exports = (err, req, res, next) => {
     } else if (process.env.NODE_ENV === "production") {
         // create new instance or shallow copy of err
         let error = Object.create(err);
+
+        // Handle specific Sequelize errors
+        if (error instanceof Sequelize.ForeignKeyConstraintError) {
+            error = handleForeignKeyConstraintError(err);
+        }
 
         // Check for specific Sequelize errors
         if (err instanceof Sequelize.UniqueConstraintError) {
@@ -103,14 +112,12 @@ module.exports = (err, req, res, next) => {
         }
         if (error instanceof Sequelize.DatabaseError) {
             // Handle other SequelizeDatabaseError cases
-            const message =
-                "Database operation failed. Please check your input and try again.";
+            const message = "Database operation failed. Please check your input and try again.";
             error = new AppError(message, 400);
         }
 
         if (error.name === "JsonWebTokenError") error = handleJWTError(error);
-        if (error.name === "TokenExpiredError")
-            error = handleJWTExpiredError(error);
+        if (error.name === "TokenExpiredError") error = handleJWTExpiredError(error);
 
         sendErrorProd(error, req, res);
     }
