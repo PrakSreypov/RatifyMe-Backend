@@ -1,9 +1,10 @@
-const Specifications = require("../../models/Specifications");
-const BaseControllers = require("../../utils/baseControllers");
-const FieldOfStudies = require("../../models/FieldOfStudies");
-const catchAsync = require("../../utils/catchAsync");
-const institutionControllers = require("../institution/institutionControllers");
 
+const Specifications = require("../../models/Specifications");
+const FieldOfStudies = require("../../models/FieldOfStudies");
+
+const BaseControllers = require("../../utils/baseControllers");
+
+const catchAsync = require("../../utils/catchAsync");
 class SpecificationControllers extends BaseControllers {
     constructor() {
         super(Specifications, [FieldOfStudies]);
