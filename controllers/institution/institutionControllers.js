@@ -5,9 +5,11 @@ const catchAsync = require("../../utils/catchAsync");
 
 class InstitutionController extends BaseController {
     constructor() {
-        super(Institution);
+        // Pass Institution model and associations ()
+        super(Institution, [Users]);
     }
 
+    // override the 'getAll'
     getAll = catchAsync(async (req, res, next) => {
         const institution = await Institution.findAll({
             include: [{ model: Users }],
