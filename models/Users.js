@@ -1,5 +1,7 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../configs/database");
+const bcrypt = require("bcryptjs");
+const crypto = require("crypto");
 
 const Users = sequelize.define(
     "Users",
@@ -22,7 +24,7 @@ const Users = sequelize.define(
                 },
                 len: {
                     args: [2, 30],
-                    msg: "First name must be between 2 and 30 characters long.",    
+                    msg: "First name must be between 2 and 30 characters long.",
                 },
             },
         },
@@ -163,11 +165,7 @@ const Users = sequelize.define(
                     msg: "Password must be between 8 and 20 characters",
                 },
                 isStrongPassword(value) {
-                    if (
-                        !/(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[\W_]).{8,}/.test(
-                            value,
-                        )
-                    ) {
+                    if (!/(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[\W_]).{8,}/.test(value)) {
                         throw new Error(
                             "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character.",
                         );
@@ -194,13 +192,29 @@ const Users = sequelize.define(
         indexes: [
             {
                 unique: true,
-                fields: ["email", "username"],
+                fields: ["email", "username", "phoneNumber"],
             },
         ],
     },
     {
         timestamps: true,
+        defaultScope: {
+            attributes: { exclude: ["password", "passwordConfirm"] },
+        },
+        scopes: {
+            attributes: { include: ["password"] },
+        },
     },
 );
+
+// Ensure password and passwordConfirm are not included in the response
+Users.prototype.toJSON = function () {
+    const values = Object.assign({}, this.get());
+
+    delete values.password;
+    delete values.passwordConfirm;
+
+    return values;
+};
 
 module.exports = Users;
