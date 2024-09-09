@@ -1,4 +1,4 @@
-const Institution = require("../../models/Institution");
+const Institutions = require("../../models/Institution");
 const BaseController = require("../../utils/baseControllers");
 const Users = require('../../models/Users')
 const catchAsync = require("../../utils/catchAsync");
@@ -6,7 +6,7 @@ const catchAsync = require("../../utils/catchAsync");
 class InstitutionController extends BaseController {
     constructor() {
         // Pass Institution model and associations ()
-        super(Institution, [Users]);
+        super(Institutions, [Users]);
     }
 
     // override the 'getAll'
