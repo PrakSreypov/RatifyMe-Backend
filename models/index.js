@@ -62,15 +62,15 @@ AcademicBackgrounds.belongsTo(Users, {
 // ============ End Users Association ============
 
 // ============ Start Academics Association (for earner) ============
-// AcademicBackgrounds & Institution
+// AcademicBackgrounds & Institution 
 Institutions.hasMany(AcademicBackgrounds, {
-    foreignKey: "institutionId",
-    onDelete: "CASCADE",
-    onUpdate: "CASCADE",
-});
+    foreignKey: 'institutionId',
+    onDelete: 'CASCADE',
+    onUpdate: 'CASCADE'
+})
 AcademicBackgrounds.belongsTo(Institutions, {
-    foreignKey: "institutionId",
-});
+    foreignKey: 'institutionId'
+})
 
 // AcademicBackground & FieldOfStudy association
 AcademicBackgrounds.belongsTo(FieldOfStudies, {
