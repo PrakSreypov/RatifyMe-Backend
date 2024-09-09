@@ -3,10 +3,12 @@ const router = express.Router();
 
 const academicLevelRouters = require("./academicLevelRouters");
 const fieldOfStudyRouters = require("./fieldOfStudyRouters");
-const specificationRouter = require("./specificationRouter");
+const specializationRouters = require("./specializationRouters");
+const courseRouters = require("./courseRouters");
 
 router.use("/academiclevels", academicLevelRouters);
 router.use("/fieldofstudies", fieldOfStudyRouters);
-router.use("/specifications", specificationRouter);
+router.use("/specializations", specializationRouters);
+router.use("/courses", courseRouters);
 
 module.exports = router;
