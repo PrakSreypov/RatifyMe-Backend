@@ -217,4 +217,22 @@ Users.prototype.toJSON = function () {
     return values;
 };
 
+// Hash password
+Users.beforeSave(async (user) => {
+    // Only run this function if the password was actually modified
+    if (!user.changed("password")) return;
+
+    user.password = await bcrypt.hash(user.password, 12);
+});
+
+// Adding a method to the user model prototype to check if a given password is correct
+Users.prototype.correctPassword = async function (cadidatePassword, userPassword) {
+    return await bcrypt.compare(cadidatePassword, userPassword);
+
+    /*
+        candidatePassword: the password entered by the user attempting to log in
+        userPassword: the hased password stored in the database for this user
+    */
+};
+
 module.exports = Users;
