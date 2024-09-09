@@ -7,7 +7,7 @@ const FieldOfStudies = require("./FieldOfStudies");
 const AcademicBackgrounds = require("./AcademicBackgrounds");
 const Specifications = require("./Specifications");
 const Courses = require("./Courses");
-const Institution = require("./Institution");
+const Institutions = require("./Institutions");
 const ServicePlans = require("./ServicePlans");
 const Subscriptions = require("./Subscriptions");
 const Payments = require("./Payments");
@@ -63,12 +63,12 @@ AcademicBackgrounds.belongsTo(Users, {
 
 // ============ Start Academics Association (for earner) ============
 // AcademicBackgrounds & Institution
-Institution.hasMany(AcademicBackgrounds, {
+Institutions.hasMany(AcademicBackgrounds, {
     foreignKey: "institutionId",
     onDelete: "CASCADE",
     onUpdate: "CASCADE",
 });
-AcademicBackgrounds.belongsTo(Institution, {
+AcademicBackgrounds.belongsTo(Institutions, {
     foreignKey: "institutionId",
 });
 
@@ -136,12 +136,12 @@ Subscriptions.belongsTo(ServicePlans, {
 });
 
 // Institution & Subscription
-Institution.hasMany(Subscriptions, {
+Institutions.hasMany(Subscriptions, {
     foreignKey: "institutionId",
     onDelete: "CASCADE",
     onUpdate: "CASCADE",
 });
-Subscriptions.belongsTo(Institution, {
+Subscriptions.belongsTo(Institutions, {
     foreignKey: "institutionId",
 });
 
@@ -158,22 +158,22 @@ Payments.belongsTo(Subscriptions, {
 
 // ============ Start Institutions Association ============
 // Users & Institution
-Users.hasOne(Institution, {
+Users.hasOne(Institutions, {
     foreignKey: "userId",
     onDelete: "CASCADE",
     onUpdate: "CASCADE",
 });
-Institution.belongsTo(Users, {
+Institutions.belongsTo(Users, {
     foreignKey: "userId",
 });
 
 // Institution & Address
-Institution.hasMany(Address, {
+Institutions.hasMany(Address, {
     foreignKey: "institutionId",
     onDelete: "CASCADE",
     onUpdate: "CASCADE",
 });
-Address.belongsTo(Institution, {
+Address.belongsTo(Institutions, {
     foreignKey: "institutionId",
 });
 // ============ End Institutions Association ============
@@ -190,12 +190,12 @@ Issuers.belongsTo(Users, {
 });
 
 // Issuers & Institution
-Institution.hasMany(Issuers, {
+Institutions.hasMany(Issuers, {
     foreignKey: "institutionId",
     onDelete: "CASCADE",
     onUpdate: "CASCADE",
 });
-Issuers.belongsTo(Institution, {
+Issuers.belongsTo(Institutions, {
     foreignKey: "institutionId",
 });
 // ============ End Issuers Association ============
@@ -286,7 +286,7 @@ module.exports = {
     AcademicBackgrounds,
     Specifications,
     Courses,
-    Institution,
+    Institutions,
     ServicePlans,
     Subscriptions,
     Payments,

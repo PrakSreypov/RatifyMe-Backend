@@ -17,7 +17,7 @@ const FieldOfStudies = sequelize.define("FieldOfStudies", {
         },
     },
     description: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.STRING,
     },
 });
 
