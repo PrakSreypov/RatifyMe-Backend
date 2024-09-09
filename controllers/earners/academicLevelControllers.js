@@ -1,6 +1,6 @@
 const AcademicLevels = require("../../models/AcademicLevels");
-const BaseController = require("../../utils/baseControllers");
+const BaseControllers = require("../../utils/baseControllers");
 
-const academicLevelControllers = new BaseController(AcademicLevels);
+const academicLevelControllers = new BaseControllers(AcademicLevels);
 
 module.exports = academicLevelControllers;
