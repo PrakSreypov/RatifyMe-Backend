@@ -15,11 +15,11 @@ const Courses = sequelize.define(
         },
         description: DataTypes.STRING,
         courseCode: DataTypes.STRING,
-        specificationId: {
+        specializationId: {
             type: DataTypes.INTEGER,
             allowNull: true,
             references: {
-                model: "Specifications",
+                model: "Specializations",
                 key: "id",
             },
             onDelete: "CASCADE",

@@ -5,7 +5,7 @@ const Address = require("./Addresses");
 const AcademicLevels = require("./AcademicLevels");
 const FieldOfStudies = require("./FieldOfStudies");
 const AcademicBackgrounds = require("./AcademicBackgrounds");
-const Specifications = require("./Specifications");
+const Specializations = require("./Specializations");
 const Courses = require("./Courses");
 const Institutions = require("./Institutions");
 const ServicePlans = require("./ServicePlans");
@@ -93,12 +93,12 @@ AcademicLevels.hasMany(AcademicBackgrounds, {
 });
 
 // FieldOfStudy Specification
-FieldOfStudies.hasMany(Specifications, {
+FieldOfStudies.hasMany(Specializations, {
     foreignKey: "fieldOfStudyId",
     onDelete: "CASCADE",
     onUpdate: "CASCADE",
 });
-Specifications.belongsTo(FieldOfStudies, {
+Specializations.belongsTo(FieldOfStudies, {
     foreignKey: "fieldOfStudyId",
 });
 
@@ -113,13 +113,13 @@ Courses.belongsTo(FieldOfStudies, {
 });
 
 // Courses & Specification
-Specifications.hasMany(Courses, {
-    foreignKey: "specificationId",
+Specializations.hasMany(Courses, {
+    foreignKey: "specializationId",
     onDelete: "CASCADE",
     onUpdate: "CASCADE",
 });
-Courses.belongsTo(Specifications, {
-    foreignKey: "specificationId",
+Courses.belongsTo(Specializations, {
+    foreignKey: "specializationId",
 });
 
 // ============ End Academics Association (for earner) ============
@@ -284,7 +284,7 @@ module.exports = {
     AcademicLevels,
     FieldOfStudies,
     AcademicBackgrounds,
-    Specifications,
+    Specializations,
     Courses,
     Institutions,
     ServicePlans,

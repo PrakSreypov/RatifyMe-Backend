@@ -1,8 +1,8 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../configs/database");
 
-const Specifications = sequelize.define(
-    "Specifications",
+const Specializations = sequelize.define(
+    "Specializations",
     {
         id: {
             autoIncrement: true,
@@ -15,7 +15,7 @@ const Specifications = sequelize.define(
             allowNull: false,
             validate: {
                 isAlpha: {
-                    msg: "Specification must contain only letters.",
+                    msg: "Specializations must contain only letters.",
                 },
             },
         },
@@ -40,4 +40,4 @@ const Specifications = sequelize.define(
     },
 );
 
-module.exports = Specifications;
+module.exports = Specializations;
