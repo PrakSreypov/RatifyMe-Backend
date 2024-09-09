@@ -1,4 +1,4 @@
-const Institutions = require("../../models/Institution");
+const Institutions = require("../../models/Institutions");
 const BaseControllers = require("../../utils/baseControllers");
 const Users = require('../../models/Users')
 const catchAsync = require("../../utils/catchAsync");

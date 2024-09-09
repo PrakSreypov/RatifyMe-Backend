@@ -60,6 +60,14 @@ const BadgeClasses = sequelize.define(
     {
         timestamps: true,
     },
+    {
+        indexes: [
+            {
+                unique: true,
+                fields: ["name"],
+            },
+        ],
+    },
 );
 
 module.exports = BadgeClasses;
