@@ -3,7 +3,7 @@ const Issuers = require("../../models/Issuers");
 const BaseControllers = require("../../utils/baseControllers");
 const catchAsync = require("../../utils/catchAsync");
 
-class BadgeClassesController extends BaseControllers {
+class BadgeClassesControllers extends BaseControllers {
     constructor() {
         super(BadgeClasses, [Issuers]);
     }
@@ -20,4 +20,4 @@ class BadgeClassesController extends BaseControllers {
     });
 }
 
-module.exports = new BadgeClassesController();
+module.exports = new BadgeClassesControllers();

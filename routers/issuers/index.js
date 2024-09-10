@@ -5,7 +5,7 @@ const issuerRouters = require("./issuerRouters");
 const achievementRouters = require("./achievementRouters");
 const badgeClassRouters = require("./badgeClassRouters");
 
-router.use("/achievement", achievementRouters);
+router.use("/achievements", achievementRouters);
 router.use("/badgeclasses", badgeClassRouters);
 router.use("/", issuerRouters);
 
