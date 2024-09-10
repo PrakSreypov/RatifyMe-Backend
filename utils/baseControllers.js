@@ -16,41 +16,69 @@ class BaseController {
         this.associations = associations;
     }
 
-    // Check for existing unique fields
+    // ============ Start Utility Method ============
+    // Start Send response helper method
+    sendResponse(res, statusCode, data, message) {
+        res.status(statusCode).json({
+            status: "success",
+            message,
+            data,
+        });
+    }
+    // End Send response helper method
+
+    // Start Check for existing unique fields
     async checkUniqueFields(data, excludeId = null) {
+        const conflictingFields = [];
+
         for (const field of this.uniqueFields) {
             if (data[field]) {
+                // Build query for each field
                 const query = { [field]: data[field] };
                 if (excludeId) {
                     query.id = { [Op.ne]: excludeId };
                 }
+
+                // Check if a record exists with this field value
                 const existingRecord = await this.Model.findOne({ where: query });
                 if (existingRecord) {
-                    throw new AppError(`A record with this ${field} already exists`, 409);
+                    conflictingFields.push(field);
                 }
             }
         }
-    }
 
-    // Check if a record exists by ID
+        if (conflictingFields.length > 0) {
+            // Construct a detailed error message
+            const fieldsString = conflictingFields.join(", ");
+            throw new AppError(`A record with this ${fieldsString} already exists`, 409);
+        }
+    }
+    // End Check for existing unique fields
+
+    // Start Check if a record exists by ID
     async checkRecordExists(id) {
         const record = await this.Model.findByPk(id, { include: this.associations });
         if (!record) {
-            throw new AppError("No record found with this ID", 404);
+            throw new AppError("No record found with this ID", 404); // This error only applies to valid routes with missing records
         }
         return record;
     }
+    // Start Check if a record exists by ID
+    // ============ End Utility Method ============
 
-    // Fetch all records
+    // ============ Start CRUD Method  ============
+    // Start Fetch all records
     getAll = catchAsync(async (req, res, next) => {
         const records = await this.Model.findAll({ include: this.associations });
+
         res.status(200).json({
             status: "success",
             data: records,
         });
     });
+    // End Fetch all records
 
-    // Create a new record
+    // Start Create a new record
     createOne = catchAsync(async (req, res, next) => {
         if (Object.keys(req.body).length === 0) {
             return next(new AppError("You can't create with empty field", 400));
@@ -60,24 +88,24 @@ class BaseController {
         await this.checkUniqueFields(req.body);
 
         const newRecord = await this.Model.create(req.body);
-        res.status(201).json({
-            status: "success",
-            message: `${this.Model.name} successfully created`,
-            data: newRecord,
-        });
-    });
 
-    // Fetch a single record by ID
+        // Use the default sendResponse method
+        this.sendResponse(res, 201, newRecord, `${this.Model.name} successfully created`);
+
+        // Return newRecord so child controllers can use it
+        return newRecord;
+    });
+    // End Create a new record
+
+    // Start Fetch a single record by ID
     getOne = catchAsync(async (req, res, next) => {
         const record = await this.checkRecordExists(req.params.id);
 
-        res.status(200).json({
-            status: "success",
-            data: record,
-        });
+        this.sendResponse(res, 200, record, `${this.Model.name} found`);
     });
+    // End Fetch a single record by ID
 
-    // Update a record by ID
+    // Start Update a record by ID
     updateOne = catchAsync(async (req, res, next) => {
         const { id } = req.params;
 
@@ -107,14 +135,11 @@ class BaseController {
         // Retrieve the updated record
         const updatedRecord = await this.Model.findByPk(id, { include: this.associations });
 
-        res.status(200).json({
-            status: "success",
-            message: `${this.Model.name} successfully updated`,
-            data: updatedRecord,
-        });
+        this.sendResponse(res, 200, updatedRecord, `${this.Model.name} successfully updated`);
     });
+    // End Update a record by ID
 
-    // Delete a record by ID
+    // Start Delete a record by ID
     deleteOne = catchAsync(async (req, res, next) => {
         const { id } = req.params;
         await this.checkRecordExists(id);
@@ -122,23 +147,21 @@ class BaseController {
         await this.Model.destroy({
             where: { id },
         });
-        res.status(200).json({
-            status: "success",
-            message: `${this.Model.name} successfully deleted`,
-        });
+        this.sendResponse(res, 200, null, `${this.Model.name} successfully deleted`);
     });
+    // End Delete a record by ID
 
-    // Delete all records
+    // Start Delete all records
     deleteAll = catchAsync(async (req, res, next) => {
         await this.Model.destroy({
             where: {}, // No conditions, so this will delete all records
             truncate: false, // Optional: Also reset auto-increment counter if needed
         });
-        res.status(200).json({
-            status: "success",
-            message: "All Records successfully deleted.",
-        });
+        this.sendResponse(res, 200, null, "All Records successfully deleted.");
     });
+    // End Delete all records
+
+    // ============ End CRUD Method  ============
 }
 
 module.exports = BaseController;
