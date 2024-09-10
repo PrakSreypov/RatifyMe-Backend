@@ -13,11 +13,6 @@ const Specializations = sequelize.define(
         name: {
             type: DataTypes.STRING,
             allowNull: false,
-            validate: {
-                isAlpha: {
-                    msg: "Specializations must contain only letters.",
-                },
-            },
         },
         description: DataTypes.STRING,
         fieldOfStudyId: {
