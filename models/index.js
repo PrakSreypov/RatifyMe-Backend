@@ -245,16 +245,24 @@ Achievements.belongsTo(BadgeClasses, {
 });
 
 // Achievements & Criterias through BadgeCriteriaItems
-Achievements.belongsToMany(Criterias, {
-    through: BadgeCriteriaItems,
+Achievements.hasMany(BadgeCriteriaItems, {
+    foreignKey: "achievementsId", // This should match the foreign key in BadgeCriteriaItems
     onDelete: "CASCADE",
     onUpdate: "CASCADE",
 });
 
-Criterias.belongsToMany(Achievements, {
-    through: BadgeCriteriaItems,
+BadgeCriteriaItems.belongsTo(Achievements, {
+    foreignKey: "achievementsId",
+});
+
+Criterias.hasMany(BadgeCriteriaItems, {
+    foreignKey: "criteriasId",
     onDelete: "CASCADE",
     onUpdate: "CASCADE",
+});
+
+BadgeCriteriaItems.belongsTo(Criterias, {
+    foreignKey: "criteriasId", // This should match the foreign key in BadgeCriteriaItems
 });
 // ============ End Achievements  Association ============
 
