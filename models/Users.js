@@ -1,4 +1,4 @@
-const { DataTypes } = require("sequelize");
+const { DataTypes, Sequelize } = require("sequelize");
 const sequelize = require("../configs/database");
 const bcrypt = require("bcryptjs");
 const crypto = require("crypto");
@@ -225,6 +225,41 @@ Users.prototype.correctPassword = async function (cadidatePassword, userPassword
         candidatePassword: the password entered by the user attempting to log in
         userPassword: the hased password stored in the database for this user
     */
+};
+
+// Update the passwordChangedAt field when the password is modified
+Users.beforeSave(async (user) => {
+    if (!user.changed("password") || user.isNewRecord) return;
+
+    user.passwordChangedAt = new Date(Date.now() - 1000);
+});
+
+// Add a hook to modify query options before saving a user record
+Users.addHook("beforeSave", (options) => {
+    // Ensure options exist before modifying them
+    if (!options) {
+        options = {};
+    }
+
+    // If options contain a "where" clause, initialize it
+    if (options.where) {
+        options.where = {};
+    }
+
+    // Modify the "where" clause to exclude inactive users
+    options.where.active = { [Sequelize.Op.ne]: false };
+});
+
+// Add a method to check if the user changed their password after a JWT token was issued
+Users.prototype.changedPasswordAfter = function (JWTTimestamp) {
+    // If passwordChangedAt exists, compare it to the JWT issuance timestamp
+    if (this.passwordChangedAt) {
+        const changedTimestamp = parseInt(this.passwordChangedAt.getTime() / 1000, 10);
+        return JWTTimestamp < changedTimestamp;
+    }
+
+    // False means the password was not changed after the JWT was issued
+    return false;
 };
 
 module.exports = Users;
