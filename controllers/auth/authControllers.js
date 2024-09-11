@@ -114,9 +114,29 @@ class AuthControllers extends BaseController {
         user.passwordResetExpires = undefined;
         await user.save({ validate: false });
 
-        createSendToken(user, 200, res)
+        createSendToken(user, 200, res);
     });
     // ============ End Reset Password controller     ============
+
+    // ============ Start Update Password controller   ============
+    updatePassword = catchAsync(async (req, res, next) => {
+        const user = await Users.scope("withPassword").findByPk(req.user.id);
+
+        if (!user) {
+            return next(new AppError("User not found", 404));
+        }
+
+        if (!(await user.correctPassword(req.body.passwordCurrent, user.password))) {
+            return next(new AppError("Your current password is wrong.", 401));
+        }
+
+        user.password = req.body.password;
+        user.passwordConfirm = req.body.passwordConfirm;
+        await user.save({ validate: true });
+
+        createSendToken(user, 200, res);
+    });
+    // ============ End Update Password controller     ============
 }
 
 module.exports = new AuthControllers();
