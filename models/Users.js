@@ -159,19 +159,6 @@ const Users = sequelize.define(
         password: {
             type: DataTypes.STRING,
             allowNull: false,
-            validate: {
-                len: {
-                    args: [8, 20],
-                    msg: "Password must be between 8 and 20 characters",
-                },
-                isStrongPassword(value) {
-                    if (!/(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[\W_]).{8,}/.test(value)) {
-                        throw new Error(
-                            "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character.",
-                        );
-                    }
-                },
-            },
         },
         passwordConfirm: {
             type: DataTypes.VIRTUAL,
@@ -195,14 +182,14 @@ const Users = sequelize.define(
                 fields: ["email", "username", "phoneNumber"],
             },
         ],
-    },
-    {
         timestamps: true,
         defaultScope: {
             attributes: { exclude: ["password", "passwordConfirm"] },
         },
         scopes: {
-            attributes: { include: ["password"] },
+            withPassword: {
+                attributes: { include: ["password"] },
+            },
         },
     },
 );
@@ -221,6 +208,11 @@ Users.prototype.toJSON = function () {
 Users.beforeSave(async (user) => {
     // Only run this function if the password was actually modified
     if (!user.changed("password")) return;
+
+    // Validate the length of the plain-text password
+    if (user.password.length < 8 || user.password.length > 20) {
+        throw Error("Password must be between 8 and 20 characters.");
+    }
 
     user.password = await bcrypt.hash(user.password, 12);
 });
