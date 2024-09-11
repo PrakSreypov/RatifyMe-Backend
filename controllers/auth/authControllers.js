@@ -8,7 +8,7 @@ const Users = require("../../models/Users");
 const uniqueFields = ["email", "username", "phoneNumber"];
 const associations = [Roles, Genders];
 
-class AuthController extends BaseController {
+class AuthControllers extends BaseController {
     constructor() {
         super(Users, uniqueFields, associations);
     }
@@ -23,4 +23,4 @@ class AuthController extends BaseController {
     });
 }
 
-module.exports = new AuthController();
+module.exports = new AuthControllers();
