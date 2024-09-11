@@ -1,56 +1,53 @@
+const { Op } = require("sequelize");
+
 class ApiFeature {
-    constructor(query, queryString) {
+    constructor(query, queryString, model) {
         this.query = query;
         this.queryString = queryString;
+        this.model = model;
     }
 
-    // method to filter the result exclude sort page limit and fields params
-    // those params does not work with filter
+    // method to filter the result exclude sort, page, limit, and fields params
     filtering() {
         const queryObj = { ...this.queryString };
         const excludeFields = ["sort", "page", "limit", "fields"];
-
         excludeFields.forEach((el) => delete queryObj[el]);
 
-        let queryStr = JSON.stringify(queryObj);
-
-        queryStr = queryStr.replace(/\b(gte|gt|lte|lt)\b/g, (match) => {
-            switch (match) {
-                case "gte":
-                    return "[Op.gte]";
-                case "gt":
-                    return "[Op.gt]";
-                case "lte":
-                    return "[Op.lte]";
-                case "lt":
-                    return "[Op.lt]";
-                default:
-                    return match;
+        Object.keys(queryObj).forEach((key) => {
+            if (queryObj[key].includes(",")) {
+                queryObj[key] = { [Op.in]: queryObj[key].split(",") }; // Handle conditions with multiple values (e.g., id=1,2,3)
+            }
+            // Replace comparison operators with Sequelize's Op
+            if (queryObj[key].startsWith("gte")) {
+                queryObj[key] = { [Op.gte]: queryObj[key].substring(4) };
+            } else if (queryObj[key].startsWith("gt")) {
+                queryObj[key] = { [Op.gt]: queryObj[key].substring(3) };
+            } else if (queryObj[key].startsWith("lte")) {
+                queryObj[key] = { [Op.lte]: queryObj[key].substring(4) };
+            } else if (queryObj[key].startsWith("lt")) {
+                queryObj[key] = { [Op.lt]: queryObj[key].substring(3) };
             }
         });
 
         this.query = {
-            where: JSON.parse(queryStr),
+            where: queryObj,
         };
 
         return this;
     }
 
-    // method sort the output 
+    // method to sort the output
     sorting() {
         if (this.queryString.sort) {
-            const sortBy = this.queryString.sort
-                .split(",")
-                .map((el) => [el, "ASC"]);
+            const sortBy = this.queryString.sort.split(",").map((el) => [el, "ASC"]);
             this.query.order = sortBy;
         } else {
             this.query.order = [["id", "DESC"]];
         }
-
         return this;
     }
 
-    // method fields output
+    // method to select specific fields for output
     limitFields() {
         if (this.queryString.fields) {
             const fields = this.queryString.fields.split(",");
@@ -60,7 +57,7 @@ class ApiFeature {
         return this;
     }
 
-    // method pagination in offset
+    // method to handle pagination (offset)
     pagination() {
         const page = this.queryString.page * 1 || 1;
         const limit = this.queryString.limit * 1 || 10;
@@ -72,8 +69,9 @@ class ApiFeature {
         return this;
     }
 
-    async execute(model) {
-        return await model.findAll(this.query);
+    async execute(options = {}) {
+        // Merge the query (where, attributes, etc.) with other options like include
+        return await this.model.findAll({ ...this.query, ...options });
     }
 }
 

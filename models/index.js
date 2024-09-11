@@ -16,6 +16,7 @@ const Criterias = require("./Criterias");
 const BadgeClasses = require("./BadgeClasses");
 const AchievementTypes = require("./AchievementTypes");
 const Achievements = require("./Achievements");
+const BadgeCriteriaItems = require("./BadgeCriteriaItems");
 const Earners = require("./Earners");
 
 // ============ Start Users Association ============
@@ -62,15 +63,15 @@ AcademicBackgrounds.belongsTo(Users, {
 // ============ End Users Association ============
 
 // ============ Start Academics Association (for earner) ============
-// AcademicBackgrounds & Institution 
+// AcademicBackgrounds & Institution
 Institutions.hasMany(AcademicBackgrounds, {
-    foreignKey: 'institutionId',
-    onDelete: 'CASCADE',
-    onUpdate: 'CASCADE'
-})
+    foreignKey: "institutionId",
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+});
 AcademicBackgrounds.belongsTo(Institutions, {
-    foreignKey: 'institutionId'
-})
+    foreignKey: "institutionId",
+});
 
 // AcademicBackground & FieldOfStudy association
 AcademicBackgrounds.belongsTo(FieldOfStudies, {
@@ -242,6 +243,27 @@ BadgeClasses.hasMany(Achievements, {
 Achievements.belongsTo(BadgeClasses, {
     foreignKey: "badgeClassId",
 });
+
+// Achievements & Criterias through BadgeCriteriaItems
+Achievements.hasMany(BadgeCriteriaItems, {
+    foreignKey: "achievementsId", // This should match the foreign key in BadgeCriteriaItems
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+});
+
+BadgeCriteriaItems.belongsTo(Achievements, {
+    foreignKey: "achievementsId",
+});
+
+Criterias.hasMany(BadgeCriteriaItems, {
+    foreignKey: "criteriasId",
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+});
+
+BadgeCriteriaItems.belongsTo(Criterias, {
+    foreignKey: "criteriasId", // This should match the foreign key in BadgeCriteriaItems
+});
 // ============ End Achievements  Association ============
 
 // ============ Start Earners Association ============
@@ -296,4 +318,5 @@ module.exports = {
     AchievementTypes,
     Achievements,
     Earners,
+    BadgeCriteriaItems,
 };
