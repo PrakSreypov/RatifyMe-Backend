@@ -91,7 +91,7 @@ const Users = sequelize.define(
                     msg: "Phone number must contain only numbers.",
                 },
                 len: {
-                    args: [10, 20],
+                    args: [9, 30],
                     msg: "Phone number must be between 10 and 15 digits long.",
                 },
             },
