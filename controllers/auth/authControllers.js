@@ -3,9 +3,9 @@ const Roles = require("../../models/Roles");
 const BaseController = require("../../utils/baseControllers");
 const catchAsync = require("../../utils/catchAsync");
 const { createSendToken } = require("../../middlewares/auth");
+const AppError = require("../../utils/appError");
 
 const Users = require("../../models/Users");
-const AppError = require("../../utils/appError");
 const uniqueFields = ["email", "username", "phoneNumber"];
 const associations = [Roles, Genders];
 
