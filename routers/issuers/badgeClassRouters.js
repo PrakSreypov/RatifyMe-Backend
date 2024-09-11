@@ -1,8 +1,7 @@
 const express = require("express");
+const router = express.Router();
 
 const badgeClassesControllers = require("../../controllers/issuers/badgeClassControllers");
-
-const router = express.Router();
 
 router.route("/").get(badgeClassesControllers.getAll).post(badgeClassesControllers.createOne);
 

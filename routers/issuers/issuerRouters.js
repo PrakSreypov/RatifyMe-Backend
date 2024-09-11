@@ -1,7 +1,7 @@
 const express = require("express");
+const router = express.Router();
 
 const issuerControllers = require("../../controllers/issuers/issuerControllers");
-const router = express.Router();
 
 router.route("/").get(issuerControllers.getAll).post(issuerControllers.createOne);
 

@@ -1,6 +1,7 @@
 const express = require("express");
-const institutionControllers = require("../../controllers/institutions/institutionControllers");
 const router = express.Router();
+
+const institutionControllers = require("../../controllers/institutions/institutionControllers");
 
 router.route("/").get(institutionControllers.getAll).post(institutionControllers.createOne);
 
