@@ -50,7 +50,7 @@ class AuthControllers extends BaseController {
 
     // ============ Start Forgot Password controller ============
     forgotPassword = catchAsync(async (req, res, next) => {
-        // 1. Get User based on POST email
+        // Get User based on POST email
         const user = await Users.findOne({
             where: { email: req.body.email },
         });
@@ -58,12 +58,11 @@ class AuthControllers extends BaseController {
         if (!user) {
             return next(new AppError("There is no user with that email address.", 404));
         }
-        console.log(user instanceof Users);
-        // 2. Generate the random reset token
+        // Generate the random reset token
         const resetToken = user.createPasswordResetToken();
         await user.save({ validate: false }); // Save the reset token and expiry to the DB
     
-        // 3. Send it to user's email
+        // Send it to user's email
         const resetURL = `${req.protocol}://${req.get("host")}/api/v1/users/resetPassword/${resetToken}`;
         const message = `Forgot your password? Submit a PATCH request with your new password and passwordConfirm to: ${resetURL}.\nIf you didn't forget your password, please ignore this email.`;
     
@@ -85,8 +84,7 @@ class AuthControllers extends BaseController {
     
             return next(new AppError("There was an error sending the email. Try again later!", 500));
         }
-    });
-    
+    }); 
     // ============ End Forgot Password controller   ============
 
 }
