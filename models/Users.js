@@ -225,22 +225,6 @@ Users.beforeSave(async (user) => {
     user.passwordChangedAt = new Date(Date.now() - 1000);
 });
 
-// Add a hook to modify query options before saving a user record
-Users.addHook("beforeSave", (options) => {
-    // Ensure options exist before modifying them
-    if (!options) {
-        options = {};
-    }
-
-    // If options contain a "where" clause, initialize it
-    if (options.where) {
-        options.where = {};
-    }
-
-    // Modify the "where" clause to exclude inactive users
-    options.where.active = { [Sequelize.Op.ne]: false };
-});
-
 // Add a method to check if the user changed their password after a JWT token was issued
 Users.prototype.changedPasswordAfter = function (JWTTimestamp) {
     // If passwordChangedAt exists, compare it to the JWT issuance timestamp
