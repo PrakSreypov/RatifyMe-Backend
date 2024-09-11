@@ -253,6 +253,14 @@ Users.prototype.changedPasswordAfter = function (JWTTimestamp) {
     return false;
 };
 
-user
+// Add a method to create a password reset token
+Users.prototype.createPasswordResetToken = function () {
+    const resetToken = crypto.randomBytes(32).toString("hex");
+
+    this.passwordResetToken = crypto.createHash("sha256").update(resetToken).digest("hex");
+    this.passwordResetExpires = Date.now() + 10 * 60 * 1000; // 10mn
+
+    return resetToken;
+};
 
 module.exports = Users;
