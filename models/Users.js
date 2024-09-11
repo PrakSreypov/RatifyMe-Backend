@@ -98,15 +98,6 @@ const Users = sequelize.define(
         },
         nationality: {
             type: DataTypes.STRING,
-            validate: {
-                isAlpha: {
-                    msg: "Nationality must contain only letters.",
-                },
-                len: {
-                    args: [2, 50],
-                    msg: "Nationality must be between 2 and 50 charaters long.",
-                },
-            },
         },
         dateOfBirth: {
             type: DataTypes.DATE,
@@ -261,5 +252,7 @@ Users.prototype.changedPasswordAfter = function (JWTTimestamp) {
     // False means the password was not changed after the JWT was issued
     return false;
 };
+
+user
 
 module.exports = Users;
