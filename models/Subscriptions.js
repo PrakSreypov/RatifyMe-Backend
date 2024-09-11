@@ -92,6 +92,15 @@ const Subscriptions = sequelize.define("Subscriptions", {
             },
         },
     },
+    stripeSubscriptionId : {
+        type : DataTypes.STRING,
+        allowNull: false
+    },
+}, {
+    indexes : [{
+        unique : true,
+        fields: ['stripeSubscriptionId']
+    }]
 });
 
 module.exports = Subscriptions;

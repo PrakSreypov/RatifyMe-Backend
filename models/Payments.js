@@ -59,6 +59,17 @@ const Payments = sequelize.define("Payments", {
     status: {
         type: DataTypes.BOOLEAN,
     },
+    stripePriceId : {
+        type : DataTypes.STRING,
+        allowNull : false
+    }
+}, {
+    indexes : [
+        {
+            unique : true,
+            fields : ['stripePriceId']
+        }
+    ]
 });
 
 module.exports = Payments;

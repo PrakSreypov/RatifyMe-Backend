@@ -76,12 +76,16 @@ const Institutions = sequelize.define(
         profileImage: {
             type: DataTypes.STRING,
         },
+        stripeCustomerId: {
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
     },
     {
         indexes: [
             {
                 unique: true,
-                fields: ["name"],
+                fields: ["name", "stripeCustomerId"],
             },
         ],
     },
