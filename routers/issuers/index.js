@@ -9,9 +9,9 @@ const badgeCriteriaItemRouters = require("./badgeCriteriaItemRouters");
 const criteriaRouters = require("./criteriaRouters");
 
 router.use("/achievements", achievementRouters);
-router.use("/badgeclasses", badgeClassRouters);
-router.use("/achievementtypes", achievementTypeRouters);
-router.use("/badgecriteriasitems", badgeCriteriaItemRouters);
+router.use("/badgeClasses", badgeClassRouters);
+router.use("/achievementTypes", achievementTypeRouters);
+router.use("/badgeCriteriaItems", badgeCriteriaItemRouters);
 router.use("/criterias", criteriaRouters);
 router.use("/", issuerRouters);
 
