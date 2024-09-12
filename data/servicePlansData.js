@@ -14,7 +14,8 @@ const servicePlansData = [
         isBadgeReportsAvailable: true,
         isBadgeCertificatesAvailable: false,
         isTechnicalSupportType: true,
-        stripeProductId: "price_1PxklvBj5Xx4BpZrxrzB6Utp",
+        stripeProductId: "prod_QpPbi5JFLxgLJL",
+        stripePriceId: "price_1PxklvBj5Xx4BpZrxrzB6Utp",
     },
     {
         name: "Midyear Membership",
@@ -28,7 +29,8 @@ const servicePlansData = [
         isBadgeReportsAvailable: true,
         isBadgeCertificatesAvailable: true,
         isTechnicalSupportType: true,
-        stripeProductId: "price_1PxkmdBj5Xx4BpZr5UcGp3Zg",
+        stripeProductId: "prod_QpPbEgGeIMt1qV",
+        stripePriceId: "price_1PxkmdBj5Xx4BpZr5UcGp3Zg",
     },
     {
         name: "Annual Advantage",
@@ -42,7 +44,8 @@ const servicePlansData = [
         isBadgeReportsAvailable: true,
         isBadgeCertificatesAvailable: true,
         isTechnicalSupportType: true,
-        stripeProductId: "price_1Pxkn8Bj5Xx4BpZrVQ5cDi34",
+        stripeProductId: "prod_QpPbEgGeIMt1qV",
+        stripePriceId: "price_1Pxkn8Bj5Xx4BpZrVQ5cDi34",
     },
 ];
 insertData(ServicePlans, servicePlansData, {validate: false});
