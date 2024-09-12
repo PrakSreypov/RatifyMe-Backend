@@ -17,12 +17,19 @@ app.use(express.json());
 app.use(helmet());
 app.use(cors());
 
+
+
 if (process.env.NODE_ENV === "development") {
     app.use(morgan("dev"));
 }
 
 // Use the dynamically loaded routes
 app.use('/api/v1', routers);
+// ejs template engine
+app.set("view engine", "ejs");
+app.get("/", async (req, res) => {
+    res.render("index.ejs");
+});
 
 // Handling Unhandled Routes
 app.all("*", (req, res, next) => {
