@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const checkoutRouters = require("./checkoutRouters");
 
-router.use("/checkoutSession", checkoutRouters);
-// router.use("/customers/:institutionId");
+router.use("/subscribe/:servicePlanId", checkoutRouters);
+// router.use("/checkoutSession", checkoutRouters);
 
 module.exports = router;
