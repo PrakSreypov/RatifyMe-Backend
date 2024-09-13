@@ -57,7 +57,7 @@ exports.protect = catchAsync(async (req, res, next) => {
 
     // check if Users changed password after the token was issued
     if (currentUser.changedPasswordAfter && currentUser.changedPasswordAfter(decoded.iat)) {
-        return next(new AppError("User recently changed password! Please log in again."));
+        return next(new AppError("User recently changed password! Please log in again.", 401));
     }
 
     // Grant access to protected route
@@ -81,9 +81,10 @@ exports.authorizeRole = (...allowedRoles) => {
 
 // ============ Start Check Authenticate Middleware ============
 exports.isLoggedIn = async (req, res, next) => {
-    if (req.cookie.jwt) {
+    if (req.cookies.jwt) {
         try {
-            const decoded = await promisify(jwt.verify)(req.cookie.jwt, process.env.JWT_SECRET);
+            const decoded = await promisify(jwt.verify)(req.cookies.jwt, process.env.JWT_SECRET);
+            console.log(decoded)
 
             const currentUser = await Users.findByPk(decoded.id);
             if (!currentUser) {
@@ -95,6 +96,7 @@ exports.isLoggedIn = async (req, res, next) => {
             }
 
             res.locals.user = currentUser;
+            console.log("current User", currentUser);
             return next();
         } catch (error) {
             return next();

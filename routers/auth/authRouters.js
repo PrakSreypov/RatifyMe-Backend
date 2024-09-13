@@ -4,6 +4,8 @@ const router = express.Router();
 const authControllers = require("../../controllers/auth/authControllers");
 const authMiddlewares = require("../../middlewares/auth");
 
+router.route("/checkAuth").get(authMiddlewares.isLoggedIn, authControllers.checkAuth);
+
 router.route("/signup").post(authControllers.signup);
 router.route("/signin").post(authControllers.signin);
 router.route("/forgotPassword").post(authControllers.forgotPassword);

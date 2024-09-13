@@ -152,6 +152,19 @@ class AuthControllers extends BaseController {
         });
     };
     // ============ End Logout controller   ============
+
+    // ============ Start Check Auth controller   ============
+    checkAuth = catchAsync(async(req, res, next) => {
+        const user = res.locals.user;
+        console.log(user)
+        // const user = await Users.findByPk(req.body.id)
+        if(!user){
+            return next(new AppError('User not found!', 404))
+        }
+
+        res.status(200).json({user})
+    })
+    // ============ End Check Auth controller     ============
 }
 
 module.exports = new AuthControllers();
