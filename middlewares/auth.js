@@ -78,3 +78,28 @@ exports.authorizeRole = (...allowedRoles) => {
     };
 };
 // ============ End role-based access control Middleware   ============
+
+// ============ Start Check Authenticate Middleware ============
+exports.isLoggedIn = async (req, res, next) => {
+    if (req.cookie.jwt) {
+        try {
+            const decoded = await promisify(jwt.verify)(req.cookie.jwt, process.env.JWT_SECRET);
+
+            const currentUser = await Users.findByPk(decoded.id);
+            if (!currentUser) {
+                return next();
+            }
+
+            if (currentUser.changedPasswordAfter(decoded.iat)) {
+                return next();
+            }
+
+            res.locals.user = currentUser;
+            return next();
+        } catch (error) {
+            return next();
+        }
+    }
+    next();
+};
+// ============ End Check Authenticate Middleware   ============
