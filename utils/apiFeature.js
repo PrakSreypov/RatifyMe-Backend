@@ -11,36 +11,49 @@ class ApiFeature {
     filtering() {
         const queryObj = { ...this.queryString };
         const excludeFields = ["sort", "page", "limit", "fields"];
-
+    
         // Remove excluded fields from the query object
         excludeFields.forEach((el) => delete queryObj[el]);
-
+    
         // Transform query object into Sequelize-compatible format
         Object.keys(queryObj).forEach((key) => {
             const value = queryObj[key];
-
-            if (typeof value === "string" && value.includes(",")) {
-                // Handle conditions with multiple values (e.g., id=1,2,3)
-                queryObj[key] = { [Op.in]: value.split(",") };
-            } else {
-                // Replace comparison operators with Sequelize's Op
-                if (typeof value === "string") {
-                    if (value.startsWith("gte")) {
-                        queryObj[key] = { [Op.gte]: value.substring(4) };
-                    } else if (value.startsWith("gt")) {
-                        queryObj[key] = { [Op.gt]: value.substring(3) };
-                    } else if (value.startsWith("lte")) {
-                        queryObj[key] = { [Op.lte]: value.substring(4) };
-                    } else if (value.startsWith("lt")) {
-                        queryObj[key] = { [Op.lt]: value.substring(3) };
-                    }
-                } else {
-                    // Handle case where value is not a string
-                    queryObj[key] = value;
+    
+            // Match query keys with operators using regex
+            const match = key.match(/^(\w+)\[(gte|gt|lte|lt)\]$/); // Match keys like duration[gte], price[lt], etc.
+            if (match) {
+                const fieldName = match[1]; // e.g., duration
+                const operator = match[2]; // e.g., gte
+    
+                // Ensure value is converted to a number if it's numeric
+                const numericValue = parseFloat(value); // Use parseFloat to handle decimal numbers
+    
+                // Initialize field if not already present
+                if (!queryObj[fieldName]) {
+                    queryObj[fieldName] = {};
                 }
+    
+                // Map operators to Sequelize's Op and use match group for the operation
+                const operatorMapping = {
+                    gte: Op.gte,
+                    gt: Op.gt,
+                    lte: Op.lte,
+                    lt: Op.lt,
+                };
+    
+                queryObj[fieldName][operatorMapping[operator]] = numericValue;
+    
+                // Remove the original key with brackets (e.g., duration[gte])
+                delete queryObj[key];
+            } else if (typeof value === "string" && value.includes(",")) {
+                // Handle conditions with multiple values (e.g., id=1,2,3)
+                queryObj[key] = { [Op.in]: value.split(",").map(Number) }; // Convert to numbers
+            } else {
+                // Handle case where value is not a string
+                queryObj[key] = value;
             }
         });
-
+    
         // Set the query's where clause if the query object is not empty
         if (Object.keys(queryObj).length > 0) {
             this.query = {
@@ -49,9 +62,11 @@ class ApiFeature {
         } else {
             this.query = {};
         }
-
+    
         return this;
     }
+    
+    
 
     // method to sort the output
     sorting() {
