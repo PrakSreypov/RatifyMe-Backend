@@ -37,9 +37,10 @@ exports.protect = catchAsync(async (req, res, next) => {
     let token;
     if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
         token = req.headers.authorization.split(" ")[1];
-    } else if (req.cookie.jwt) {
-        token = req.cookie.jwt;
     }
+    // else if (req.cookie.jwt) {
+    //     token = req.cookie.jwt;
+    // }
 
     if (!token) {
         return next(new AppError("You are not signed in!. Please sign in to get access.", 401));
@@ -65,3 +66,15 @@ exports.protect = catchAsync(async (req, res, next) => {
 });
 
 // ============ End Middleware for Authorization ============
+
+// ============ Start role-based access control Middleware ============
+exports.authorizeRole = (...allowedRoles) => {
+    return (req, res, next) => {
+        if (!allowedRoles.includes(req.user.roleId)) {
+            return next(new AppError("You do not have permission to perform this action.", 403));
+        }
+
+        next();
+    };
+};
+// ============ End role-based access control Middleware   ============
