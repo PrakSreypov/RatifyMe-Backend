@@ -137,6 +137,21 @@ class AuthControllers extends BaseController {
         createSendToken(user, 200, res);
     });
     // ============ End Update Password controller     ============
+
+    // ============ Start Logout controller ============
+    logout = (req, res, next) => {
+        res.cookie("jwt", "loggedout", {
+            expires: new Date(Date.now() + 10 * 1000), //current time + 10 seconds
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "Strict",
+        });
+        res.status(200).json({
+            status: "success",
+            message: "Successfully logged out",
+        });
+    };
+    // ============ End Logout controller   ============
 }
 
 module.exports = new AuthControllers();
