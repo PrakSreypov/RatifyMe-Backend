@@ -11,27 +11,44 @@ class ApiFeature {
     filtering() {
         const queryObj = { ...this.queryString };
         const excludeFields = ["sort", "page", "limit", "fields"];
+
+        // Remove excluded fields from the query object
         excludeFields.forEach((el) => delete queryObj[el]);
 
+        // Transform query object into Sequelize-compatible format
         Object.keys(queryObj).forEach((key) => {
-            if (queryObj[key].includes(",")) {
-                queryObj[key] = { [Op.in]: queryObj[key].split(",") }; // Handle conditions with multiple values (e.g., id=1,2,3)
-            }
-            // Replace comparison operators with Sequelize's Op
-            if (queryObj[key].startsWith("gte")) {
-                queryObj[key] = { [Op.gte]: queryObj[key].substring(4) };
-            } else if (queryObj[key].startsWith("gt")) {
-                queryObj[key] = { [Op.gt]: queryObj[key].substring(3) };
-            } else if (queryObj[key].startsWith("lte")) {
-                queryObj[key] = { [Op.lte]: queryObj[key].substring(4) };
-            } else if (queryObj[key].startsWith("lt")) {
-                queryObj[key] = { [Op.lt]: queryObj[key].substring(3) };
+            const value = queryObj[key];
+
+            if (typeof value === "string" && value.includes(",")) {
+                // Handle conditions with multiple values (e.g., id=1,2,3)
+                queryObj[key] = { [Op.in]: value.split(",") };
+            } else {
+                // Replace comparison operators with Sequelize's Op
+                if (typeof value === "string") {
+                    if (value.startsWith("gte")) {
+                        queryObj[key] = { [Op.gte]: value.substring(4) };
+                    } else if (value.startsWith("gt")) {
+                        queryObj[key] = { [Op.gt]: value.substring(3) };
+                    } else if (value.startsWith("lte")) {
+                        queryObj[key] = { [Op.lte]: value.substring(4) };
+                    } else if (value.startsWith("lt")) {
+                        queryObj[key] = { [Op.lt]: value.substring(3) };
+                    }
+                } else {
+                    // Handle case where value is not a string
+                    queryObj[key] = value;
+                }
             }
         });
 
-        this.query = {
-            where: queryObj,
-        };
+        // Set the query's where clause if the query object is not empty
+        if (Object.keys(queryObj).length > 0) {
+            this.query = {
+                where: queryObj,
+            };
+        } else {
+            this.query = {};
+        }
 
         return this;
     }
@@ -39,10 +56,10 @@ class ApiFeature {
     // method to sort the output
     sorting() {
         if (this.queryString.sort) {
-            const sortBy = this.queryString.sort.split(",").map((el) => [el, "ASC"]);
+            const sortBy = this.queryString.sort.split(",").map((el) => [el, "DESC"]);
             this.query.order = sortBy;
         } else {
-            this.query.order = [["id", "DESC"]];
+            this.query.order = [["id", "ASC"]];
         }
         return this;
     }
@@ -60,7 +77,7 @@ class ApiFeature {
     // method to handle pagination (offset)
     pagination() {
         const page = this.queryString.page * 1 || 1;
-        const limit = this.queryString.limit * 1 || 10;
+        const limit = this.queryString.limit * 1 || 100;
         const offset = (page - 1) * limit;
 
         this.query.limit = limit;

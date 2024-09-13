@@ -2,6 +2,7 @@
 const { Op } = require("sequelize");
 const AppError = require("./appError");
 const catchAsync = require("./catchAsync");
+const ApiFeatures = require("./apiFeature");
 
 /**
  * @class BaseController : CRUD default controller
@@ -67,12 +68,31 @@ class BaseController {
     // ============ End Utility Method ============
 
     // ============ Start CRUD Method  ============
-    // Start Fetch all records
+
+    // Start Fetch all records (with ApiFeatures applied)
+    getAllWithApiFeatures = async (req) => {
+        // Initialize ApiFeatures with the model and query parameters
+        const apiFeature = new ApiFeatures(this.Model, req.query, this.Model)
+            .filtering() // Apply filtering
+            .sorting() // Apply sorting
+            .limitFields() // Apply field limiting
+            .pagination(); // Apply pagination
+
+        // Execute the query with associated models included
+        const records = await apiFeature.execute({
+            include: this.associations,
+        });
+
+        return records; // Return the data to be handled by the derived class
+    };
+
+    // Default getAll method that can be overridden
     getAll = catchAsync(async (req, res, next) => {
-        const records = await this.Model.findAll({ include: this.associations });
+        const records = await this.getAllWithApiFeatures(req);
 
         res.status(200).json({
             status: "success",
+            results: records.length,
             data: records,
         });
     });
@@ -117,7 +137,9 @@ class BaseController {
         }
 
         // Check if the new data is different from the current data
-        const isDataIdentical = Object.keys(req.body).every((field) => req.body[field] === record[field]);
+        const isDataIdentical = Object.keys(req.body).every(
+            (field) => req.body[field] === record[field],
+        );
 
         if (isDataIdentical) {
             return next(new AppError("No new changes detected!", 400));
