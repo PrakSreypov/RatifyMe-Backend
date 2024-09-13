@@ -6,7 +6,7 @@ const authMiddlewares = require("../../middlewares/auth");
 
 router
     .route("/")
-    .get(authMiddlewares.protect, roleControllers.getAll)
+    .get(authMiddlewares.protect, authMiddlewares.authorizeRole(1), roleControllers.getAll)
     .post(authMiddlewares.protect, roleControllers.createOne);
 router
     .route("/:id")
