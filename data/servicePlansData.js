@@ -3,7 +3,7 @@ const ServicePlans = require("../models/ServicePlans");
 
 const servicePlansData = [
     {
-        name: "Quarterly",
+        name: "Quarterly Quarter",
         description: "A quarterly plan for 3 months of access.",
         duration: 3, // 3 months
         price: 299.99,
@@ -36,7 +36,7 @@ const servicePlansData = [
         name: "Annual Advantage",
         description: "An annual plan for 12 months of premium access.",
         duration: 12, // 12 months
-        price: 799.0,
+        price: 799.99,
         badgeLimit: 50,
         peopleLimit: 200,
         isBadgeVerificationAvailable: true,
