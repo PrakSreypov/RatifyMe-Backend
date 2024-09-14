@@ -1,66 +1,89 @@
 const { Op } = require("sequelize");
 
+
+/**
+ *
+ * @param queryString : take operation from endpoint and apply by output 
+ * @class ApiFeature
+ */
 class ApiFeature {
-    constructor(query, queryString, model) {
-        this.query = query;
-        this.queryString = queryString;
-        this.model = model;
+    constructor(queryString, model) {
+        this.query = {}; // Start with an empty query object
+        this.queryString = queryString; // Holds req.query
+        this.model = model; // The Sequelize model to query
     }
 
-    // method to filter the result exclude sort, page, limit, and fields params
+    // Filtering logic
     filtering() {
-        const queryObj = { ...this.queryString };
-        const excludeFields = ["sort", "page", "limit", "fields"];
-        excludeFields.forEach((el) => delete queryObj[el]);
+        const queryObj = { ...this.queryString }; // req.query is passed as queryString
+        const excludedFields = ["page", "sort", "limit", "fields"];
+        excludedFields.forEach((el) => delete queryObj[el]);
 
-        Object.keys(queryObj).forEach((key) => {
-            if (queryObj[key].includes(",")) {
-                queryObj[key] = { [Op.in]: queryObj[key].split(",") }; // Handle conditions with multiple values (e.g., id=1,2,3)
-            }
-            // Replace comparison operators with Sequelize's Op
-            if (queryObj[key].startsWith("gte")) {
-                queryObj[key] = { [Op.gte]: queryObj[key].substring(4) };
-            } else if (queryObj[key].startsWith("gt")) {
-                queryObj[key] = { [Op.gt]: queryObj[key].substring(3) };
-            } else if (queryObj[key].startsWith("lte")) {
-                queryObj[key] = { [Op.lte]: queryObj[key].substring(4) };
-            } else if (queryObj[key].startsWith("lt")) {
-                queryObj[key] = { [Op.lt]: queryObj[key].substring(3) };
+        // Advanced filtering
+        const filters = {};
+
+        // Loop through each query object key and handle Sequelize operators
+        Object.keys(queryObj).forEach((field) => {
+            if (typeof queryObj[field] === "object") {
+                // Handle nested objects like duration[gt]
+                for (const op in queryObj[field]) {
+                    const value = queryObj[field][op];
+
+                    // Map query string operators (gte, gt, lte, lt) to Sequelize operators
+                    if (op === "gte") {
+                        filters[field] = { [Op.gte]: value };
+                    } else if (op === "gt") {
+                        filters[field] = { [Op.gt]: value };
+                    } else if (op === "lte") {
+                        filters[field] = { [Op.lte]: value };
+                    } else if (op === "lt") {
+                        filters[field] = { [Op.lt]: value };
+                    }
+                }
+            } else {
+                // Direct assignment for non-object fields
+                filters[field] = queryObj[field];
             }
         });
 
-        this.query = {
-            where: queryObj,
-        };
+        // Apply filters in Sequelize query
+        this.query.where = filters;
 
         return this;
     }
 
-    // method to sort the output
+    // Sorting logic
     sorting() {
         if (this.queryString.sort) {
-            const sortBy = this.queryString.sort.split(",").map((el) => [el, "ASC"]);
+            const sortBy = this.queryString.sort.split(",").map((el) => {
+                let field = el;
+                let order = "ASC";
+                if (el.startsWith("-")) {
+                    field = el.slice(1);
+                    order = "DESC";
+                }
+                return [field, order];
+            });
             this.query.order = sortBy;
         } else {
-            this.query.order = [["id", "DESC"]];
+            this.query.order = [["id", "ASC"]];
         }
         return this;
     }
 
-    // method to select specific fields for output
+    // Field limiting logic
     limitFields() {
         if (this.queryString.fields) {
             const fields = this.queryString.fields.split(",");
             this.query.attributes = fields;
         }
-
         return this;
     }
 
-    // method to handle pagination (offset)
+    // Pagination logic
     pagination() {
-        const page = this.queryString.page * 1 || 1;
-        const limit = this.queryString.limit * 1 || 10;
+        const page = this.queryString.page * 1 || 1; // Default to page 1
+        const limit = this.queryString.limit * 1 || 100; // Default limit to 100
         const offset = (page - 1) * limit;
 
         this.query.limit = limit;
@@ -69,8 +92,8 @@ class ApiFeature {
         return this;
     }
 
+    // Execute the query and return results
     async execute(options = {}) {
-        // Merge the query (where, attributes, etc.) with other options like include
         return await this.model.findAll({ ...this.query, ...options });
     }
 }
