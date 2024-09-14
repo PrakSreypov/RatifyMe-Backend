@@ -72,7 +72,7 @@ class BaseController {
     // Start Fetch all records (with ApiFeatures applied)
     getAllWithApiFeatures = async (req) => {
         // Initialize ApiFeatures with the model and query parameters
-        const apiFeature = new ApiFeatures(this.Model, req.query, this.Model)
+        const apiFeature = new ApiFeatures(req.query, this.Model)
             .filtering() // Apply filtering
             .sorting() // Apply sorting
             .limitFields() // Apply field limiting
