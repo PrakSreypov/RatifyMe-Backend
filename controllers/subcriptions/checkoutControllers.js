@@ -27,7 +27,7 @@ exports.createCheckoutSession = catchAsync(async (req, res, next) => {
         mode: 'subscription',
         line_items: [{ price: priceId, quantity: 1 }],
         success_url: `${process.env.BASE_URL}/success?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${process.env.BASE_URL}/cancel`,
+        cancel_url: `${process.env.BASE_URL}`,
         // Attach any custom data to the session
         metadata: {
             institutionId,
@@ -39,7 +39,6 @@ exports.createCheckoutSession = catchAsync(async (req, res, next) => {
     res.status(200).json({ sessionId: session.id });
 });
 
-
-exports.getSession = catchAsync(async (req, res, next) => {
-    const servicePlanId = req.params.id
-})
+exports.getCancel = async (req, res) => {
+    res.redirect("/");
+};

@@ -3,6 +3,6 @@ const checkoutSession = require("../../controllers/subcriptions/checkoutControll
 const router = express.Router();
 
 router.post("/:servicePlanId", checkoutSession.createCheckoutSession);
-// router.get('/success' )
-// router.get('/cancel',)
+// router.get('/success')
+router.get('/cancel', checkoutSession.getCancel)
 module.exports = router;
