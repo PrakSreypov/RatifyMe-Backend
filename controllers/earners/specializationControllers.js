@@ -4,4 +4,4 @@ const FieldOfStudies = require("../../models/FieldOfStudies");
 const BaseControllers = require("../../utils/baseControllers");
 
 const specializationsControllers = new BaseControllers(Specializations,["name"], [FieldOfStudies])
-module.exports = specializationsControllers;
+module.exports = specializationsControllers();
