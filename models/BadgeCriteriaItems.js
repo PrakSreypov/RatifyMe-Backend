@@ -23,6 +23,4 @@ const BadgeCriteriaItems = sequelize.define("BadgeCriteriaItems", {
     },
 });
 
-// Optionally, you can add associations here after model definition if needed
-
 module.exports = BadgeCriteriaItems;
