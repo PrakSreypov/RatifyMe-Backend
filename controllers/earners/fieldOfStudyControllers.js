@@ -1,6 +1,6 @@
 const FieldOfStudies = require("../../models/FieldOfStudies");
 const BaseControllers = require("../../utils/baseControllers");
 
-const FieldOfStudyControllers = new BaseControllers(FieldOfStudies);
+const fieldOfStudyControllers = new BaseControllers(FieldOfStudies, ["name"]);
 
-module.exports = FieldOfStudyControllers;
+module.exports = fieldOfStudyControllers;
