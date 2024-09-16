@@ -1,6 +1,8 @@
 const Criterias = require("../../models/Criterias");
-const baseControllers = require("../../utils/baseControllers");
+const BadgeClass = require("../../models/BadgeClasses");
 
-const criteriaControllers = new baseControllers(Criterias);
+const BaseControllers = require("../../utils/baseControllers");
+
+const criteriaControllers = new BaseControllers(Criterias, [], [BadgeClass]);
 
 module.exports = criteriaControllers;

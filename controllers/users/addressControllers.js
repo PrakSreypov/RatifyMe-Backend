@@ -1,24 +1,9 @@
 const Addresses = require("../../models/Addresses");
+const Institutions = require("../../models/Institutions");
 const Users = require("../../models/Users");
-const BaseController = require("../../utils/baseControllers");
 
-class AddressControllers extends BaseController {
-    constructor() {
-        // Pass Addresses model and associations (Users)
-        super(Addresses, [Users]);
-    }
+const BaseControllers = require("../../utils/baseControllers");
 
-    // override the `getAll` method for more specific logic
-    getAll = catchAsync(async (req, res, next) => {
-        const addresses = await Addresses.findAll({
-            include: [{ model: Addresses }],
-        });
+const addressControllers = new BaseControllers(Addresses, [], [Users, Institutions]);
 
-        res.status(200).json({
-            status: "success",
-            data: addresses,
-        });
-    });
-}
-
-module.exports = new AddressControllers();
+module.exports = addressControllers;

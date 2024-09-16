@@ -37,7 +37,7 @@ const Achievements = sequelize.define("Achievements", {
             },
             isIn: {
                 args: [["ToDo", "Doing", "Done"]],
-                msg: "status in must be To-do, Doing, or Done",
+                msg: "status in must be ToDo, Doing, or Done",
             },
         },
     },

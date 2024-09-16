@@ -15,11 +15,9 @@ const app = express();
 
 // Global Middleware
 app.use(express.json());
+app.use(cors({ origin: "http://localhost:5173", credentials: true }));
 app.use(cookieParser());
 app.use(helmet());
-app.use(cors());
-
-
 
 if (process.env.NODE_ENV === "development") {
     app.use(morgan("dev"));
@@ -28,7 +26,7 @@ if (process.env.NODE_ENV === "development") {
 // Test middleware
 app.use((req, res, next) => {
     req.requestTime = new Date().toISOString();
-    // console.log(req.cookies);
+    // console.log("cookies req from app", req.cookies);
     next();
 });
 

@@ -137,6 +137,34 @@ class AuthControllers extends BaseController {
         createSendToken(user, 200, res);
     });
     // ============ End Update Password controller     ============
+
+    // ============ Start Logout controller ============
+    logout = (req, res, next) => {
+        res.cookie("jwt", "loggedout", {
+            expires: new Date(Date.now() + 10 * 1000), //current time + 10 seconds
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "Strict",
+        });
+        res.status(200).json({
+            status: "success",
+            message: "Successfully logged out",
+        });
+    };
+    // ============ End Logout controller   ============
+
+    // ============ Start Check Auth controller   ============
+    checkAuth = catchAsync(async(req, res, next) => {
+        const user = res.locals.user;
+        
+        // const user = await Users.findByPk(req.body.id)
+        if(!user){
+            return next(new AppError('User not found!', 404))
+        }
+
+        res.status(200).json({user})
+    })
+    // ============ End Check Auth controller     ============
 }
 
 module.exports = new AuthControllers();
