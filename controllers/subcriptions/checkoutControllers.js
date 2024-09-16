@@ -42,3 +42,7 @@ exports.createCheckoutSession = catchAsync(async (req, res, next) => {
 exports.getCancel = async (req, res) => {
     res.redirect("/");
 };
+
+exports.getSuccess = async (req, res) => {
+    res.status(200).send("You've successfully subscribed to our plan")
+};
