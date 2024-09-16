@@ -1,6 +1,6 @@
 const Genders = require("../../models/Genders");
-const BaseController = require("../../utils/baseControllers");
+const BaseControllers = require("../../utils/baseControllers");
 
-const genderControllers = new BaseController(Genders);
+const genderControllers = new BaseControllers(Genders);
 
 module.exports = genderControllers;

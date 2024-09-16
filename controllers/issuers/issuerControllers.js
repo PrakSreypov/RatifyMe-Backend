@@ -1,24 +1,8 @@
 const Issuers = require("../../models/Issuers");
 const Users = require("../../models/Users");
 const Institutions = require("../../models/Institutions");
-const baseControllers = require("../../utils/baseControllers");
-const catchAsync = require("../../utils/catchAsync");
+const BaseControllers = require("../../utils/baseControllers");
 
-class IssuerControllers extends baseControllers {
-    constructor() {
-        super(Issuers, [Users, Institutions]);
-    }
+const issuerControllers = new BaseControllers(Issuers, [], [Users, Institutions]);
 
-    getAll = catchAsync(async (req, res, next) => {
-        const issuers = await Issuers.findAll({
-            include: [{ model: Users }, { model: Institutions }],
-        });
-        res.status(200).json({
-            status: "success",
-            results: issuers.length,
-            data: issuers,
-        });
-    });
-}
-
-module.exports = new IssuerControllers();
+module.exports = issuerControllers;

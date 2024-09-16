@@ -43,9 +43,6 @@ const BadgeClasses = sequelize.define(
                 onUpdate: "CASCADE",
             },
         },
-        alignmentId: {
-            type: DataTypes.INTEGER,
-        },
         tags: {
             type: DataTypes.STRING,
             allowNull: true,
