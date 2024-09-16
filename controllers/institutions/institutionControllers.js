@@ -1,6 +1,7 @@
 const Institutions = require("../../models/Institutions");
-const BaseControllers = require("../../utils/baseControllers");
 const Users = require("../../models/Users");
+
+const BaseControllers = require("../../utils/baseControllers");
 
 const institutionControllers = new BaseControllers(
     Institutions,
