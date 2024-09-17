@@ -156,7 +156,7 @@ class AuthControllers extends BaseController {
     // ============ Start Check Auth controller   ============
     checkAuth = catchAsync(async(req, res, next) => {
         const user = res.locals.user;
-        
+
         // const user = await Users.findByPk(req.body.id)
         if(!user){
             return next(new AppError('User not found!', 404))
