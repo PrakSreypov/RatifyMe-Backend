@@ -78,7 +78,6 @@ const Institutions = sequelize.define(
         },
         stripeCustomerId: {
             type: DataTypes.STRING,
-            allowNull: false,
         },
     },
     {

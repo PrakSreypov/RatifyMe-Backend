@@ -81,11 +81,8 @@ const Subscriptions = sequelize.define(
         },
         endDate: {
             type: DataTypes.DATE,
-            allowNull: false,
+            allowNull: true,
             validate: {
-                notNull: {
-                    msg: "End Date is required.",
-                },
                 isDate: {
                     msg: "End date must be a valid date.",
                 },
@@ -96,18 +93,8 @@ const Subscriptions = sequelize.define(
                 },
             },
         },
-        stripeSubscriptionId: {
-            type: DataTypes.STRING,
-            allowNull: false,
-        },
     },
     {
-        indexes: [
-            {
-                unique: true,
-                fields: ["stripeSubscriptionId"],
-            },
-        ],
         hooks: {
             beforeCreate: async (subscription) => {
                 // Fetch the associated ServicePlan
