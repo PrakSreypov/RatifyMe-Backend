@@ -1,5 +1,7 @@
 const catchAsync = require("../../utils/catchAsync");
 const AppError = require("../../utils/appError");
+const Subscriptions = require("../../models/Subscriptions");
+const Payments  = require("../../models/Payments");
 require("dotenv").config();
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
