@@ -2,6 +2,7 @@ const catchAsync = require("../../utils/catchAsync");
 const AppError = require("../../utils/appError");
 const Subscriptions = require("../../models/Subscriptions");
 const Payments = require("../../models/Payments");
+const { where } = require("sequelize");
 require("dotenv").config();
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
@@ -14,7 +15,6 @@ const updateSubscription = catchAsync(async (subscriptionId, stripeSubscriptionI
     // Find the subscription record by its primary key or stripeSubscriptionId
     const subscription = await Subscriptions.findOne({
         where: { id: subscriptionId },
-        logging: console.log,
     });
 
     if (!subscription) {
@@ -27,17 +27,17 @@ const updateSubscription = catchAsync(async (subscriptionId, stripeSubscriptionI
 
     // Calculate end date based on service plan duration (this is just an example)
     switch (subscription.servicePlanId) {
-        case 1: // Quarterly
+        case 1: // Quarterly (3 months)
             endDate = new Date(currentDate.setMonth(currentDate.getMonth() + 3));
             break;
         case 2: // Midyear (6 months)
             endDate = new Date(currentDate.setMonth(currentDate.getMonth() + 6));
             break;
-        case 3: // Annual
+        case 3: // Annual (12 months)
             endDate = new Date(currentDate.setFullYear(currentDate.getFullYear() + 1));
             break;
         default:
-            throw new Error("Invalid service plan.");
+            return next(new AppError("Can't find the service plan with that id", 404));
     }
 
     await subscription.update({
@@ -67,29 +67,38 @@ exports.webhook = catchAsync(async (req, res, next) => {
         return res.status(400).send(`Webhook Error: ${err.message}`);
     }
 
-    // Handle the event based on its type
-    const session = event.data.object; // Access the session object
+    // Access the session object
+    const session = event.data.object;
 
+    // Handle the event based on its type
     switch (event.type) {
         case "checkout.session.completed":
             console.log("Checkout session completed:", session);
 
             // Retrieve relevant information from the session
-            const subscriptionId = session.metadata.subscriptionId;
+            const { subscriptionId, paymentId } = session.metadata;
             const stripeSubscriptionId = session.subscription;
-            const paymentStatus = session.payment_status;
             const amountPaid = session.amount_total;
-            const paymentMethod = session.payment_method_types[0];
+            const paymentMethod = session.payment_method_types[0] || "card";
 
             // Use this data to update your database, e.g., update the subscription
             await updateSubscription(subscriptionId, stripeSubscriptionId);
 
-            await Payments.create({
-                subscriptionId,
-                amount: amountPaid / 100,
-                paymentMethod,
-                status: true,
-            });
+            await Payments.update(
+                {
+                    subscriptionId,
+                    amount: amountPaid / 100,
+                    paymentMethod,
+                    status: true,
+                },
+                {
+                    where: {
+                        id: paymentId,
+                    },
+                },
+            );
+            break;
+        case "checkout.session.expired":
             break;
 
         // Add other cases as needed
