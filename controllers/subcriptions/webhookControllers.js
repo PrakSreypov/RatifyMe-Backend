@@ -1,12 +1,56 @@
 const catchAsync = require("../../utils/catchAsync");
 const AppError = require("../../utils/appError");
 const Subscriptions = require("../../models/Subscriptions");
-const Payments  = require("../../models/Payments");
+const Payments = require("../../models/Payments");
 require("dotenv").config();
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
-exports.webhook = catchAsync(async (req, res, next) => {
+/**
+ * @param {Number} subscriptionId - id from subscription table
+ * @param {Number} stripeSubscriptionId - id from stripe session when successfully paid
+ * @returns {...} updating the subscription table {status, enddate, stripeSubscriptionId}
+ */
+const updateSubscription = catchAsync(async (subscriptionId, stripeSubscriptionId) => {
+    // Find the subscription record by its primary key or stripeSubscriptionId
+    const subscription = await Subscriptions.findOne({
+        where: { id: subscriptionId },
+        logging: console.log,
+    });
 
+    if (!subscription) {
+        return next(new AppError("Subscription not found.", 404));
+    }
+
+    // Update the subscription status to active, set the stripeSubscriptionId, startDate, and endDate
+    const currentDate = new Date();
+    let endDate;
+
+    // Calculate end date based on service plan duration (this is just an example)
+    switch (subscription.servicePlanId) {
+        case 1: // Quarterly
+            endDate = new Date(currentDate.setMonth(currentDate.getMonth() + 3));
+            break;
+        case 2: // Midyear (6 months)
+            endDate = new Date(currentDate.setMonth(currentDate.getMonth() + 6));
+            break;
+        case 3: // Annual
+            endDate = new Date(currentDate.setFullYear(currentDate.getFullYear() + 1));
+            break;
+        default:
+            throw new Error("Invalid service plan.");
+    }
+
+    await subscription.update({
+        status: true,
+        startDate: new Date(),
+        endDate: endDate,
+        stripeSubscriptionId: stripeSubscriptionId,
+    });
+
+    console.log("Subscription updated successfully.");
+});
+
+exports.webhook = catchAsync(async (req, res, next) => {
     const sig = req.headers["stripe-signature"];
     let event;
 
@@ -29,7 +73,23 @@ exports.webhook = catchAsync(async (req, res, next) => {
     switch (event.type) {
         case "checkout.session.completed":
             console.log("Checkout session completed:", session);
-            // Handle the successful checkout session here
+
+            // Retrieve relevant information from the session
+            const subscriptionId = session.metadata.subscriptionId;
+            const stripeSubscriptionId = session.subscription;
+            const paymentStatus = session.payment_status;
+            const amountPaid = session.amount_total;
+            const paymentMethod = session.payment_method_types[0];
+
+            // Use this data to update your database, e.g., update the subscription
+            await updateSubscription(subscriptionId, stripeSubscriptionId);
+
+            await Payments.create({
+                subscriptionId,
+                amount: amountPaid / 100,
+                paymentMethod,
+                status: true,
+            });
             break;
 
         // Add other cases as needed
