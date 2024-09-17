@@ -93,8 +93,17 @@ const Subscriptions = sequelize.define(
                 },
             },
         },
+        stripeSubscriptionId: {
+            type: DataTypes.STRING,
+        },
     },
     {
+        indexes: [
+            {
+                unique: true,
+                fields: ["stripeSubscriptionId"],
+            },
+        ],
         hooks: {
             beforeCreate: async (subscription) => {
                 // Fetch the associated ServicePlan
