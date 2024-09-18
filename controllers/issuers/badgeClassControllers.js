@@ -4,7 +4,6 @@ const Institutions = require("../../models/Institutions");
 const Criterias = require("../../models/Criterias");
 const Achievements = require("../../models/Achievements");
 const AchievementTypes = require("../../models/AchievementTypes");
-const Earners = require("../../models/Earners");
 
 const BaseControllers = require("../../utils/baseControllers");
 
@@ -15,7 +14,7 @@ const badgeClassControllers = new BaseControllers(
     [
         {
             model: Issuers,
-            include: [{ model: Institutions }], // Include Institutions when fetching Issuers
+            include: [{ model: Institutions }],
         },
         {
             model: Achievements,
@@ -26,7 +25,7 @@ const badgeClassControllers = new BaseControllers(
             ],
         },
         {
-            model: Criterias, // Use the alias defined in your association
+            model: Criterias,
         },
     ],
 );
