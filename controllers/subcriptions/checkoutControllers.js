@@ -21,9 +21,8 @@ exports.createCheckoutSession = catchAsync(async (req, res, next) => {
 
     // create a stripe customers to get the id
     const customer = await stripe.customers.create({
-        email: institution.email, // Use institution's email or other details
+        email: institution.email,
         name: institution.name,
-        // Add other customer details if needed
     });
     console.log("Customer object", customer);
 
@@ -52,7 +51,7 @@ exports.createCheckoutSession = catchAsync(async (req, res, next) => {
     });
 
     // Create a new payment record with a unpaid status
-    const payment = await Payments.create({
+    await Payments.create({
         subscriptionId: subscription.id,
         paymentDate: new Date(),
         amount: 0,
@@ -69,10 +68,9 @@ exports.createCheckoutSession = catchAsync(async (req, res, next) => {
         metadata: {
             subscriptionId: subscription.id,
             servicePlanId,
-            paymentId : payment.id
         },
     });
-    console.log("Session created completed : ", session);
+    // console.log("Session created completed : ", session);
     if (!session) {
         return next(new AppError("Failed to create Stripe session", 400));
     }
