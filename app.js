@@ -13,6 +13,9 @@ const routers = require("./routers");
 
 const app = express();
 
+// Stripe webhook Middleware raw body
+app.use('/api/v1/subscriptions/webhook', express.raw({ type: 'application/json' }));
+
 // Global Middleware
 app.use(express.json());
 app.use(cors({ origin: "http://localhost:5173", credentials: true }));

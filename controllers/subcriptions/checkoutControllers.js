@@ -21,9 +21,8 @@ exports.createCheckoutSession = catchAsync(async (req, res, next) => {
 
     // create a stripe customers to get the id
     const customer = await stripe.customers.create({
-        email: institution.email, // Use institution's email or other details
+        email: institution.email,
         name: institution.name,
-        // Add other customer details if needed
     });
     console.log("Customer object", customer);
 
@@ -52,7 +51,7 @@ exports.createCheckoutSession = catchAsync(async (req, res, next) => {
     });
 
     // Create a new payment record with a unpaid status
-    const payment = await Payments.create({
+    await Payments.create({
         subscriptionId: subscription.id,
         paymentDate: new Date(),
         amount: 0,
@@ -64,15 +63,14 @@ exports.createCheckoutSession = catchAsync(async (req, res, next) => {
     const session = await stripe.checkout.sessions.create({
         mode: "subscription",
         line_items: [{ price: stripePriceId, quantity: 1 }],
-        success_url: `${process.env.BASE_URL}/dashboard`,
-        cancel_url: `${process.env.BASE_URL}/price`,
+        success_url: `${process.env.CLIENT_BASE_URL}/dashboard`,
+        cancel_url: `${process.env.CLIENT_BASE_URL}/price`,
         metadata: {
             subscriptionId: subscription.id,
             servicePlanId,
-            paymentId : payment.id
         },
     });
-    console.log("Session created completed : ", session);
+    // console.log("Session created completed : ", session);
     if (!session) {
         return next(new AppError("Failed to create Stripe session", 400));
     }
@@ -82,9 +80,6 @@ exports.createCheckoutSession = catchAsync(async (req, res, next) => {
     res.status(200).json({ sessionId: session.id });
 });
 
-exports.getCancel = async (req, res) => {
-    res.redirect("/");
-};
 
 exports.getSuccess = async (req, res) => {
     res.status(200).send("You've successfully subscribed to our plan");

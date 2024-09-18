@@ -2,7 +2,6 @@ const catchAsync = require("../../utils/catchAsync");
 const AppError = require("../../utils/appError");
 const Subscriptions = require("../../models/Subscriptions");
 const Payments = require("../../models/Payments");
-const { where } = require("sequelize");
 require("dotenv").config();
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
@@ -69,18 +68,15 @@ exports.webhook = catchAsync(async (req, res, next) => {
 
     // Access the session object
     const session = event.data.object;
-
+    // Retrieve relevant information from the session
+    const { subscriptionId } = session.metadata;
+    const stripeSubscriptionId = session.subscription;
+    const amountPaid = session.amount_total;
+    const paymentMethod = session.payment_method_types[0] || "card";
     // Handle the event based on its type
     switch (event.type) {
         case "checkout.session.completed":
             console.log("Checkout session completed:", session);
-
-            // Retrieve relevant information from the session
-            const { subscriptionId, paymentId } = session.metadata;
-            const stripeSubscriptionId = session.subscription;
-            const amountPaid = session.amount_total;
-            const paymentMethod = session.payment_method_types[0] || "card";
-
             // Use this data to update your database, e.g., update the subscription
             await updateSubscription(subscriptionId, stripeSubscriptionId);
 
@@ -93,12 +89,23 @@ exports.webhook = catchAsync(async (req, res, next) => {
                 },
                 {
                     where: {
-                        id: paymentId,
+                        subscriptionId,
                     },
                 },
             );
             break;
         case "checkout.session.expired":
+            await Subscriptions.destroy({
+                where: {
+                    id: subscriptionId,
+                },
+            });
+            await Payments.destroy({
+                where: {
+                    subscriptionId,
+                },
+            });
+
             break;
 
         // Add other cases as needed

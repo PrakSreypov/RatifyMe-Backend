@@ -1,34 +1,37 @@
-const { Institutions } = require("../models");
+const Institutions  = require("../models/Institutions");
 const insertData = require("./insertData");
 
 const institutions = [
     {
-        userId: 101,
-        name: 'Tech Innovations Inc.',
-        bio: 'A leading institution in technology and innovation, dedicated to fostering creativity and entrepreneurship.',
-        email: 'info@techinnovationss.com',
-        phoneNumber: '1234567890',
-        websiteUrl: 'https://www.techinnovations.com',
-        profileImage: 'https://www.techinnovations.com/images/profile.jpg',
+        userId: 2,
+        name: "Tech Innovators",
+        bio: "A leading institution in technology innovations, fostering growth and development.",
+        email: "contact@techinnovators.com",
+        phoneNumber: "1234567890",
+        websiteUrl: "https://www.techinnovators.com",
+        profileImage: "https://www.techinnovators.com/profile.jpg",
+        stripeCustomerId: "cus_TECH123456"
     },
     {
-        userId: 102,
-        name: 'Health & Wellness Center',
-        bio: 'Committed to improving health and wellness through education and community support.',
-        email: 'contact@healthwellnesss.org',
-        phoneNumber: '0987654321',
-        websiteUrl: 'https://www.healthwellness.org',
-        profileImage: null,
+        userId: 2,
+        name: "Health First",
+        bio: "Committed to providing top-notch healthcare and wellness services.",
+        email: "info@healthfirst.com",
+        phoneNumber: "0987654321",
+        websiteUrl: "https://www.healthfirst.com",
+        profileImage: "https://www.healthfirst.com/profile.jpg",
+        stripeCustomerId: "cus_HEALTH654321"
     },
     {
-        userId: 103,
-        name: 'Creative Arts Academy',
-        bio: 'An institution that nurtures artistic talent and promotes creative expression among students.',
-        email: 'admissions@creativeartsacademys.com',
-        phoneNumber: '5551234567',
-        websiteUrl: 'https://www.creativeartsacademy.com',
-        profileImage: null,
+        userId: 2,
+        name: "Green Planet",
+        bio: "Dedicated to environmental sustainability and eco-friendly practices.",
+        email: "support@greenplanet.org",
+        phoneNumber: "1122334455",
+        websiteUrl: "https://www.greenplanet.org",
+        profileImage: "https://www.greenplanet.org/profile.jpg",
+        stripeCustomerId: "cus_GREEN789012"
     }
-]
+];
 
 insertData(Institutions, institutions, {validate: false})
