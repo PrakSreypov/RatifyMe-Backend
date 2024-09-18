@@ -63,8 +63,8 @@ exports.createCheckoutSession = catchAsync(async (req, res, next) => {
     const session = await stripe.checkout.sessions.create({
         mode: "subscription",
         line_items: [{ price: stripePriceId, quantity: 1 }],
-        success_url: `${process.env.BASE_URL}/dashboard`,
-        cancel_url: `${process.env.BASE_URL}/price`,
+        success_url: `${process.env.CLIENT_BASE_URL}/dashboard`,
+        cancel_url: `${process.env.CLIENT_BASE_URL}/price`,
         metadata: {
             subscriptionId: subscription.id,
             servicePlanId,
@@ -80,9 +80,6 @@ exports.createCheckoutSession = catchAsync(async (req, res, next) => {
     res.status(200).json({ sessionId: session.id });
 });
 
-exports.getCancel = async (req, res) => {
-    res.redirect("/");
-};
 
 exports.getSuccess = async (req, res) => {
     res.status(200).send("You've successfully subscribed to our plan");
