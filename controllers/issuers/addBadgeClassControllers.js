@@ -2,47 +2,71 @@ const {
     BadgeClasses,
     Issuers,
     Institutions,
-    Achievements,
+    Achievements: AchievementModel,
     AchievementTypes,
-    Criterias,
+    Criterias: CriteriaModel,
 } = require("../../models");
-const sequelize = require("../../configs/database"); // Assuming you have sequelize initialized here
-const catchAsync = require("../../utils/catchAsync"); // Assuming you're using a catchAsync utility for error handling
+const sequelize = require("../../configs/database");
+const catchAsync = require("../../utils/catchAsync");
 
 exports.addBadgeClass = catchAsync(async (req, res, next) => {
-    const { badgeClassData, issuerData, institutionData, achievementsData, criteriasData } =
-        req.body;
+    const {
+        name,
+        description,
+        imageUrl,
+        tags,
+        startedDate,
+        expiredDate,
+        issuerId,
+        Issuer,
+        Achievements,
+        Criterias,
+    } = req.body;
 
     // Start a transaction for atomicity
     const transaction = await sequelize.transaction();
 
     try {
-        // Create BadgeClass
-        const newBadgeClass = await BadgeClasses.create(badgeClassData, { transaction });
-
-        // Create Issuer with associated Institution
-        const newIssuer = await Issuers.create(
+        // 1. Create BadgeClass with basic details, including issuerId if provided
+        const newBadgeClass = await BadgeClasses.create(
             {
-                ...issuerData,
-                badgeClassId: newBadgeClass.id, // Assuming Issuers have badgeClassId as foreign key
+                name,
+                description,
+                imageUrl,
+                tags,
+                startedDate,
+                expiredDate,
+                issuerId, // Make sure this is correctly included
             },
             { transaction },
         );
 
-        if (institutionData) {
-            await Institutions.create(
+        // 2. Create Issuer and associated Institution if applicable
+        if (Issuer) {
+            const newIssuer = await Issuers.create(
                 {
-                    ...institutionData,
-                    issuerId: newIssuer.id, // Assuming Institutions have issuerId as foreign key
+                    ...Issuer,
+                    badgeClassId: newBadgeClass.id,
                 },
                 { transaction },
             );
+
+            // Handle optional institution data if provided
+            if (Issuer.institution) {
+                await Institutions.create(
+                    {
+                        ...Issuer.institution,
+                        issuerId: newIssuer.id,
+                    },
+                    { transaction },
+                );
+            }
         }
 
-        // Create Achievements with associated AchievementTypes
-        if (achievementsData && achievementsData.length > 0) {
-            for (const achievement of achievementsData) {
-                const newAchievement = await Achievements.create(
+        // 3. Create Achievements with associated AchievementTypes
+        if (Achievements && Achievements.length > 0) {
+            for (const achievement of Achievements) {
+                const newAchievement = await AchievementModel.create(
                     {
                         ...achievement,
                         badgeClassId: newBadgeClass.id,
@@ -50,33 +74,37 @@ exports.addBadgeClass = catchAsync(async (req, res, next) => {
                     { transaction },
                 );
 
-                // If AchievementTypes exist, associate them
                 if (achievement.achievementTypeId) {
-                    await AchievementTypes.create(
-                        {
-                            ...achievement.achievementType,
-                            achievementId: newAchievement.id,
-                        },
-                        { transaction },
-                    );
+                    await newAchievement.setAchievementType(achievement.achievementTypeId, {
+                        transaction,
+                    });
+                }
+
+                if (achievement.AchievementType) {
+                    const [achievementType] = await AchievementTypes.findOrCreate({
+                        where: { name: achievement.AchievementType.name },
+                        defaults: achievement.AchievementType,
+                        transaction,
+                    });
+                    await newAchievement.setAchievementType(achievementType.id, { transaction });
                 }
             }
         }
 
-        // Create Criterias associated with the BadgeClass
-        if (criteriasData && criteriasData.length > 0) {
-            for (const criteria of criteriasData) {
-                await Criterias.create(
+        // 4. Create Criterias associated with the BadgeClass
+        if (Criterias && Criterias.length > 0) {
+            for (const criteria of Criterias) {
+                await CriteriaModel.create(
                     {
                         ...criteria,
-                        badgeClassId: newBadgeClass.id, // Assuming Criterias have badgeClassId as foreign key
+                        badgeClassId: newBadgeClass.id,
                     },
                     { transaction },
                 );
             }
         }
 
-        // Commit the transaction once all operations are successfully completed
+        // 5. Commit the transaction once all operations are successfully completed
         await transaction.commit();
 
         // Fetch the created BadgeClass with its associations to match the desired response structure
@@ -88,22 +116,22 @@ exports.addBadgeClass = catchAsync(async (req, res, next) => {
                     include: [{ model: Institutions }],
                 },
                 {
-                    model: Achievements,
+                    model: AchievementModel,
                     include: [{ model: AchievementTypes }],
                 },
                 {
-                    model: Criterias,
+                    model: CriteriaModel,
                 },
             ],
         });
 
-        // Return the newly created BadgeClass with associations
+        // 6. Return the newly created BadgeClass with associations
         res.status(201).json({
             status: "success",
             data: createdBadgeClass,
         });
     } catch (error) {
-        // Rollback transaction only if it hasn't been committed yet
+        // Rollback transaction if it hasn't been committed yet
         if (!transaction.finished) {
             await transaction.rollback();
         }
