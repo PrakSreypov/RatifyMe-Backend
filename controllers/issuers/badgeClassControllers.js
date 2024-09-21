@@ -11,15 +11,11 @@ const BaseControllers = require("../../utils/baseControllers");
 const associated = [
     {
         model: Issuers,
-        include: [{ model: Institutions }],
+        include: [Institutions],
     },
     {
         model: Achievements,
-        include: [
-            {
-                model: AchievementTypes,
-            },
-        ],
+        include: [AchievementTypes],
     },
     {
         model: Criterias,
