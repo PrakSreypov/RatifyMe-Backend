@@ -55,11 +55,11 @@ const BadgeClasses = sequelize.define(
         },
         startedDate: {
             type: DataTypes.DATE,
-            allowNull: false,
+            allowNull: true,
         },
         expiredDate: {
             type: DataTypes.DATE,
-            allowNull: false,
+            allowNull: true,
         },
         duration: {
             type: DataTypes.DATE,
