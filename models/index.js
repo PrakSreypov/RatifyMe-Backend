@@ -199,6 +199,16 @@ Institutions.hasMany(Issuers, {
 Issuers.belongsTo(Institutions, {
     foreignKey: "institutionId",
 });
+
+Issuers.hasMany(Earners, {
+    foreignKey: "issuerId",
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+})
+
+Earners.belongsTo(Issuers, {
+    foreignKey: "issuerId"
+})
 // ============ End Issuers Association ============
 
 // ============ Start BadgeClasses Association ============

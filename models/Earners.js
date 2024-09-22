@@ -2,7 +2,7 @@ const { DataTypes } = require("sequelize");
 const sequelize = require("../configs/database");
 const Users = require("./Users");
 const AcademicBackgrounds = require("./AcademicBackgrounds");
-
+const Issuers = require("./Issuers")
 const Earners = sequelize.define("Earners", {
     id: {
         autoIncrement: true,
@@ -48,6 +48,15 @@ const Earners = sequelize.define("Earners", {
         onDelete: "CASCADE",
         onUpdate: "CASCADE",
     },
+    issuerId: {
+        type: DataTypes.INTEGER,
+        references: {
+            model: "Issuers",
+            key: "id",
+        },
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
+    }
 });
 
 Earners.addHook("beforeCreate", async (earner, options) => {
