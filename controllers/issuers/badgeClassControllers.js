@@ -17,9 +17,7 @@ const associated = [
         model: Achievements,
         include: [AchievementTypes],
     },
-    {
-        model: Criterias,
-    },
+    Criterias,
 ];
 const badgeClassControllers = new BaseControllers(BadgeClasses, ["name"], associated);
 
