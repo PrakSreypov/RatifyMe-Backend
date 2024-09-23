@@ -4,6 +4,7 @@ const { InviteUsers, Users } = require("../models");
 const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/appError");
 const { Op, where } = require("sequelize");
+const { generateVerificationCode } = require("../utils/generateVerificationCode");
 
 class CodeInvitationService {
     constructor(
@@ -110,15 +111,39 @@ class CodeInvitationService {
             return next(new AppError(`No inviter found for code '${inviterCode}'.`, 404));
         }
 
-        const existUser = await Users.findOne({
+        const existingUser = await Users.findOne({
             where: { email: guest.inviteEmail },
         });
 
-        if (existUser) {
-            if (existUser.roleId === 4) {
+        if (existingUser) {
+            if (existingUser.roleId === 4) {
+                const existingIssuer = await this.guestModel.findOne({
+                    where: { issuerId: inviter.id },
+                });
+
+                if (existingIssuer) {
+                    return next(
+                        new AppError("Your account already exists in this institution.", 400),
+                    );
+                }
                 await this.guestModel.create({
-                    userId: existUser.id,
+                    userId: existingUser.id,
                     issuerId: inviter.id,
+                });
+            } else if (existingUser.roleId === 3) {
+                const existingIssuer = await this.guestModel.findOne({
+                    where: { institutionId: inviter.id },
+                });
+
+                if (existingIssuer) {
+                    return next(
+                        new AppError("Your account already exists in this institution.", 400),
+                    );
+                }
+                await this.guestModel.create({
+                    userId: existingUser.id,
+                    institutionId: inviter.id,
+                    code: generateVerificationCode(),
                 });
             }
         }
@@ -131,7 +156,7 @@ class CodeInvitationService {
             message: `Invitation verified successfully`,
             inviter: inviter,
             guest: guest,
-            user: existUser,
+            user: existingUser,
         });
     });
 }
