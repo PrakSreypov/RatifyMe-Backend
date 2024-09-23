@@ -9,13 +9,16 @@ const BaseControllers = require("../../utils/baseControllers");
 const AcademicLevels = require("../../models/AcademicLevels");
 const Institutions = require("../../models/Institutions");
 const AchievementTypes = require("../../models/AchievementTypes");
+const Addresses = require("../../models/Addresses");
+const Issuers = require("../../models/Issuers");
+
 const earnerControllers = new BaseControllers(
     Earners,
     [],
     [
         {
             model: Users,
-            include: [Roles, Genders],
+            include: [Roles, Genders, Addresses],
         },
         {
             model: AcademicBackgrounds,
@@ -25,6 +28,10 @@ const earnerControllers = new BaseControllers(
             model: Achievements,
             include: [BadgeClasses, AchievementTypes],
         },
+        {
+            model: Issuers,
+            include: [Users, Institutions]
+        }
     ],
 );
 module.exports = earnerControllers;

@@ -3,7 +3,17 @@ const insertData = require("./insertData");
 
 const institutions = [
     {
-        userId: 2,
+        userId: 5,
+        name: "Tech Innovators",
+        bio: "A leading institution in technology innovations, fostering growth and development.",
+        email: "contact@techinnovators.com",
+        phoneNumber: "1234567890",
+        websiteUrl: "https://www.techinnovators.com",
+        profileImage: "https://www.techinnovators.com/profile.jpg",
+        stripeCustomerId: "cus_TECH123456"
+    },
+    {
+        userId: 6,
         name: "Tech Innovators",
         bio: "A leading institution in technology innovations, fostering growth and development.",
         email: "contact@techinnovators.com",

@@ -113,11 +113,11 @@ exports.addBadgeClass = catchAsync(async (req, res, next) => {
             include: [
                 {
                     model: Issuers,
-                    include: [{ model: Institutions }],
+                    include: [Institutions],
                 },
                 {
                     model: AchievementModel,
-                    include: [{ model: AchievementTypes }],
+                    include: [AchievementTypes],
                 },
                 {
                     model: CriteriaModel,
