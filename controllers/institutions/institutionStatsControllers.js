@@ -24,13 +24,6 @@ const getAllInstitutionStats = catchAsync(async (req, res) => {
                 ],
             },
         ],
-        attributes: {
-            include: [
-                [Sequelize.fn('COUNT', Sequelize.col('Issuers.id')), 'totalIssuers'],
-                [Sequelize.fn('COUNT', Sequelize.col('Issuers.BadgeClasses.id')), 'totalBadges'],
-                [Sequelize.fn('COUNT', Sequelize.col('Issuers.Earners.id')), 'totalEarners'],
-            ],
-        },
         group: [
             'Institutions.id',
             'Issuers.id',
