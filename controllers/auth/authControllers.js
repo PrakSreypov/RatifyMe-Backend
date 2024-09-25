@@ -5,11 +5,16 @@ const BaseController = require("../../utils/baseControllers");
 const catchAsync = require("../../utils/catchAsync");
 const AppError = require("../../utils/appError");
 const { createSendToken } = require("../../middlewares/auth");
-const sendEmail = require("../../services/email");
+const sendEmail = require("../../services/mailServices");
 
 const Users = require("../../models/Users");
 const Genders = require("../../models/Genders");
 const Roles = require("../../models/Roles");
+const sequelize = require("../../configs/database");
+const Addresses = require("../../models/Addresses");
+const Institutions = require("../../models/Institutions");
+const { generateVerificationCode } = require("../../utils/generateVerificationCode");
+const { Issuers, Earners } = require("../../models");
 
 const uniqueFields = ["email", "username", "phoneNumber"];
 const associations = [Roles, Genders];
@@ -21,13 +26,124 @@ class AuthControllers extends BaseController {
 
     // ============ Start Signup controller ============
     signup = catchAsync(async (req, res, next) => {
-        const user = req.body;
+        const {
+            userData,
+            addressData,
+            institutionData,
+            institutionAddressData,
+            issuerData,
+            earnerData,
+        } = req.body;
 
-        await this.checkUniqueFields(user);
+        const transaction = await sequelize.transaction();
 
-        const newUser = await Users.create(user);
-        createSendToken(newUser, 201, res);
+        try {
+            // Check for unique fields
+            await this.checkUniqueFields(userData);
+
+            // Create the user
+            const newUser = await Users.create(userData, { transaction });
+
+            if (!newUser || !newUser.id) {
+                return next(new AppError('User creation failed.', 500)); // Handle user creation failure
+            }
+
+            const role = newUser.roleId;
+
+            // Create address if address data exists
+            if (addressData) {
+                await Addresses.create({ ...addressData, userId: newUser.id }, { transaction });
+            }
+
+            // Handle different roles
+            if (role === 2) {
+                // If institution data exists, create the institution with userId
+                const institutionCode = generateVerificationCode();
+                const newInstitution = await Institutions.create(
+                    { ...institutionData, userId: newUser.id, code: institutionCode },
+                    { transaction },
+                );
+
+                // If institution address data exists, create institution address
+                if (institutionAddressData) {
+                    await Addresses.create(
+                        { ...institutionAddressData, institutionId: newInstitution.id },
+                        { transaction },
+                    );
+                }
+
+                // Optionally handle any issuer creation here if needed
+            } else if (role === 3) {
+                const { institutionId } = issuerData;
+                const issuerCode = generateVerificationCode();
+                // Check that institutionId is provided for the Issuer role
+                if (!issuerData || !institutionId) {
+                    return next(new AppError("Institution ID or Issuer data is missing.", 400));
+                }
+
+                // Verify that the institution exists using the institutionId
+                const institution = await Institutions.findByPk(institutionId, { transaction });
+                if (!institution) {
+                    return next(
+                        new AppError(`Institution with ID ${institutionId} not found.`, 404),
+                    );
+                }
+
+                // Create the issuer with the userId and institutionId
+                await Issuers.create(
+                    {
+                        ...issuerData,
+                        userId: newUser.id,
+                        institutionId: institution.id,
+                        code: issuerCode,
+                    },
+                    { transaction },
+                );
+            } else if (role === 4) {
+                const { issuerId } = earnerData;
+
+                // Check that institutionId is provided for the Issuer role
+                if (!earnerData || !issuerId) {
+                    return next(new AppError("Issuer ID or Issuer data is missing.", 400));
+                }
+
+                // Verify that the institution exists using the institutionId
+                const issuer = await Issuers.findByPk(issuerId, { transaction });
+                if (!issuer) {
+                    return next(
+                        new AppError(`Institution with ID ${issuerId} not found.`, 404),
+                    );
+                }
+
+                // Create the issuer with the userId and institutionId
+                await Earners.create(
+                    {
+                        ...earnerData,
+                        userId: newUser.id,
+                        issuerId
+                    },
+                    { transaction },
+                );
+            }
+
+            // Commit the transaction once all operations are successful
+            await transaction.commit();
+
+            // Generate and send a token back to the client
+            createSendToken(
+                [newUser, addressData, institutionData, issuerData, earnerData],
+                201,
+                res,
+            );
+        } catch (error) {
+            // Rollback transaction if it hasn't been committed yet
+            if (!transaction.finished) {
+                await transaction.rollback();
+            }
+            return next(error);
+        }
     });
+
     // ============ End Signup controller ============
 
     // ============ Start Signin controller ============
@@ -67,10 +183,11 @@ class AuthControllers extends BaseController {
         await user.save({ validate: false }); // Save the reset token and expiry to the DB
 
         // Send it to user's email
-        const resetURL = `${req.protocol}://${req.get(
-            "host",
-        )}/api/v1/users/resetPassword/${resetToken}`;
-        const message = `Forgot your password? Submit a PATCH request with your new password and passwordConfirm to: ${resetURL}.\nIf you didn't forget your password, please ignore this email.`;
+        // const resetURL = `${req.protocol}://${req.get(
+        //     "host",
+        // )}/api/v1/users/resetPassword/${resetToken}`;
+        // const message = `Forgot your password? Submit a PATCH request with your new password and passwordConfirm to: ${resetURL}.\nIf you didn't forget your password, please ignore this email.`;
+        const message = "forgot password";
 
         try {
             await sendEmail({
@@ -154,16 +271,16 @@ class AuthControllers extends BaseController {
     // ============ End Logout controller   ============
 
     // ============ Start Check Auth controller   ============
-    checkAuth = catchAsync(async(req, res, next) => {
+    checkAuth = catchAsync(async (req, res, next) => {
         const user = res.locals.user;
 
         // const user = await Users.findByPk(req.body.id)
-        if(!user){
-            return next(new AppError('User not found!', 404))
+        if (!user) {
+            return next(new AppError("User not found!", 404));
         }
 
-        res.status(200).json({user})
-    })
+        res.status(200).json({ user });
+    });
     // ============ End Check Auth controller     ============
 }
 
