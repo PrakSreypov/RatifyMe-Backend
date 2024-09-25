@@ -12,7 +12,6 @@ const getRandomFutureDate = (start, end) => {
 
 const badgeClassesData = [
     {
-        id: 1,
         name: "Achievement Explorer",
         description: "Awarded for exploring all possible achievements.",
         imageUrl: "https://example.com/images/explorer.png",
@@ -26,7 +25,6 @@ const badgeClassesData = [
         ), // Random date in the next year
     },
     {
-        id: 2,
         name: "Coding Champion",
         description: "Given to those who excel in coding challenges.",
         imageUrl: "https://example.com/images/coding-champion.png",
@@ -40,7 +38,6 @@ const badgeClassesData = [
         ),
     },
     {
-        id: 3,
         name: "Bug Hunter",
         description: "For identifying and fixing critical bugs.",
         imageUrl: "https://example.com/images/bug-hunter.png",
@@ -54,7 +51,6 @@ const badgeClassesData = [
         ),
     },
     {
-        id: 4,
         name: "Design Guru",
         description: "Awarded for excellence in UI/UX design.",
         imageUrl: "https://example.com/images/design-guru.png",
@@ -68,7 +64,6 @@ const badgeClassesData = [
         ),
     },
     {
-        id: 6,
         name: "Data Scientist",
         description: "For those who excel in data science projects.",
         imageUrl: "https://example.com/images/data-scientist.png",
@@ -82,7 +77,6 @@ const badgeClassesData = [
         ),
     },
     {
-        id: 7,
         name: "Security Expert",
         description: "Awarded for expertise in cybersecurity.",
         imageUrl: "https://example.com/images/security-expert.png",
@@ -96,7 +90,6 @@ const badgeClassesData = [
         ),
     },
     {
-        id: 8,
         name: "Full Stack Developer",
         description: "Given to those who excel in both front-end and back-end development.",
         imageUrl: "https://example.com/images/full-stack.png",
@@ -110,7 +103,6 @@ const badgeClassesData = [
         ),
     },
     {
-        id: 9,
         name: "Cloud Architect",
         description: "For expertise in designing scalable cloud architectures.",
         imageUrl: "https://example.com/images/cloud-architect.png",
@@ -124,7 +116,6 @@ const badgeClassesData = [
         ),
     },
     {
-        id: 10,
         name: "DevOps Specialist",
         description: "Awarded for expertise in DevOps practices.",
         imageUrl: "https://example.com/images/devops-specialist.png",

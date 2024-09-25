@@ -101,7 +101,7 @@ const Users = sequelize.define(
         },
         dateOfBirth: {
             type: DataTypes.DATE,
-            allowNull: false,
+            allowNull: true,
             validate: {
                 isDate: {
                     msg: "Please provide a valide date of birth.",
