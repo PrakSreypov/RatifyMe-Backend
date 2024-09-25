@@ -341,5 +341,4 @@ module.exports = {
     Achievements,
     Earners,
     BadgeCriteriaItems,
-    InviteUsers,
 };
