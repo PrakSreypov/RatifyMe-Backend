@@ -75,7 +75,7 @@ class BaseController {
         }
         return record;
     }
-    // Start Check if a record exists by ID
+    // End Check if a record exists by ID
     // ============ End Utility Method ============
 
     // ============ Start CRUD Method  ============

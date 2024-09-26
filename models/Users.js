@@ -91,8 +91,8 @@ const Users = sequelize.define(
                     msg: "Phone number must contain only numbers.",
                 },
                 len: {
-                    args: [8, 15],
-                    msg: "Phone number must be between 8 and 15 digits long.",
+                    args: [8, 30],
+                    msg: "Phone number must be between 8 and 30 digits long.",
                 },
             },
         },
@@ -120,7 +120,7 @@ const Users = sequelize.define(
             },
             onDelete: "CASCADE",
             onUpdate: "CASCADE",
-            defaultValue: 1
+            defaultValue: 1,
         },
         roleId: {
             type: DataTypes.INTEGER,
