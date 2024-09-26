@@ -27,19 +27,20 @@ const Achievements = sequelize.define("Achievements", {
         onUpdate: "CASCADE",
     },
     status: {
-        type: DataTypes.STRING,
-        validate: {
-            isAlpha: {
-                msg: "Status must be string only.",
-            },
-            notEmpty: {
-                msg: "Status must not be empty",
-            },
-            isIn: {
-                args: [["ToDo", "Doing", "Done"]],
-                msg: "status in must be ToDo, Doing, or Done",
-            },
-        },
+        type: DataTypes.BOOLEAN,
+        // validate: {
+        //     isAlpha: {
+        //         msg: "Status must be string only.",
+        //     },
+        //     notEmpty: {
+        //         msg: "Status must not be empty",
+        //     },
+        //     isIn: {
+        //         args: [["ToDo", "Doing", "Done"]],
+        //         msg: "status in must be ToDo, Doing, or Done",
+        //     },
+        // },
+        defaultValue: false,
     },
 });
 
