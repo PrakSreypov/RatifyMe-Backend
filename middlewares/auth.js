@@ -2,7 +2,17 @@ const jwt = require("jsonwebtoken");
 const { promisify } = require("util");
 const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/appError");
-const { Users, Roles, Genders, Addresses, Institutions, Issuers, Earners } = require("../models");
+const {
+    Users,
+    Roles,
+    Genders,
+    Addresses,
+    Institutions,
+    Issuers,
+    Earners,
+    AcademicBackgrounds,
+    Achievements,
+} = require("../models");
 
 // Sign Token
 const signToken = (id) => {
@@ -88,14 +98,7 @@ exports.isLoggedIn = async (req, res, next) => {
         try {
             const decoded = await promisify(jwt.verify)(req.cookies.jwt, process.env.JWT_SECRET);
             const currentUser = await Users.findByPk(decoded.id, {
-                include: [
-                    {
-                        model: Roles,
-                    },
-                    {
-                        model: Genders,
-                    },
-                ],
+                include: [{ model: Roles }, { model: Genders }],
             });
 
             if (!currentUser) {
@@ -116,7 +119,6 @@ exports.isLoggedIn = async (req, res, next) => {
             let additionalData = {};
 
             if (currentUser.roleId === 2) {
-                // For role 3 (issuer), load institution data
                 const institutionData = await Institutions.findOne({
                     where: { userId: currentUser.id },
                     include: [{ model: Users }],
@@ -124,21 +126,22 @@ exports.isLoggedIn = async (req, res, next) => {
 
                 additionalData = { institutionData };
             } else if (currentUser.roleId === 3) {
-                // For role 3 (issuer), load issuer-specific data
                 const issuerData = await Issuers.findOne({
                     where: { userId: currentUser.id },
                     include: [{ model: Users }, { model: Institutions }],
                 });
                 additionalData = { issuerData };
             } else if (currentUser.roleId === 4) {
-                // For role 4 (earner), load earner-specific data
                 const earnerData = await Earners.findOne({
                     where: { userId: currentUser.id },
                     include: [
                         { model: Users },
                         { model: AcademicBackgrounds },
                         { model: Achievements },
-                        { model: Issuers, include: [{ model: Users }, { model: Institutions }] },
+                        {
+                            model: Issuers,
+                            include: [{ model: Users }, { model: Institutions }],
+                        },
                     ],
                 });
                 additionalData = { earnerData };
@@ -153,9 +156,12 @@ exports.isLoggedIn = async (req, res, next) => {
 
             return next();
         } catch (error) {
+            console.error("JWT verification failed:", error);
+            res.clearCookie("jwt");
             return next();
         }
     }
     next();
 };
+
 // ============ End Check Authenticate Middleware   ============
