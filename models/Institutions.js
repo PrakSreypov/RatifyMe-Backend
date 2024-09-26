@@ -60,8 +60,8 @@ const Institutions = sequelize.define(
                     msg: "Phone number must contain only numbers.",
                 },
                 len: {
-                    args: [10, 20],
-                    msg: "Phone number must be between 10 and 15 digits.",
+                    args: [8, 30],
+                    msg: "Phone number must be between 8 and 30 digits long.",
                 },
             },
         },
@@ -97,7 +97,7 @@ const Institutions = sequelize.define(
         indexes: [
             {
                 unique: true,
-                fields: ["institutionName", "stripeCustomerId", 'code'],
+                fields: ["institutionName", "stripeCustomerId", "code"],
             },
         ],
     },
