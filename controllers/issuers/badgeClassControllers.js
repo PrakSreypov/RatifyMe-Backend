@@ -4,6 +4,7 @@ const Institutions = require("../../models/Institutions");
 const Criterias = require("../../models/Criterias");
 const Achievements = require("../../models/Achievements");
 const AchievementTypes = require("../../models/AchievementTypes");
+const Users = require("../../models/Users");
 
 const BaseControllers = require("../../utils/baseControllers");
 
@@ -11,7 +12,7 @@ const BaseControllers = require("../../utils/baseControllers");
 const associated = [
     {
         model: Issuers,
-        include: [Institutions],
+        include: [Institutions, Users],
     },
     {
         model: Achievements,
