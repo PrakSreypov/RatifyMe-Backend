@@ -1,7 +1,7 @@
 const Users = require("./Users");
 const Roles = require("./Roles");
 const Genders = require("./Genders");
-const Address = require("./Addresses");
+const Addresses = require("./Addresses");
 const AcademicLevels = require("./AcademicLevels");
 const FieldOfStudies = require("./FieldOfStudies");
 const AcademicBackgrounds = require("./AcademicBackgrounds");
@@ -21,13 +21,13 @@ const Earners = require("./Earners");
 const InviteUsers = require("./InviteUsers");
 
 // ============ Start Users Association ============
-// User & Address association
-Users.hasMany(Address, {
+// User & Addresses association
+Users.hasMany(Addresses, {
     foreignKey: "userId",
     onDelete: "CASCADE",
     onUpdate: "CASCADE",
 });
-Address.belongsTo(Users, {
+Addresses.belongsTo(Users, {
     foreignKey: "userId",
 });
 
@@ -169,13 +169,13 @@ Institutions.belongsTo(Users, {
     foreignKey: "userId",
 });
 
-// Institution & Address
-Institutions.hasMany(Address, {
+// Institution & Addresses
+Institutions.hasMany(Addresses, {
     foreignKey: "institutionId",
     onDelete: "CASCADE",
     onUpdate: "CASCADE",
 });
-Address.belongsTo(Institutions, {
+Addresses.belongsTo(Institutions, {
     foreignKey: "institutionId",
 });
 // ============ End Institutions Association ============
@@ -324,7 +324,7 @@ module.exports = {
     Users,
     Roles,
     Genders,
-    Address,
+    Addresses,
     AcademicLevels,
     FieldOfStudies,
     AcademicBackgrounds,
