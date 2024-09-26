@@ -2,7 +2,7 @@ const jwt = require("jsonwebtoken");
 const { promisify } = require("util");
 const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/appError");
-const Users = require("../models/Users");
+const { Users, Roles, Genders, Addresses, Institutions, Issuers, Earners } = require("../models");
 
 // Sign Token
 const signToken = (id) => {
@@ -16,10 +16,10 @@ exports.createSendToken = (user, statusCode, res) => {
     const token = signToken(user.id);
 
     const cookieOptions = {
-        // expires: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000),
-        expires: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 60 * 1000),
+        expires: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000),
+        // expires: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 60 * 1000),
         httpOnly: true,
-        sameSite: 'Strict',
+        sameSite: "Strict",
     };
 
     if (process.env.NODE_ENV === "production") cookieOptions.secure = true;
@@ -87,7 +87,16 @@ exports.isLoggedIn = async (req, res, next) => {
     if (req.cookies.jwt) {
         try {
             const decoded = await promisify(jwt.verify)(req.cookies.jwt, process.env.JWT_SECRET);
-            const currentUser = await Users.findByPk(decoded.id);
+            const currentUser = await Users.findByPk(decoded.id, {
+                include: [
+                    {
+                        model: Roles,
+                    },
+                    {
+                        model: Genders,
+                    },
+                ],
+            });
 
             if (!currentUser) {
                 return next();
@@ -97,7 +106,51 @@ exports.isLoggedIn = async (req, res, next) => {
                 return next();
             }
 
-            res.locals.user = currentUser;
+            // Load address data
+            const addressData = await Addresses.findOne({
+                where: { userId: currentUser.id },
+                include: [{ model: Users }, { model: Institutions }],
+            });
+
+            // Load additional data based on user role
+            let additionalData = {};
+
+            if (currentUser.roleId === 2) {
+                // For role 3 (issuer), load institution data
+                const institutionData = await Institutions.findOne({
+                    where: { userId: currentUser.id },
+                    include: [{ model: Users }],
+                });
+
+                additionalData = { institutionData };
+            } else if (currentUser.roleId === 3) {
+                // For role 3 (issuer), load issuer-specific data
+                const issuerData = await Issuers.findOne({
+                    where: { userId: currentUser.id },
+                    include: [{ model: Users }, { model: Institutions }],
+                });
+                additionalData = { issuerData };
+            } else if (currentUser.roleId === 4) {
+                // For role 4 (earner), load earner-specific data
+                const earnerData = await Earners.findOne({
+                    where: { userId: currentUser.id },
+                    include: [
+                        { model: Users },
+                        { model: AcademicBackgrounds },
+                        { model: Achievements },
+                        { model: Issuers, include: [{ model: Users }, { model: Institutions }] },
+                    ],
+                });
+                additionalData = { earnerData };
+            }
+
+            // Attach the current user and additional data to res.locals
+            res.locals.user = {
+                currentUser,
+                addressData,
+                ...additionalData,
+            };
+
             return next();
         } catch (error) {
             return next();

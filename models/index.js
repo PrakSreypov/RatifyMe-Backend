@@ -205,11 +205,11 @@ Issuers.hasMany(Earners, {
     foreignKey: "issuerId",
     onDelete: "CASCADE",
     onUpdate: "CASCADE",
-})
+});
 
 Earners.belongsTo(Issuers, {
-    foreignKey: "issuerId"
-})
+    foreignKey: "issuerId",
+});
 // ============ End Issuers Association ============
 
 // ============ Start BadgeClasses Association ============
@@ -341,4 +341,5 @@ module.exports = {
     Achievements,
     Earners,
     BadgeCriteriaItems,
+    InviteUsers,
 };
