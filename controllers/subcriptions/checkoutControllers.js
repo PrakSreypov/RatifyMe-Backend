@@ -16,8 +16,9 @@ exports.createCheckoutSession = catchAsync(async (req, res, next) => {
 
     //  Fetch the institution from the database
     const institution = await Institutions.findOne({
-        where : userId
+        where: { userId },
     });
+
     if (!institution) {
         return next(new AppError("Institution not found", 404));
     }
@@ -27,7 +28,6 @@ exports.createCheckoutSession = catchAsync(async (req, res, next) => {
         email: institution.email,
         name: institution.name,
     });
-    console.log("Customer object", customer);
 
     // Store customerId in the Institutions table
     await institution.update({
