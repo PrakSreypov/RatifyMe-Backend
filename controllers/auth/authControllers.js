@@ -131,9 +131,10 @@ class AuthControllers extends BaseController {
 
             // Generate and send a token back to the client
             createSendToken(
-                [newUser, addressData, institutionData, issuerData, earnerData],
+                {newUser, addressData, institutionData, issuerData, earnerData},
                 201,
                 res,
+                true
             );
         } catch (error) {
             // Rollback transaction if it hasn't been committed yet

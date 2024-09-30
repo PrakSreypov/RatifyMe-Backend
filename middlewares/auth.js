@@ -22,8 +22,8 @@ const signToken = (id) => {
 };
 
 // ============ Start Send Token ============
-exports.createSendToken = (user, statusCode, res) => {
-    const token = signToken(user.id);
+exports.createSendToken = (user, statusCode, res, isSignup = false) => {
+    const token = signToken(isSignup ? user.newUser.id : user.id);
 
     const cookieOptions = {
         expires: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000),
@@ -97,6 +97,7 @@ exports.isLoggedIn = async (req, res, next) => {
     if (req.cookies.jwt) {
         try {
             const decoded = await promisify(jwt.verify)(req.cookies.jwt, process.env.JWT_SECRET);
+            console.log(" ===== decoded from req:  ===== ", decoded);
             const currentUser = await Users.findByPk(decoded.id, {
                 include: [{ model: Roles }, { model: Genders }],
             });

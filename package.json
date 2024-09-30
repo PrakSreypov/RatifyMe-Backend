@@ -27,6 +27,6 @@
     "nodemailer": "^6.9.15",
     "nodemon": "^3.1.4",
     "sequelize": "^6.37.3",
-    "stripe": "^16.11.0"
+    "stripe": "^16.12.0"
   }
 }
