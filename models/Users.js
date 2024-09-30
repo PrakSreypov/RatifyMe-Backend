@@ -136,7 +136,7 @@ const Users = sequelize.define(
             type: DataTypes.STRING,
         },
         bio: {
-            type: DataTypes.STRING,
+            type: DataTypes.STRING(500),
             validate: {
                 len: {
                     args: [0, 500],

@@ -150,6 +150,7 @@ class CodeInvitationService {
 
         // Mark the invitation as verified
         guest.status = true;
+        guest.updatedAt = new Date();
         await guest.save({ validate: false });
 
         res.status(200).json({

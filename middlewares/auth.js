@@ -97,7 +97,6 @@ exports.isLoggedIn = async (req, res, next) => {
     if (req.cookies.jwt) {
         try {
             const decoded = await promisify(jwt.verify)(req.cookies.jwt, process.env.JWT_SECRET);
-            console.log(" ===== decoded from req:  ===== ", decoded);
             const currentUser = await Users.findByPk(decoded.id, {
                 include: [{ model: Roles }, { model: Genders }],
             });
