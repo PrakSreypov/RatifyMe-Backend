@@ -15,6 +15,7 @@ const Addresses = require("../../models/Addresses");
 const Institutions = require("../../models/Institutions");
 const { generateVerificationCode } = require("../../utils/generateVerificationCode");
 const { Issuers, Earners } = require("../../models");
+const EmailService = require("../../services/mailServices");
 
 const uniqueFields = ["email", "username", "phoneNumber"];
 const associations = [Roles, Genders];
@@ -45,7 +46,7 @@ class AuthControllers extends BaseController {
             const newUser = await Users.create(userData, { transaction });
 
             if (!newUser || !newUser.id) {
-                return next(new AppError('User creation failed.', 500)); // Handle user creation failure
+                return next(new AppError("User creation failed.", 500)); // Handle user creation failure
             }
 
             const role = newUser.roleId;
@@ -110,9 +111,7 @@ class AuthControllers extends BaseController {
                 // Verify that the institution exists using the institutionId
                 const issuer = await Issuers.findByPk(issuerId, { transaction });
                 if (!issuer) {
-                    return next(
-                        new AppError(`Institution with ID ${issuerId} not found.`, 404),
-                    );
+                    return next(new AppError(`Institution with ID ${issuerId} not found.`, 404));
                 }
 
                 // Create the issuer with the userId and institutionId
@@ -120,7 +119,7 @@ class AuthControllers extends BaseController {
                     {
                         ...earnerData,
                         userId: newUser.id,
-                        issuerId
+                        issuerId,
                     },
                     { transaction },
                 );
@@ -131,10 +130,10 @@ class AuthControllers extends BaseController {
 
             // Generate and send a token back to the client
             createSendToken(
-                {newUser, addressData, institutionData, issuerData, earnerData},
+                { newUser, addressData, institutionData, issuerData, earnerData },
                 201,
                 res,
-                true
+                true,
             );
         } catch (error) {
             // Rollback transaction if it hasn't been committed yet
@@ -184,18 +183,13 @@ class AuthControllers extends BaseController {
         await user.save({ validate: false }); // Save the reset token and expiry to the DB
 
         // Send it to user's email
-        // const resetURL = `${req.protocol}://${req.get(
-        //     "host",
-        // )}/api/v1/users/resetPassword/${resetToken}`;
-        // const message = `Forgot your password? Submit a PATCH request with your new password and passwordConfirm to: ${resetURL}.\nIf you didn't forget your password, please ignore this email.`;
-        const message = "forgot password";
+        const resetURL = `${req.protocol}://${req.get(
+            "host",
+        )}/api/v1/users/resetPassword/${resetToken}`;
 
         try {
-            await sendEmail({
-                email: user.email,
-                subject: "Your password reset token (valid for 10 min)",
-                message,
-            });
+            const emailService = new EmailService();
+            await emailService.sendPasswordResetEmail(user.email, resetURL);
 
             res.status(200).json({
                 status: "success",
