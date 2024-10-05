@@ -5,6 +5,7 @@ const Roles = require("../../models/Roles");
 const Genders = require("../../models/Genders");
 const Addresses = require("../../models/Addresses");
 const BaseControllers = require("../../utils/baseControllers");
+const BadgeClasses = require("../../models/BadgeClasses");
 
 const issuerControllers = new BaseControllers(
     Issuers,
@@ -18,6 +19,7 @@ const issuerControllers = new BaseControllers(
             model: Institutions,
             include: [Users],
         },
+        { model: BadgeClasses },
     ],
 );
 

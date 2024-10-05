@@ -22,8 +22,8 @@ const signToken = (id) => {
 };
 
 // ============ Start Send Token ============
-exports.createSendToken = (user, statusCode, res) => {
-    const token = signToken(user.id);
+exports.createSendToken = (user, statusCode, res, isSignup = false) => {
+    const token = signToken(isSignup ? user.newUser.id : user.id);
 
     const cookieOptions = {
         expires: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000),
