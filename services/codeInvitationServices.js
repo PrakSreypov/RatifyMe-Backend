@@ -1,5 +1,5 @@
 const EmailService = require("./mailServices");
-const { inviteCodeTemplate } = require("../templates/inviteCodeTemplate");
+const { inviteCodeTemplate } = require("../public/templates/inviteCodeTemplate");
 const { InviteUsers, Users } = require("../models");
 const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/appError");
