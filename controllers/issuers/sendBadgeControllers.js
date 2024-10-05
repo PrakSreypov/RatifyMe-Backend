@@ -1,49 +1,36 @@
-const Earner = require("../../models/Earners");
 const Achievement = require("../../models/Achievements");
 const catchAsync = require("../../utils/catchAsync");
 
-exports.sendBadges = catchAsync(async (req, res) => {
-    const { id } = req.params; // ID of the earner
-    const { badgeClassId } = req.body; // badgeClassId to associate achievements
+exports.assignBadgeToEarners = catchAsync(async (req, res) => {
+    const { badgeClass } = req; // BadgeClass object from middleware
+    const { earners } = req; // Array of Earner objects from middleware
 
-    // Fetch the achievement that has the matching badgeClassId
-    const achievement = await Achievement.findOne({
-        where: { badgeClassId }, // Assuming each badgeClassId maps to one achievement
+    // Find all achievements related to the badgeClassId
+    const achievements = await Achievement.findAll({
+        where: { badgeClassId: badgeClass.id },
     });
 
-    if (!achievement) {
-        return res.status(404).json({
-            status: "fail",
-            message: "No achievement found for this badge class",
-        });
+    // If there are no achievements, return an error
+    if (!achievements || achievements.length === 0) {
+        return res.status(404).json({ message: "No achievements found for this badge" });
     }
 
-    // Check if the earner exists
-    const earner = await Earner.findByPk(id);
-    if (!earner) {
-        return res.status(404).json({
-            status: "fail",
-            message: "Earner not found",
-        });
+    // Update each earner with the corresponding achievements
+    for (const earner of earners) {
+        for (const achievement of achievements) {
+            // Associate the achievement with the earner
+            await achievement.addEarner(earner); // Ensure 'addEarner' is defined in the Achievement model
+        }
     }
 
-    // Update the earner's achievementId with the corresponding achievement's ID
-    earner.achievementId = achievement.id; // Update to the corresponding achievement ID
-
-    // Save the updated earner
-    await earner.save();
-
-    // Optionally fetch the updated earner record
-    const updatedEarner = await Earner.findByPk(id, {
-        include: Achievement, // Include associated achievements
-    });
-
-    // Send the updated earner with the associated achievements
+    // Send response with assigned achievements and earners
     res.status(200).json({
         status: "success",
+        message: "Badge assigned to all earners successfully",
         data: {
-            earner: updatedEarner,
-            achievement, // Include the achievement that was associated
+            badgeClass, // Return badge class info
+            earners, // Return earners info
+            achievements, // Return the achievements that were assigned
         },
     });
 });
