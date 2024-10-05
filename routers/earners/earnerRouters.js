@@ -5,6 +5,8 @@ const earnerControllers = require("../../controllers/earners/earnerControllers")
 
 router.route("/").get(earnerControllers.getAll).post(earnerControllers.createOne);
 
+router.route("/achievement/:earnerId").patch(earnerControllers.updateAchievementStatus);
+
 router
     .route("/:id")
     .get(earnerControllers.getOne)

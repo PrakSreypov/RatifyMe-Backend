@@ -1,4 +1,5 @@
 const express = require("express");
+const validateBadgeAndEarners = require("../../middlewares/validateBadgeAndEarners");
 const router = express.Router();
 
 const issuerControllers = require("../../controllers/issuers/issuerControllers");
@@ -12,6 +13,9 @@ router
     .patch(issuerControllers.updateOne)
     .delete(issuerControllers.deleteOne);
 
-router.route("/sendBadge/:id").patch(sendBadgeControllers.sendBadges);
+// PATCH route to assign badges to earners
+router
+    .route("/:badgeClassId/assignEarners")
+    .patch(validateBadgeAndEarners, sendBadgeControllers.assignBadgeToEarners);
 
 module.exports = router;

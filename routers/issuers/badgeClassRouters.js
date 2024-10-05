@@ -8,6 +8,9 @@ router.route("/").get(badgeClassesControllers.getAll).post(badgeClassesControlle
 
 router.route("/addBadge").post(addBadgesControllers.addBadgeClass);
 
+router.route("/earner/:earnerId").get(badgeClassesControllers.getBadgeClassesByEarnerId);
+router.route("/claim/:earnerId").get(badgeClassesControllers.getBadgeClaimByEarner);
+
 router
     .route("/:id")
     .get(badgeClassesControllers.getOne)
