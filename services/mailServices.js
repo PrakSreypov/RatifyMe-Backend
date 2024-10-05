@@ -1,17 +1,15 @@
 const nodemailer = require("nodemailer");
 
-const PASSWORD_RESET_REQUEST_TEMPLATE =
-    "<p>Click <a href='{resetURL}'>here</a> to reset your password</p>";
+const { resetPasswordTemplate } = require("../public/templates/resetPasswordTemplate");
 const PASSWORD_RESET_SUCCESS_TEMPLATE = "<p>Your password has been successfully reset.</p>";
 const VERIFICATION_EMAIL_TEMPLATE = "<p>Your verification code is {verificationCode}</p>";
-const { inviteCodeTemplate } = require("../templates/inviteCodeTemplate");
 
 class EmailService {
     constructor() {
         this.transporter = nodemailer.createTransport({
             host: process.env.EMAIL_HOST,
             port: process.env.EMAIL_PORT,
-            secure: process.env.EMAIL_PORT === "465", // True for 465, false for other ports
+            secure: Number(process.env.EMAIL_PORT) === 465,
             auth: {
                 user: process.env.EMAIL_USERNAME,
                 pass: process.env.EMAIL_PASSWORD,
@@ -82,7 +80,10 @@ class EmailService {
      * @param {string} resetURL - Password reset URL
      */
     async sendPasswordResetEmail(email, resetURL) {
-        const html = PASSWORD_RESET_REQUEST_TEMPLATE.replace("{resetURL}", resetURL);
+        const html = resetPasswordTemplate
+            .replace("[RESET_PASSWORD_LINK]", resetURL)
+            .replace("[EMAIL_RESET_PASSWORD]", email)
+            .replace('[FORGOT_PASSWORD_LINK]', `${process.env.CLIENT_BASE_URL}/forgot-password`)
         await this.sendEmail({
             email,
             subject: "Reset your password",

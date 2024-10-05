@@ -5,7 +5,6 @@ const BaseController = require("../../utils/baseControllers");
 const catchAsync = require("../../utils/catchAsync");
 const AppError = require("../../utils/appError");
 const { createSendToken } = require("../../middlewares/auth");
-const sendEmail = require("../../services/mailServices");
 
 const Users = require("../../models/Users");
 const Genders = require("../../models/Genders");
@@ -176,16 +175,22 @@ class AuthControllers extends BaseController {
         });
 
         if (!user) {
-            return next(new AppError("There is no user with that email address.", 404));
+            return next(
+                new AppError(
+                    "We couldn’t find an account associated with that email address. Please ensure you've entered the correct email, or consider registering for a new account.",
+                    404,
+                ),
+            );
         }
         // Generate the random reset token
         const resetToken = user.createPasswordResetToken();
         await user.save({ validate: false }); // Save the reset token and expiry to the DB
 
         // Send it to user's email
-        const resetURL = `${req.protocol}://${req.get(
-            "host",
-        )}/api/v1/users/resetPassword/${resetToken}`;
+        // const resetURL = `${req.protocol}://${req.get(
+        //     "host",
+        // )}/api/v1/users/resetPassword/${resetToken}`;
+        const resetURL = `${process.env.CLIENT_BASE_URL}/reset-password/${resetToken}`;
 
         try {
             const emailService = new EmailService();
