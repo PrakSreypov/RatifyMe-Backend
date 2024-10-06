@@ -258,10 +258,11 @@ class AuthControllers extends BaseController {
     // ============ Start Logout controller ============
     logout = (req, res, next) => {
         res.cookie("jwt", "loggedout", {
-            expires: new Date(Date.now() + 10 * 1000), //current time + 10 seconds
+            expires: new Date(Date.now() - 10 * 1000),
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
             sameSite: "Strict",
+            path: "/",
         });
         res.status(200).json({
             status: "success",
