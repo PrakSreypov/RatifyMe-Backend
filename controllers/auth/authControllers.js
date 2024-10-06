@@ -177,7 +177,7 @@ class AuthControllers extends BaseController {
         if (!user) {
             return next(
                 new AppError(
-                    "We couldn’t find an account associated with that email address. Please ensure you've entered the correct email, or consider registering for a new account.",
+                    "Account not found. Please check the email or register for a new account.",
                     404,
                 ),
             );
