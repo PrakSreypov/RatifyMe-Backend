@@ -46,7 +46,7 @@ const Earners = sequelize.define("Earners", {
         },
         onDelete: "CASCADE",
         onUpdate: "CASCADE",
-    }
+    },
 });
 
 // Earners.addHook("beforeCreate", async (earner, options) => {

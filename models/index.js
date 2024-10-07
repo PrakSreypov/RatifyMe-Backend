@@ -299,13 +299,13 @@ AcademicBackgrounds.hasMany(Earners, {
 });
 
 // Achievements & Earner
-Achievements.hasMany(Earners, {
-    foreignKey: "achievementId",
+Achievements.belongsToMany(Earners, {
+    through: "EarnerAchievements",
     onDelete: "CASCADE",
     onUpdate: "CASCADE",
 });
-Earners.belongsTo(Achievements, {
-    foreignKey: "achievementId",
+Earners.belongsToMany(Achievements, {
+    through: "EarnerAchievements",
 });
 // ============ End Earners Association ============
 

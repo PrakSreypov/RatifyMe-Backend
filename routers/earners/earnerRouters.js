@@ -2,8 +2,13 @@ const express = require("express");
 const router = express.Router();
 
 const earnerControllers = require("../../controllers/earners/earnerControllers");
+const earnerAchievementControllers = require("../../controllers/earners/earnerAchievementsController");
 
 router.route("/").get(earnerControllers.getAll).post(earnerControllers.createOne);
+
+router.route("/achievement/:earnerId").patch(earnerControllers.updateAchievementStatus);
+
+router.route("/earnerAchievement").get(earnerAchievementControllers.getAll);
 
 router
     .route("/:id")
