@@ -1,11 +1,7 @@
-const crypto = require("crypto");
-const { Op } = require("sequelize");
-
 const BaseController = require("../../utils/baseControllers");
 const catchAsync = require("../../utils/catchAsync");
 const AppError = require("../../utils/appError");
 const { createSendToken } = require("../../middlewares/auth");
-const sendEmail = require("../../services/mailServices");
 
 const Users = require("../../models/Users");
 const Genders = require("../../models/Genders");
@@ -16,6 +12,7 @@ const Institutions = require("../../models/Institutions");
 const { generateVerificationCode } = require("../../utils/generateVerificationCode");
 const { Issuers, Earners } = require("../../models");
 const EmailService = require("../../services/mailServices");
+const { getUserFromToken } = require("../../utils/auth/getUserFromToken");
 
 const uniqueFields = ["email", "username", "phoneNumber"];
 const associations = [Roles, Genders];
@@ -176,16 +173,19 @@ class AuthControllers extends BaseController {
         });
 
         if (!user) {
-            return next(new AppError("There is no user with that email address.", 404));
+            return next(
+                new AppError(
+                    "Account not found. Please check the email or register for a new account.",
+                    404,
+                ),
+            );
         }
         // Generate the random reset token
         const resetToken = user.createPasswordResetToken();
-        await user.save({ validate: false }); // Save the reset token and expiry to the DB
+        await user.save({ validate: false });
 
-        // Send it to user's email
-        const resetURL = `${req.protocol}://${req.get(
-            "host",
-        )}/api/v1/users/resetPassword/${resetToken}`;
+        // Send to user's email
+        const resetURL = `${process.env.CLIENT_BASE_URL}/reset-password/${resetToken}`;
 
         try {
             const emailService = new EmailService();
@@ -207,27 +207,43 @@ class AuthControllers extends BaseController {
     });
     // ============ End Forgot Password controller   ============
 
-    // ============ Start Reset Password controller   ============
-    resetPassword = catchAsync(async (req, res, next) => {
-        const hashedToken = crypto.createHash("sha256").update(req.params.token).digest("hex");
-        const user = await Users.findOne({
-            where: {
-                passwordResetToken: hashedToken,
-                passwordResetExpires: { [Op.gt]: Date.now() },
-            },
-        });
+    // ============ Start Verify Reset token controller ============
+    verifyResetToken = catchAsync(async (req, res, next) => {
+        const user = await getUserFromToken(req.params.token);
 
         if (!user) {
             return next(new AppError("Token is invalid or has expired", 400));
         }
+
+        // If token is valid, respond with success
+        res.status(200).json({
+            status: "success",
+            message: "Token is valid",
+            data: user,
+        });
+    });
+    // ============ End  Verify Reset token controller  ============
+
+    // ============ Start Reset Password controller   ============
+    resetPassword = catchAsync(async (req, res, next) => {
+        const user = await getUserFromToken(req.params.token);
+
+        if (!user) {
+            return next(new AppError("Token is invalid or has expired", 400));
+        }
+
         user.password = req.body.password;
         user.passwordConfirm = req.body.passwordConfirm;
         user.passwordResetToken = undefined;
         user.passwordResetExpires = undefined;
         await user.save({ validate: false });
 
-        createSendToken(user, 200, res);
+        res.status(200).json({
+            status: "Reset password successfully",
+            data: user,
+        });
     });
+
     // ============ End Reset Password controller     ============
 
     // ============ Start Update Password controller   ============
@@ -253,10 +269,11 @@ class AuthControllers extends BaseController {
     // ============ Start Logout controller ============
     logout = (req, res, next) => {
         res.cookie("jwt", "loggedout", {
-            expires: new Date(Date.now() + 10 * 1000), //current time + 10 seconds
+            expires: new Date(Date.now() - 10 * 1000),
             httpOnly: true,
             secure: process.env.NODE_ENV === "production",
             sameSite: "Strict",
+            path: "/",
         });
         res.status(200).json({
             status: "success",
