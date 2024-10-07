@@ -28,16 +28,16 @@ const Earners = sequelize.define("Earners", {
         onDelete: "CASCADE",
         onUpdate: "CASCADE",
     },
-    // achievementId: {
-    //     type: DataTypes.INTEGER,
-    //     allowNull: true,
-    //     references: {
-    //         model: "Achievements",
-    //         key: "id",
-    //     },
-    //     onDelete: "CASCADE",
-    //     onUpdate: "CASCADE",
-    // },
+    achievementId: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        references: {
+            model: "Achievements",
+            key: "id",
+        },
+        onDelete: "CASCADE",
+        onUpdate: "CASCADE",
+    },
     issuerId: {
         type: DataTypes.INTEGER,
         references: {
@@ -46,7 +46,7 @@ const Earners = sequelize.define("Earners", {
         },
         onDelete: "CASCADE",
         onUpdate: "CASCADE",
-    }
+    },
 });
 
 // Earners.addHook("beforeCreate", async (earner, options) => {

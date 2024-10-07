@@ -1,13 +1,14 @@
-const Sequelize = require('sequelize');
+const Sequelize = require("sequelize");
 const Institutions = require("../../models/Institutions");
 const Issuers = require("../../models/Issuers");
 const BadgeClasses = require("../../models/BadgeClasses");
 const Earners = require("../../models/Earners");
-const Achievements = require("../../models/Achievements"); // Import the Achievements model
-const Users = require("../../models/Users")
+const Achievements = require("../../models/Achievements");
+const EarnerAchievements = require("../../models/EarnerAchievements"); // Import EarnerAchievement model
+const Users = require("../../models/Users");
 const catchAsync = require("../../utils/catchAsync");
 
-// This function sums up total Issuer, total Badge, and total Earner including total badges by achievementId
+// This function sums up total Issuer, total Badge, total Earner including total badges by achievementId
 const getAllInstitutionStats = catchAsync(async (req, res) => {
     const institutions = await Institutions.findAll({
         include: [
@@ -25,6 +26,10 @@ const getAllInstitutionStats = catchAsync(async (req, res) => {
                         include: [
                             {
                                 model: Achievements, 
+                                through: {
+                                    model: EarnerAchievements,
+                                    attributes: [], 
+                                },
                                 include: [
                                     {
                                         model: BadgeClasses,
@@ -38,18 +43,24 @@ const getAllInstitutionStats = catchAsync(async (req, res) => {
         ],
         attributes: {
             include: [
-                [Sequelize.fn('COUNT', Sequelize.col('Issuers.id')), 'totalIssuers'],
-                [Sequelize.fn('COUNT', Sequelize.col('Issuers.BadgeClasses.id')), 'totalBadges'],
-                [Sequelize.fn('COUNT', Sequelize.col('Issuers.Earners.id')), 'totalEarners'],
-                [Sequelize.fn('COUNT', Sequelize.col('Issuers.Earners.Achievement.badgeClassId')), 'totalEarnerBadges'],
+                [Sequelize.fn("COUNT", Sequelize.col("Issuers.id")), "totalIssuers"],
+                [Sequelize.fn("COUNT", Sequelize.col("Issuers.BadgeClasses.id")), "totalBadges"],
+                [Sequelize.fn("COUNT", Sequelize.col("Issuers.Earners.id")), "totalEarners"],
+                [
+                    Sequelize.fn(
+                        "COUNT",
+                        Sequelize.col("Issuers.Earners.Achievements.badgeClassId"),
+                    ),
+                    "totalEarnerBadges",
+                ],
             ],
         },
         group: [
-            'Institutions.id',
-            'Issuers.id',
-            'Issuers.BadgeClasses.id',
-            'Issuers.Earners.id',
-            'Issuers.Earners.Achievement.id',
+            "Institutions.id",
+            "Issuers.id",
+            "Issuers.BadgeClasses.id",
+            "Issuers.Earners.id",
+            "Issuers.Earners.Achievements.id",
         ],
     });
 
@@ -63,4 +74,3 @@ const getAllInstitutionStats = catchAsync(async (req, res) => {
 module.exports = {
     getAllInstitutionStats,
 };
-
