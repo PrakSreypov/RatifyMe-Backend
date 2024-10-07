@@ -255,6 +255,7 @@ class BaseController {
             Body: buffer,
             ContentType: mimetype,
         };
+        console.log("Upload profile",uploadParams);
 
         try {
             const data = await s3.upload(uploadParams).promise();
