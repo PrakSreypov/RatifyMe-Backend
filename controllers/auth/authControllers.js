@@ -182,12 +182,9 @@ class AuthControllers extends BaseController {
         }
         // Generate the random reset token
         const resetToken = user.createPasswordResetToken();
-        await user.save({ validate: false }); // Save the reset token and expiry to the DB
+        await user.save({ validate: false });
 
-        // Send it to user's email
-        // const resetURL = `${req.protocol}://${req.get(
-        //     "host",
-        // )}/api/v1/users/resetPassword/${resetToken}`;
+        // Send to user's email
         const resetURL = `${process.env.CLIENT_BASE_URL}/reset-password/${resetToken}`;
 
         try {
@@ -212,8 +209,7 @@ class AuthControllers extends BaseController {
 
     // ============ Start Verify Reset token controller ============
     verifyResetToken = catchAsync(async (req, res, next) => {
-        const { token } = req.params;
-        const user = await getUserFromToken(token);
+        const user = await getUserFromToken(req.params.token);
 
         if (!user) {
             return next(new AppError("Token is invalid or has expired", 400));
@@ -223,14 +219,14 @@ class AuthControllers extends BaseController {
         res.status(200).json({
             status: "success",
             message: "Token is valid",
-            data: user
+            data: user,
         });
     });
     // ============ End  Verify Reset token controller  ============
 
     // ============ Start Reset Password controller   ============
     resetPassword = catchAsync(async (req, res, next) => {
-        const user = await getUserFromToken(req.params);
+        const user = await getUserFromToken(req.params.token);
 
         if (!user) {
             return next(new AppError("Token is invalid or has expired", 400));
@@ -242,8 +238,12 @@ class AuthControllers extends BaseController {
         user.passwordResetExpires = undefined;
         await user.save({ validate: false });
 
-        createSendToken(user, 200, res);
+        res.status(200).json({
+            status: "Reset password successfully",
+            data: user,
+        });
     });
+
     // ============ End Reset Password controller     ============
 
     // ============ Start Update Password controller   ============

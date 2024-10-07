@@ -103,7 +103,7 @@ exports.resetPasswordTemplate = `
                         <p>Click the button below to reset your password.</p>
                         <a href="[RESET_PASSWORD_LINK]" class="cta-button">Reset Password</a>
                         <p>
-                            If you don't use this link within 1 hour, it will expire. <a href="[FORGOT_PASSWORD_LINK]">Click here to get a new password reset link</a>
+                            If you don't use this link within 10 minutes, it will expire. <a href="[FORGOT_PASSWORD_LINK]">Click here to get a new password reset link</a>
                         </p>
                         <br />
                         <p>
