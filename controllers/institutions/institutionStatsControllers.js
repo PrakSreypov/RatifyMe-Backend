@@ -4,7 +4,7 @@ const Issuers = require("../../models/Issuers");
 const BadgeClasses = require("../../models/BadgeClasses");
 const Earners = require("../../models/Earners");
 const Achievements = require("../../models/Achievements");
-const EarnerAchievements = require("../../models/EarnerAchievements"); // Import EarnerAchievement model
+const EarnerAchievements = require("../../models/EarnerAchievements"); 
 const Users = require("../../models/Users");
 const catchAsync = require("../../utils/catchAsync");
 

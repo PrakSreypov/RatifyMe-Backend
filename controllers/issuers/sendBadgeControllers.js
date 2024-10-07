@@ -2,8 +2,8 @@ const Achievement = require("../../models/Achievements");
 const catchAsync = require("../../utils/catchAsync");
 
 exports.assignBadgeToEarners = catchAsync(async (req, res) => {
-    const { badgeClass } = req; // BadgeClass object from middleware
-    const { earners } = req; // Array of Earner objects from middleware
+    const { badgeClass } = req;
+    const { earners } = req;
 
     // Find all achievements related to the badgeClassId
     const achievements = await Achievement.findAll({
@@ -19,7 +19,7 @@ exports.assignBadgeToEarners = catchAsync(async (req, res) => {
     for (const earner of earners) {
         for (const achievement of achievements) {
             // Associate the achievement with the earner
-            await achievement.addEarner(earner); // Ensure 'addEarner' is defined in the Achievement model
+            await achievement.addEarner(earner);
         }
     }
 
@@ -28,9 +28,9 @@ exports.assignBadgeToEarners = catchAsync(async (req, res) => {
         status: "success",
         message: "Badge assigned to all earners successfully",
         data: {
-            badgeClass, // Return badge class info
-            earners, // Return earners info
-            achievements, // Return the achievements that were assigned
+            badgeClass,
+            earners,
+            achievements,
         },
     });
 });

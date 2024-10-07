@@ -8,6 +8,7 @@ const Users = require("../../models/Users");
 const Earners = require("../../models/Earners");
 const BaseControllers = require("../../utils/baseControllers");
 const EarnerAchievements = require("../../models/EarnerAchievements");
+const catchAsync = require("../../utils/catchAsync");
 
 // Define the associated models
 const associated = [
@@ -27,94 +28,84 @@ const associated = [
 const badgeClassControllers = new BaseControllers(BadgeClasses, ["name"], associated);
 
 // Custom method to get BadgeClasses by earnerId
-badgeClassControllers.getBadgeClassesByEarnerId = async (req, res) => {
-    try {
-        const { earnerId } = req.params;
+badgeClassControllers.getBadgeClassesByEarnerId = catchAsync(async (req, res) => {
+    const { earnerId } = req.params;
 
-        // Find all BadgeClasses that are associated with Achievements for the specified earnerId
-        const badgeClasses = await BadgeClasses.findAll({
-            include: [
-                {
-                    model: Achievements,
-                    include: [
-                        {
-                            model: Earners,
-                            where: { id: earnerId },
-                            required: true,
+    // Find all BadgeClasses that are associated with Achievements for the specified earnerId
+    const badgeClasses = await BadgeClasses.findAll({
+        include: [
+            {
+                model: Achievements,
+                include: [
+                    {
+                        model: Earners,
+                        where: { id: earnerId },
+                        required: true,
+                    },
+                    {
+                        model: Earners,
+                        through: {
+                            model: EarnerAchievements,
+                            where: { status: false },
                         },
-                        {
-                            model: Earners,
-                            through: {
-                                model: EarnerAchievements,
-                                where: { status: false },
-                            },
-                        },
-                        AchievementTypes,
-                    ],
-                    required: true,
-                },
-                {
-                    model: Issuers,
-                    include: [Institutions, Users],
-                },
-                Criterias,
-            ],
-        });
+                    },
+                    AchievementTypes,
+                ],
+                required: true,
+            },
+            {
+                model: Issuers,
+                include: [Institutions, Users],
+            },
+            Criterias,
+        ],
+    });
 
-        if (!badgeClasses || badgeClasses.length === 0) {
-            return res.status(404).json({ message: "No BadgeClasses found for this earner" });
-        }
-
-        res.json({ status: "success", badgeClasses });
-    } catch (error) {
-        console.error("Error fetching badge classes:", error.message);
-        res.status(500).json({ message: "Server error" });
+    if (!badgeClasses || badgeClasses.length === 0) {
+        return res.status(404).json({ message: "No BadgeClasses found for this earner" });
     }
-};
 
-badgeClassControllers.getBadgeClaimByEarner = async (req, res) => {
-    try {
-        const { earnerId } = req.params;
+    res.json({ status: "success", badgeClasses });
+});
 
-        // Find all BadgeClasses that are associated with Achievements for the specified earnerId
-        const badgeClasses = await BadgeClasses.findAll({
-            include: [
-                {
-                    model: Achievements,
-                    include: [
-                        {
-                            model: Earners,
-                            where: { id: earnerId },
-                            required: true,
+badgeClassControllers.getBadgeClaimByEarner = catchAsync(async (req, res) => {
+    const { earnerId } = req.params;
+
+    // Find all BadgeClasses that are associated with Achievements for the specified earnerId
+    const badgeClasses = await BadgeClasses.findAll({
+        include: [
+            {
+                model: Achievements,
+                include: [
+                    {
+                        model: Earners,
+                        where: { id: earnerId },
+                        required: true,
+                    },
+                    {
+                        model: Earners,
+                        through: {
+                            model: EarnerAchievements,
+                            where: { status: true },
                         },
-                        {
-                            model: Earners,
-                            through: {
-                                model: EarnerAchievements,
-                                where: { status: true },
-                            },
-                        },
-                        AchievementTypes,
-                    ],
-                    required: true,
-                },
-                {
-                    model: Issuers,
-                    include: [Institutions, Users],
-                },
-                Criterias,
-            ],
-        });
+                    },
+                    AchievementTypes,
+                ],
+                required: true,
+            },
+            {
+                model: Issuers,
+                include: [Institutions, Users],
+            },
+            Criterias,
+        ],
+    });
 
-        if (!badgeClasses || badgeClasses.length === 0) {
-            return res.status(404).json({ message: "No BadgeClasses found for this earner" });
-        }
-
-        res.json({ status: "success", badgeClasses });
-    } catch (error) {
-        console.error("Error fetching badge classes:", error.message);
-        res.status(500).json({ message: "Server error" });
+    if (!badgeClasses || badgeClasses.length === 0) {
+        return res.status(404).json({ message: "No BadgeClasses found for this earner" });
     }
-};
+
+    res.json({ status: "success", badgeClasses });
+});
 
 module.exports = badgeClassControllers;
