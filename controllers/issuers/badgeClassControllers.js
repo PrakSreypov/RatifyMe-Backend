@@ -7,6 +7,7 @@ const AchievementTypes = require("../../models/AchievementTypes");
 const Users = require("../../models/Users");
 const Earners = require("../../models/Earners");
 const BaseControllers = require("../../utils/baseControllers");
+const EarnerAchievements = require("../../models/EarnerAchievements");
 
 // Define the associated models
 const associated = [
@@ -41,6 +42,13 @@ badgeClassControllers.getBadgeClassesByEarnerId = async (req, res) => {
                             where: { id: earnerId },
                             required: true,
                         },
+                        {
+                            model: Earners,
+                            through: {
+                                model: EarnerAchievements,
+                                where: { status: false },
+                            },
+                        },
                         AchievementTypes,
                     ],
                     required: true,
@@ -73,12 +81,18 @@ badgeClassControllers.getBadgeClaimByEarner = async (req, res) => {
             include: [
                 {
                     model: Achievements,
-                    where: { status: true },
                     include: [
                         {
                             model: Earners,
                             where: { id: earnerId },
                             required: true,
+                        },
+                        {
+                            model: Earners,
+                            through: {
+                                model: EarnerAchievements,
+                                where: { status: true },
+                            },
                         },
                         AchievementTypes,
                     ],

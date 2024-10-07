@@ -26,22 +26,6 @@ const Achievements = sequelize.define("Achievements", {
         onDelete: "CASCADE",
         onUpdate: "CASCADE",
     },
-    status: {
-        type: DataTypes.BOOLEAN,
-        // validate: {
-        //     isAlpha: {
-        //         msg: "Status must be string only.",
-        //     },
-        //     notEmpty: {
-        //         msg: "Status must not be empty",
-        //     },
-        //     isIn: {
-        //         args: [["ToDo", "Doing", "Done"]],
-        //         msg: "status in must be ToDo, Doing, or Done",
-        //     },
-        // },
-        defaultValue: false,
-    },
 });
 
 module.exports = Achievements;
