@@ -3,7 +3,7 @@ const PDFDocument = require("pdfkit");
 const AWS = require("aws-sdk");
 const catchAsync = require("../../utils/catchAsync");
 const fs = require("fs");
-// const { Readable } = require('stream');
+const AppError = require("../../utils/appError");
 
 // Configure AWS S3
 const s3 = new AWS.S3({
@@ -15,11 +15,7 @@ const s3 = new AWS.S3({
 // Function to convert SVG to PDF using Sharp and PDFKit
 const convertSvgToPdf = async (jpegBuffer) => {
     // Convert SVG to PNG using sharp
-    const pngBuffer = await sharp(jpegBuffer)
-        .png() // Adjust quality settings as needed
-        .toBuffer();
-
-    // Log PNG Buffer Size
+    const pngBuffer = await sharp(jpegBuffer).png().toBuffer();
 
     // Create a PDF document using pdfkit
     const doc = new PDFDocument({ layout: "landscape", size: "A4" });
@@ -38,7 +34,8 @@ const convertSvgToPdf = async (jpegBuffer) => {
             if (finalBuffer.length === 0) {
                 reject(new Error("PDF Buffer is empty after processing"));
             } else {
-                resolve(finalBuffer); // Resolve with the complete PDF buffer
+                // Resolve with the complete PDF buffer
+                resolve(finalBuffer);
             }
         });
         doc.pipe(writeStream);
@@ -52,25 +49,21 @@ const convertSvgToPdf = async (jpegBuffer) => {
 
         // Close the PDF document
         doc.end();
-        writeStream.on('finish', () => {
-        });
     });
 };
 
 // Upload PDF to S3
-// Function to upload the PDF to S3
 const uploadToS3 = async (pdfBuffer, fileName) => {
-    const params = {
-        Bucket: process.env.AWS_BUCKET_NAME, // Your S3 bucket name
-        Key: `Certificate/${fileName}.pdf`, // Uploaded PDF file name
-        Body: pdfBuffer, // PDF buffer
-        ContentType: "application/pdf", // Correct content type
+    const uploadParams = {
+        Bucket: process.env.AWS_BUCKET_NAME,
+        Key: `Certificate/${fileName}.pdf`,
+        Body: pdfBuffer,
+        ContentType: "application/pdf",
     };
 
     try {
-        const data = await s3.upload(params).promise();
-        console.log("File uploaded to S3:", data.Location);
-        return data.Location; // Return URL of uploaded PDF
+        const data = await s3.upload(uploadParams).promise();
+        return data.Location;
     } catch (error) {
         console.error("Error uploading to S3:", error);
         throw error;
@@ -78,24 +71,24 @@ const uploadToS3 = async (pdfBuffer, fileName) => {
 };
 
 // Endpoint to handle file upload and processing
-exports.uploadCerti = catchAsync(async (req, res) => {
-    try {
-        const svgBuffer = req.file.buffer; // Multer provides the file buffer
-        console.log("svg", svgBuffer);
-        const { originalname, mimetype } = req.file;
+exports.uploadCerti = catchAsync(async (req, res, next) => {
+    const { buffer: jpegBuffer, originalname } = req.file;
 
-        // Convert the uploaded SVG to PDF
-        const pdfBuffer = await convertSvgToPdf(svgBuffer);
-        console.log("hello buffer", pdfBuffer);
-
-        const pdfUrl = await uploadToS3(pdfBuffer, originalname.replace(".jpeg", ""));
-        console.log("Pdf Url", pdfUrl);
-        res.json({
-            message: "File uploaded successfully",
-            pdfUrl,
-        });
-    } catch (error) {
-        console.error("Error processing file:", error);
-        res.status(500).json({ error: "Error processing file" });
+    if (!jpegBuffer) {
+        return next(new AppError("There is no buffer provided", 400));
     }
+    // Convert the uploaded SVG to PDF
+    const pdfBuffer = await convertSvgToPdf(jpegBuffer);
+
+    if (pdfBuffer.length === 0) {
+        return next(new AppError("Failed to convert into pdf buffer", 405));
+    }
+    const pdfUrl = await uploadToS3(pdfBuffer, originalname.replace(".jpeg", ""));
+    if (!pdfUrl) {
+        return next(new AppError("Upload failed", 405));
+    }
+    res.json({
+        message: "File uploaded successfully",
+        pdfUrl,
+    });
 });
