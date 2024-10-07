@@ -12,7 +12,7 @@ const Institutions = require("../../models/Institutions");
 const AchievementTypes = require("../../models/AchievementTypes");
 const Addresses = require("../../models/Addresses");
 const Issuers = require("../../models/Issuers");
-const EarnerAchievements = require("../../models/EarnerAchievements"); // Make sure this model is uncommented and correctly defined
+const EarnerAchievements = require("../../models/EarnerAchievements");
 
 // Set up the base controller
 const earnerControllers = new BaseControllers(
@@ -40,73 +40,58 @@ const earnerControllers = new BaseControllers(
 
 // Update Achievement Status for Earner
 earnerControllers.updateAchievementStatus = async (req, res) => {
-    let transaction;
-
     try {
-        const { badgeClassId, status } = req.body;
         const { earnerId } = req.params;
+        const { status, achievementIds, badgeClassId } = req.body;
 
-        // Validate that all required fields are provided
-        if (!earnerId || !badgeClassId || typeof status === "undefined") {
-            return res
-                .status(400)
-                .json({ message: "earnerId, badgeClassId, and status are required" });
-        }
-
-        // Start a transaction to ensure atomicity
-        transaction = await Earners.sequelize.transaction();
-
-        // Find the achievement with the specified badgeClassId
-        const achievement = await Achievements.findOne({
-            where: { badgeClassId: badgeClassId },
-            transaction,
+        // Fetch the earners with the associated achievements using the many-to-many relationship
+        const earner = await Earners.findByPk(earnerId, {
+            include: [
+                {
+                    model: Achievements,
+                    where: {
+                        id: achievementIds,
+                        badgeClassId: badgeClassId,
+                    },
+                },
+            ],
         });
 
-        // If no achievement is found, return a 404 response
-        if (!achievement) {
-            await transaction.rollback();
-            return res
-                .status(404)
-                .json({ message: "No achievement found for the given badgeClassId" });
+        if (!earner || earner.Achievements.length === 0) {
+            return res.status(404).json({
+                status: "fail",
+                message:
+                    "No achievements found for the specified earner, badgeClass, and achievement IDs.",
+            });
         }
 
-        // Find the pivot table entry for the specific earner and achievement
-        const earnerAchievement = await EarnerAchievements.findOne({
-            where: {
-                EarnerId: earnerId,
-                AchievementId: achievement.id, // Use achievement.id from the found achievement
-            },
-            transaction,
-        });
-
-        // If no entry is found, return a 404 response
-        if (!earnerAchievement) {
-            await transaction.rollback();
-            return res
-                .status(404)
-                .json({ message: "No achievement found for the given earnerId and badgeClassId" });
+        // Update the status of all achievements in the EarnerAchievements join table
+        for (let achievement of earner.Achievements) {
+            // Update the status in the EarnerAchievements join table
+            await EarnerAchievements.update(
+                { status: status },
+                {
+                    where: {
+                        earnerId: earnerId, // Specific earner
+                        achievementId: achievement.id, // Update for the specific achievement
+                    },
+                }
+            );
         }
-
-        // Update the status for this specific earner's achievement
-        earnerAchievement.status = status; // Set the new status
-        await earnerAchievement.save({ transaction }); // Save the update within the transaction
-
-        // Commit the transaction if everything is successful
-        await transaction.commit();
 
         res.status(200).json({
             status: "success",
-            message: "Achievement status updated successfully",
-            data: earnerAchievement,
+            message: `${earner.Achievements.length} achievement(s) updated successfully.`,
         });
     } catch (error) {
-        if (transaction) await transaction.rollback();
-        console.error("Error updating achievement status:", error); // Log the error for debugging
+        console.error("Error details:", error);
         res.status(500).json({
             status: "error",
-            message: "An error occurred while updating the achievement status.",
+            message: "An error occurred while updating the achievements.",
+            error: error.message || error,
         });
     }
 };
+
 
 module.exports = earnerControllers;
