@@ -234,9 +234,13 @@ class BaseController {
         }
 
         if (record[this.imageField]) {
+            // Extract and handle the key for the old image
+            const oldUrl = record[this.imageField].replace(/\+/g, "%20");
+            const deleteKey = decodeURIComponent(oldUrl.split("/").slice(-2).join("/"));
+
             const deleteParams = {
                 Bucket: process.env.AWS_BUCKET_NAME,
-                Key: record[this.imageField].split("/").pop(),
+                Key: deleteKey,
             };
 
             await s3
@@ -295,21 +299,13 @@ class BaseController {
             Key: key, // Use the extracted key
         };
 
-        // Log the image field and S3 delete key
-        console.log("Record Image Field💥: ", record[this.imageField]);
-        console.log("S3 delete key💥: ", params.Key);
-
         // Attempt to delete the image from S3
         const result = await s3
             .deleteObject(params)
             .promise()
             .catch((err) => {
-                console.error("S3 delete error: ", err); // Log the actual error
                 return next(new AppError("Failed to delete image from S3", 500, err));
             });
-
-        // Log the result of the delete operation
-        console.log("S3 delete result💥: ", result);
 
         // Set the image field to null or delete the field as per your requirement
         record[this.imageField] = null; // or `delete record[this.imageField];`
