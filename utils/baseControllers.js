@@ -234,9 +234,13 @@ class BaseController {
         }
 
         if (record[this.imageField]) {
+            // Extract and handle the key for the old image
+            const oldUrl = record[this.imageField].replace(/\+/g, "%20");
+            const deleteKey = decodeURIComponent(oldUrl.split("/").slice(-2).join("/"));
+
             const deleteParams = {
                 Bucket: process.env.AWS_BUCKET_NAME,
-                Key: record[this.imageField].split("/").pop(),
+                Key: deleteKey,
             };
 
             await s3
@@ -251,7 +255,7 @@ class BaseController {
         const { originalname, mimetype, buffer } = imageFile;
         const uploadParams = {
             Bucket: process.env.AWS_BUCKET_NAME,
-            Key: `UserProfile/${Date.now()}_${originalname}`,
+            Key: `UserProfile/${originalname}`,
             Body: buffer,
             ContentType: mimetype,
         };
@@ -286,14 +290,17 @@ class BaseController {
             return next(new AppError("No image associated with this record", 404));
         }
 
+        // Extract the key and handle special characters
+        const url = record[this.imageField].replace(/\+/g, "%20");
+        const key = decodeURIComponent(url.split("/").slice(-2).join("/"));
         // Prepare S3 delete parameters
         const params = {
             Bucket: process.env.AWS_BUCKET_NAME,
-            Key: record[this.imageField].split("/").pop(), // Extract the key from the image URL
+            Key: key, // Use the extracted key
         };
 
         // Attempt to delete the image from S3
-        await s3
+        const result = await s3
             .deleteObject(params)
             .promise()
             .catch((err) => {
@@ -306,7 +313,8 @@ class BaseController {
 
         this.sendResponse(res, 200, null, "Image successfully deleted");
     });
-    // Start Delete image
+
+    // End Delete image
 
     // ============ End CRUD Method  ============
 }
