@@ -251,7 +251,7 @@ class BaseController {
         const { originalname, mimetype, buffer } = imageFile;
         const uploadParams = {
             Bucket: process.env.AWS_BUCKET_NAME,
-            Key: `UserProfile/${Date.now()}_${originalname}`,
+            Key: `UserProfile/${originalname}`,
             Body: buffer,
             ContentType: mimetype,
         };
@@ -286,19 +286,30 @@ class BaseController {
             return next(new AppError("No image associated with this record", 404));
         }
 
+        // Extract the key and handle special characters
+        const url = record[this.imageField].replace(/\+/g, "%20");
+        const key = decodeURIComponent(url.split("/").slice(-2).join("/"));
         // Prepare S3 delete parameters
         const params = {
             Bucket: process.env.AWS_BUCKET_NAME,
-            Key: record[this.imageField].split("/").pop(), // Extract the key from the image URL
+            Key: key, // Use the extracted key
         };
 
+        // Log the image field and S3 delete key
+        console.log("Record Image Field💥: ", record[this.imageField]);
+        console.log("S3 delete key💥: ", params.Key);
+
         // Attempt to delete the image from S3
-        await s3
+        const result = await s3
             .deleteObject(params)
             .promise()
             .catch((err) => {
+                console.error("S3 delete error: ", err); // Log the actual error
                 return next(new AppError("Failed to delete image from S3", 500, err));
             });
+
+        // Log the result of the delete operation
+        console.log("S3 delete result💥: ", result);
 
         // Set the image field to null or delete the field as per your requirement
         record[this.imageField] = null; // or `delete record[this.imageField];`
@@ -306,7 +317,8 @@ class BaseController {
 
         this.sendResponse(res, 200, null, "Image successfully deleted");
     });
-    // Start Delete image
+
+    // End Delete image
 
     // ============ End CRUD Method  ============
 }
