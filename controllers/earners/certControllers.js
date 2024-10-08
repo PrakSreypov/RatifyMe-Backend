@@ -1,8 +1,9 @@
 const sharp = require("sharp");
 const PDFDocument = require("pdfkit");
 const AWS = require("aws-sdk");
-const catchAsync = require("../../utils/catchAsync");
 const fs = require("fs");
+
+const catchAsync = require("../../utils/catchAsync");
 const AppError = require("../../utils/appError");
 
 // Configure AWS S3
