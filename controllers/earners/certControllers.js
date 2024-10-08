@@ -1,7 +1,6 @@
 const sharp = require("sharp");
 const PDFDocument = require("pdfkit");
 const AWS = require("aws-sdk");
-const fs = require("fs");
 
 const catchAsync = require("../../utils/catchAsync");
 const AppError = require("../../utils/appError");
@@ -20,7 +19,6 @@ const convertSvgToPdf = async (jpegBuffer) => {
 
     // Create a PDF document using pdfkit
     const doc = new PDFDocument({ layout: "landscape", size: "A4" });
-    const writeStream = fs.createWriteStream("output.pdf");
     const pdfBufferChunks = [];
 
     // Capture data as it is generated
@@ -39,7 +37,6 @@ const convertSvgToPdf = async (jpegBuffer) => {
                 resolve(finalBuffer);
             }
         });
-        doc.pipe(writeStream);
 
         // Add the PNG image to the PDF document
         doc.image(pngBuffer, 0, 0, {
