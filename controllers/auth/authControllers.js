@@ -1,3 +1,5 @@
+const { Op } = require("sequelize");
+const crypto = require("crypto");
 const BaseController = require("../../utils/baseControllers");
 const catchAsync = require("../../utils/catchAsync");
 const AppError = require("../../utils/appError");
@@ -13,7 +15,6 @@ const { generateVerificationCode } = require("../../utils/auth/generateVerificat
 const { Issuers, Earners } = require("../../models");
 const EmailService = require("../../services/mailServices");
 const { getUserFromToken } = require("../../utils/auth/getUserFromToken");
-const { Op } = require("sequelize");
 
 const uniqueFields = ["email", "username", "phoneNumber"];
 const associations = [Roles, Genders];
@@ -40,7 +41,7 @@ class AuthControllers extends BaseController {
         try {
             // Check for unique fields
             await this.checkUniqueFields(userData);
-            const verifyDigitNum = generateVerificationCode();
+            const verifyDigitNum = crypto.randomInt(1000, 10000).toString();
 
             // Create the user
             const newUser = await Users.create(
@@ -135,7 +136,12 @@ class AuthControllers extends BaseController {
             await transaction.commit();
 
             try {
-                await emailService.sendVerificationEmail(userData.email, verifyDigitNum);
+                await emailService.sendVerificationEmail(
+                    userData.email,
+                    verifyDigitNum,
+                    userData.firstName,
+                    userData.lastName,
+                );
             } catch (emailError) {
                 return next(new AppError("Failed to send verification email.", 500));
             }
@@ -179,8 +185,8 @@ class AuthControllers extends BaseController {
 
         user.isVerified = true;
         user.active = true;
-        user.verifyDigitNum = undefined;
-        user.verifyDigitNumExpires = undefined;
+        user.verifyDigitNum = null;
+        user.verifyDigitNumExpires = null;
         await user.save();
 
         res.status(200).json({
@@ -189,6 +195,46 @@ class AuthControllers extends BaseController {
         });
     });
     // ============ End Verify Email controller   ============
+
+    // ============ Start Resend Email controller ============
+    resendVerificationEmail = catchAsync(async (req, res, next) => {
+        const { email } = req.body;
+
+        // Find the user by email
+        const user = await Users.findOne({ where: { email } });
+
+        // Check if user exists and is not verified
+        if (!user) {
+            return next(new AppError("User not found.", 404));
+        }
+
+        if (user.isVerified) {
+            return next(new AppError("User is already verified.", 400));
+        }
+
+        // Generate a new verification code
+        const verifyDigitNum = crypto.randomInt(1000, 10000).toString();
+        user.verifyDigitNum = verifyDigitNum;
+        user.verifyDigitNumExpires = Date.now() + 15 * 60 * 1000; // 15 minutes
+        await user.save();
+
+        try {
+            // Send the verification email
+            await emailService.sendVerificationEmail(
+                user.email,
+                verifyDigitNum,
+                user.firstName,
+                user.lastName,
+            );
+        } catch (emailError) {
+            return next(new AppError("Failed to send verification email.", 500));
+        }
+
+        res.status(200).json({
+            status: "Verification email resent.",
+        });
+    });
+    // ============ End Resend Email controller   ============
 
     // ============ Start Signin controller ============
     signin = catchAsync(async (req, res, next) => {
