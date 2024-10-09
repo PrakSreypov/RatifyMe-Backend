@@ -13,6 +13,7 @@ const { generateVerificationCode } = require("../../utils/auth/generateVerificat
 const { Issuers, Earners } = require("../../models");
 const EmailService = require("../../services/mailServices");
 const { getUserFromToken } = require("../../utils/auth/getUserFromToken");
+const { Op } = require("sequelize");
 
 const uniqueFields = ["email", "username", "phoneNumber"];
 const associations = [Roles, Genders];
@@ -23,6 +24,7 @@ class AuthControllers extends BaseController {
         super(Users, uniqueFields, associations);
     }
 
+    // ============ Start Signup controller ============
     signup = catchAsync(async (req, res, next) => {
         const {
             userData,
@@ -160,6 +162,34 @@ class AuthControllers extends BaseController {
 
     // ============ End Signup controller ============
 
+    // ============ Start Verify Email controller ============
+    verifyEmail = catchAsync(async (req, res, next) => {
+        const { verifyCode } = req.body;
+
+        const user = await Users.findOne({
+            where: {
+                verifyDigitNum: verifyCode,
+                verifyDigitNumExpires: { [Op.gt]: Date.now() },
+            },
+        });
+
+        if (!user) {
+            return next(new AppError("Verification code is invalid or has expired."));
+        }
+
+        user.isVerified = true;
+        user.active = true;
+        user.verifyDigitNum = undefined;
+        user.verifyDigitNumExpires = undefined;
+        await user.save();
+
+        res.status(200).json({
+            status: "Account Verified.",
+            data: user,
+        });
+    });
+    // ============ End Verify Email controller   ============
+
     // ============ Start Signin controller ============
     signin = catchAsync(async (req, res, next) => {
         const { email, password } = req.body;
@@ -214,7 +244,7 @@ class AuthControllers extends BaseController {
         } catch (error) {
             user.passwordResetToken = undefined;
             user.passwordResetExpires = undefined;
-            await user.save({ validate: false }); // Save without the token if email fails
+            await user.save({ validate: false });
 
             return next(
                 new AppError("There was an error sending the email. Try again later!", 500),
