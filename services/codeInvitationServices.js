@@ -3,8 +3,8 @@ const { inviteCodeTemplate } = require("../public/templates/inviteCodeTemplate")
 const { InviteUsers, Users } = require("../models");
 const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/appError");
-const { Op, where } = require("sequelize");
-const { generateVerificationCode } = require("../utils/generateVerificationCode");
+const { Op } = require("sequelize");
+const { generateVerificationCode } = require("../utils/auth/generateVerificationCode");
 
 class CodeInvitationService {
     constructor(
