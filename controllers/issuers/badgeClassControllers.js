@@ -25,7 +25,7 @@ const associated = [
 ];
 
 // Create an instance of BaseControllers with BadgeClasses
-const badgeClassControllers = new BaseControllers(BadgeClasses, ["name"], associated);
+const badgeClassControllers = new BaseControllers(BadgeClasses, ["name"], associated, 'imageUrl');
 
 // Custom method to get BadgeClasses by earnerId
 badgeClassControllers.getBadgeClassesByEarnerId = catchAsync(async (req, res) => {

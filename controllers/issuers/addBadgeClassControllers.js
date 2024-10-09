@@ -1,3 +1,4 @@
+const { v4 } = require("uuid");
 const {
     BadgeClasses,
     Issuers,
@@ -20,9 +21,10 @@ const s3 = new AWS.S3({
 
 // Upload PDF to S3
 const uploadToS3 = async (fileBuffer, fileName, mimetype) => {
+    const uniqueFileName = `${v4()}_${fileName}`;
     const uploadParams = {
         Bucket: process.env.AWS_BUCKET_NAME,
-        Key: `Badge/${fileName}`,
+        Key: `Badge/${uniqueFileName}`,
         Body: fileBuffer,
         ContentType: mimetype,
     };

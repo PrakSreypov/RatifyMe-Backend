@@ -9,6 +9,7 @@ router.route("/").get(badgeClassesControllers.getAll).post(badgeClassesControlle
 
 router.route("/addBadge").post(upload.single("badgeFile"), addBadgesControllers.addBadgeClass);
 
+
 router.route("/earner/:earnerId").get(badgeClassesControllers.getBadgeClassesByEarnerId);
 router.route("/claim/:earnerId").get(badgeClassesControllers.getBadgeClaimByEarner);
 
@@ -16,6 +17,6 @@ router
     .route("/:id")
     .get(badgeClassesControllers.getOne)
     .patch(badgeClassesControllers.updateOne)
-    .delete(badgeClassesControllers.deleteOne);
+    .delete(badgeClassesControllers.deleteImage,badgeClassesControllers.deleteOne);
 
 module.exports = router;
