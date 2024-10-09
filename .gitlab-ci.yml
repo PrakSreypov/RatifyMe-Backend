@@ -30,7 +30,11 @@ Nginx_Check:
         - genKey
     script:
         - ssh -o StrictHostKeyChecking=no -i key.pem -A $INSTANCE@$INSTANCEADD '
-            ls'
+            ls &&
+            cd verifyme-backend &&
+            ls &&
+            npm i
+            '
     only:
         - feature/CI/CD
 
