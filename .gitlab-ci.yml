@@ -1,0 +1,36 @@
+stages:
+    - genKey
+    - build
+    - deploy
+
+variables:
+    NODE_VERSION: "21"
+
+before_script:
+    # This will run before each job in all stages
+    - echo "Setting up environment"
+    - whoami
+
+genKey:
+    stage: genKey
+    script:
+        - echo "Creating key.pem file from environment variable"
+        - echo "$AUTH_KEY" | base64 --decode > key.pem
+        - chmod 400 key.pem
+    artifacts:
+        paths:
+        - key.pem  # Save key.pem as artifact for next stage
+    only:
+        - feature/CI/CD
+
+Nginx_Check:
+    stage: genKey
+    needs: ["genKey"]
+    dependencies:
+        - genKey
+    script:
+        - ssh -o StrictHostKeyChecking=no -i key.pem -A $INSTANCE@$INSTANCEADD '
+            ls'
+    only:
+        - feature/CI/CD
+
