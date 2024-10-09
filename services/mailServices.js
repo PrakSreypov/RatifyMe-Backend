@@ -1,9 +1,7 @@
 const nodemailer = require("nodemailer");
 
 const { resetPasswordTemplate } = require("../public/templates/resetPasswordTemplate");
-const PASSWORD_RESET_SUCCESS_TEMPLATE = "<p>Your password has been successfully reset.</p>";
-const VERIFICATION_EMAIL_TEMPLATE = "<p>Your verification code is {verificationCode}</p>";
-
+const { verifyEmailTemplate } = require("../public/templates/verifyEmailTemplate");
 class EmailService {
     constructor() {
         this.transporter = nodemailer.createTransport({
@@ -39,7 +37,8 @@ class EmailService {
 
         try {
             const response = await this.transporter.sendMail(mailOptions);
-            console.log(`${subject} email sent successfully`);
+            console.log(`${subject} -  email sent successfully`);
+            return response;
         } catch (error) {
             console.error(`Error sending ${subject} email`, error);
             throw new Error(`Error sending ${subject} email: ${error.message}`);
@@ -51,9 +50,9 @@ class EmailService {
      * @param {string} email - Recipient's email
      * @param {string} verificationToken - Verification token
      */
-    async sendVerificationEmail(email, verificationToken) {
-        const html = VERIFICATION_EMAIL_TEMPLATE.replace("{verificationCode}", verificationToken);
-        await this.sendEmail({
+    async sendVerificationEmail(email, verifyDigitNum) {
+        const html = verifyEmailTemplate.replace("{verificationCode}", verifyDigitNum);
+        return await this.sendEmail({
             email,
             subject: "Verify your email",
             html,
@@ -83,23 +82,11 @@ class EmailService {
         const html = resetPasswordTemplate
             .replace("[RESET_PASSWORD_LINK]", resetURL)
             .replace("[EMAIL_RESET_PASSWORD]", email)
-            .replace('[FORGOT_PASSWORD_LINK]', `${process.env.CLIENT_BASE_URL}/forgot-password`)
+            .replace("[FORGOT_PASSWORD_LINK]", `${process.env.CLIENT_BASE_URL}/forgot-password`);
         await this.sendEmail({
             email,
             subject: "Reset your password",
             html,
-        });
-    }
-
-    /**
-     * Send a password reset success email
-     * @param {string} email - Recipient's email
-     */
-    async sendResetSuccessEmail(email) {
-        await this.sendEmail({
-            email,
-            subject: "Password Reset Successful",
-            html: PASSWORD_RESET_SUCCESS_TEMPLATE,
         });
     }
 
