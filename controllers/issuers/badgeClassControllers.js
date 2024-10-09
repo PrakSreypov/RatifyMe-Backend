@@ -25,7 +25,7 @@ const associated = [
 ];
 
 // Create an instance of BaseControllers with BadgeClasses
-const badgeClassControllers = new BaseControllers(BadgeClasses, ["name"], associated, 'imageUrl');
+const badgeClassControllers = new BaseControllers(BadgeClasses, ["name"], associated, "imageUrl");
 
 // Custom method to get BadgeClasses by earnerId
 badgeClassControllers.getBadgeClassesByEarnerId = catchAsync(async (req, res) => {
@@ -46,7 +46,6 @@ badgeClassControllers.getBadgeClassesByEarnerId = catchAsync(async (req, res) =>
                         model: Earners,
                         through: {
                             model: EarnerAchievements,
-                            where: { status: false },
                         },
                     },
                     AchievementTypes,
