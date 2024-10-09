@@ -50,8 +50,11 @@ class EmailService {
      * @param {string} email - Recipient's email
      * @param {string} verificationToken - Verification token
      */
-    async sendVerificationEmail(email, verifyDigitNum) {
-        const html = verifyEmailTemplate.replace("{verificationCode}", verifyDigitNum);
+    async sendVerificationEmail(email, verifyDigitNum, firstName, lastName) {
+        const html = verifyEmailTemplate
+            .replace("[VERIFICATION_CODE]", verifyDigitNum)
+            .replace("[FIRSTNAME]", firstName)
+            .replace("[LASTNAME]", lastName);
         return await this.sendEmail({
             email,
             subject: "Verify your email",

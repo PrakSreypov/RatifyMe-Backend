@@ -8,6 +8,7 @@ router.route("/checkAuth").get(authMiddlewares.isLoggedIn, authControllers.check
 
 router.route("/signup").post(authControllers.signup);
 router.route("/verifyEmail").post(authControllers.verifyEmail);
+router.route("/resendVerification").post(authControllers.resendVerificationEmail);
 router.route("/signin").post(authControllers.signin);
 router.route("/forgotPassword").post(authControllers.forgotPassword);
 router.route("/verifyResetToken/:token").get(authControllers.verifyResetToken);
