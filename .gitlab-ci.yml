@@ -49,8 +49,7 @@ Build:
             \nAWS_BUCKET_NAME=$AWS_BUCKET_NAME
             \nAWS_BUCKET_REGION=$AWS_BUCKET_REGION
             \nAWS_ACCESS_KEY=$AWS_ACCESS_KEY
-            \nAWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
-            ' > .env "'
+            \nAWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY' > .env "
     artifacts:
         paths:
             - key.pem
