@@ -63,7 +63,10 @@ Deploy:
         - Build
     script:
         - ssh -o StrictHostKeyChecking=no -i key.pem -A $INSTANCE@$INSTANCEADD "
-            pwd"
+            cd verifyme-backend/ &&
+            pm2 kill &&
+            npm run pm2 &&
+            curl localhost:8000/api/v1"
     only:
         - feature/CI/CD
 #
