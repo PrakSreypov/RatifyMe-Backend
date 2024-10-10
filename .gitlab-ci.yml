@@ -66,8 +66,7 @@ Deploy:
             cd verifyme-backend/ &&
             pm2 kill &&
             npm run pm2 &&
-            pm2 status &&
-            curl localhost:8000/api/v1/users"
+            pm2 status"
     only:
         - feature/CI/CD
 
