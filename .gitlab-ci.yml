@@ -67,7 +67,7 @@ Deploy:
             pm2 kill &&
             npm run pm2 &&
             pm2 kill &&
-            curl localhost:8000/api/v1"
+            curl localhost:8000/api/v1/users"
     only:
         - feature/CI/CD
 
