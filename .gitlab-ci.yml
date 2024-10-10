@@ -43,9 +43,9 @@ Build:
             \nAWS_BUCKET_REGION=$AWS_BUCKET_REGION
             \nAWS_ACCESS_KEY=$AWS_ACCESS_KEY
             \nAWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
-            ' > /home/ec2-user/verifyme-backend/.env "
+            ' > verifyme-backend/.env "
         - ssh -o StrictHostKeyChecking=no -i key.pem -A $INSTANCE@$INSTANCEADD '
-            cat /home/ec2-user/verifyme-backend/.env'
+            cat verifyme-backend/.env'
     artifacts:
         paths:
             - key.pem
