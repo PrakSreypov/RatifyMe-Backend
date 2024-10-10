@@ -16,11 +16,11 @@ Build:
     stage: build
     script:
         - echo "Creating key.pem file from environment variable"
-        - echo "$AUTH_KEY" > key.pem
-        - chmod 400 key.pem
+        - sudo echo "$AUTH_KEY" > key.pem
+        - sudo chmod 400 key.pem
         - echo "$AUTH_KEY"
         - cat key.pem
-        - ssh -o StrictHostKeyChecking=no -i key.pem -A $INSTANCE@$INSTANCEADD "
+        - sudo ssh -o StrictHostKeyChecking=no -i key.pem -A $INSTANCE@$INSTANCEADD "
             echo 'Pull Project' &&
             cd verifyme-backend/ &&
             git pull origin feature/CI/CD &&
