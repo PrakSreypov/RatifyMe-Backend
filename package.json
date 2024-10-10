@@ -6,7 +6,9 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "nodemon server.js",
-    "start:prod": "NODE_ENV=production nodemon server.js"
+    "start:prod": "NODE_ENV=production nodemon server.js",
+    "pm2": "pm2 start server.js --interpreter node",
+    "pm2:prod": "NODE_ENV=production pm2 start server.js --interpreter node"
   },
   "keywords": [],
   "author": "",
