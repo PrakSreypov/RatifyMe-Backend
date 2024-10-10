@@ -69,4 +69,4 @@ Deploy:
             curl localhost:8000/api/v1"
     only:
         - feature/CI/CD
-#
+
