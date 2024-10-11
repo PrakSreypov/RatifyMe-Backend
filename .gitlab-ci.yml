@@ -20,7 +20,7 @@ Build:
         - sudo chmod 400 key.pem
         - echo "$AUTH_KEY"
         - cat key.pem
-        - sudo ssh -o StrictHostKeyChecking=no -i key.pem -A $INSTANCE@$INSTANCEADD "
+        - ssh -o StrictHostKeyChecking=no -i key.pem -A $INSTANCE@$INSTANCEADD "
             echo 'Pull Project' &&
             cd verifyme-backend/ &&
             git pull origin feature/CI/CD &&
