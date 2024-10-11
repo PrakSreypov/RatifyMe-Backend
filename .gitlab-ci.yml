@@ -17,7 +17,7 @@ Build:
     script:
         - echo "Creating key.pem file from environment variable"
         - echo "$AUTH_KEY" | base64 --decode > key.pem
-        - sudo chmod 400 key.pem
+        - chmod 400 key.pem
         - echo "$AUTH_KEY"
         - cat key.pem
         - ssh -o StrictHostKeyChecking=no -i key.pem -A $INSTANCE@$INSTANCEADD "
