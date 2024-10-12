@@ -14,9 +14,12 @@ const institutionControllers = new BaseControllers(
             model: Users,
             include: [Roles, Genders, Addresses],
         },
-        {   model: Issuers,
-            include: [BadgeClasses]
-        }
+        {
+            model: Issuers,
+            include: [
+                { model: BadgeClasses, attributes: ["id", "name", "imageUrl"] },
+            ],
+        },
     ],
 );
 
