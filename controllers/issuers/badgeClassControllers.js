@@ -24,8 +24,39 @@ const associated = [
     Criterias,
 ];
 
+class BadgeClassControllers extends BaseControllers {
+    constructor() {
+        super(BadgeClasses, ["name"], associated, "imageUrl");
+    }
+    deleteOne = catchAsync(async (req, res, next) => {
+        const { id } = req.params;
+        const record = await this.checkRecordExists(id);
+
+        await record.destroy();
+        if (!record[this.imageField]) {
+            // Extract the key and handle special characters
+            const url = record[this.imageField].replace(/\+/g, "%20");
+            const key = decodeURIComponent(url.split("/").slice(-2).join("/"));
+            // Prepare S3 delete parameters
+            const params = {
+                Bucket: process.env.AWS_BUCKET_NAME,
+                Key: key, // Use the extracted key
+            };
+
+            // Attempt to delete the image from S3
+            await s3
+                .deleteObject(params)
+                .promise()
+                .catch((err) => {
+                    return next(new AppError("Failed to delete image from S3", 500, err));
+                });
+        }
+        this.sendResponse(res, 200, null, "Delete badge successfully")
+    });
+}
+
 // Create an instance of BaseControllers with BadgeClasses
-const badgeClassControllers = new BaseControllers(BadgeClasses, ["name"], associated, "imageUrl");
+const badgeClassControllers = new BadgeClassControllers();
 
 // Custom method to get BadgeClasses by earnerId
 badgeClassControllers.getBadgeClassesByEarnerId = catchAsync(async (req, res) => {

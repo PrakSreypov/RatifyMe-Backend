@@ -19,6 +19,6 @@ router
     .route("/:id")
     .get(badgeClassesControllers.getOne)
     .patch(badgeClassesControllers.updateOne)
-    .delete(badgeClassesControllers.deleteImage,badgeClassesControllers.deleteOne);
+    .delete(badgeClassesControllers.deleteOne);
 
 module.exports = router;
