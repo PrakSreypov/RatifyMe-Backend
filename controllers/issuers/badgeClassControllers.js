@@ -10,6 +10,14 @@ const BaseControllers = require("../../utils/baseControllers");
 const EarnerAchievements = require("../../models/EarnerAchievements");
 const catchAsync = require("../../utils/catchAsync");
 
+const AWS = require("aws-sdk");
+
+const s3 = new AWS.S3({
+    accessKeyId: process.env.AWS_ACCESS_KEY,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    region: process.env.AWS_BUCKET_REGION,
+});
+
 // Define the associated models
 const associated = [
     {
@@ -30,20 +38,33 @@ class BadgeClassControllers extends BaseControllers {
     }
     deleteOne = catchAsync(async (req, res, next) => {
         const { id } = req.params;
+
+        // Find and check if the record exists
         const record = await this.checkRecordExists(id);
 
-        await record.destroy();
-        if (!record[this.imageField]) {
+        // Extract the image URL before deleting the record
+        const imageUrl = record[this.imageField];
+
+        // Delete the record from the database first
+        const deletedBadge = await record.destroy();
+
+        // Ensure the record is deleted from the database
+        if (!deletedBadge) {
+            return next(new AppError("Failed to delete badge from the database", 500));
+        }
+
+        // If imageUrl exists, proceed to delete the image from S3
+        if (imageUrl) {
             // Extract the key and handle special characters
-            const url = record[this.imageField].replace(/\+/g, "%20");
+            const url = imageUrl.replace(/\+/g, "%20");
             const key = decodeURIComponent(url.split("/").slice(-2).join("/"));
-            // Prepare S3 delete parameters
+
             const params = {
                 Bucket: process.env.AWS_BUCKET_NAME,
-                Key: key, // Use the extracted key
+                Key: key,
             };
 
-            // Attempt to delete the image from S3
+            // Delete the image from S3
             await s3
                 .deleteObject(params)
                 .promise()
@@ -51,7 +72,8 @@ class BadgeClassControllers extends BaseControllers {
                     return next(new AppError("Failed to delete image from S3", 500, err));
                 });
         }
-        this.sendResponse(res, 200, null, "Delete badge successfully")
+        // Send a successful response after the badge has been deleted from the database
+        this.sendResponse(res, 200, null, "Badge deleted successfully");
     });
 }
 

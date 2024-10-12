@@ -301,18 +301,17 @@ class BaseController {
         };
 
         // Attempt to delete the image from S3
-        const result = await s3
+        await s3
             .deleteObject(params)
             .promise()
             .catch((err) => {
                 return next(new AppError("Failed to delete image from S3", 500, err));
             });
-        console.log("💥 Delete s3", result)
 
         // Set the image field to null or delete the field as per your requirement
         record[this.imageField] = null; // or `delete record[this.imageField];`
         await record.save(); // Save the updated record
-        next()
+        next();
 
         // this.sendResponse(res, 200, null, "Image successfully deleted");
     });
