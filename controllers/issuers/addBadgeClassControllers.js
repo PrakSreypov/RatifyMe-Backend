@@ -47,7 +47,6 @@ exports.addBadgeClass = catchAsync(async (req, res, next) => {
 
     // Upload to S3
     const badgeImg = await uploadToS3(badgeBuffer, originalname, mimetype);
-
     if (!badgeImg) {
         return next(new AppError("Upload badge image failed", 405));
     }
@@ -59,19 +58,15 @@ exports.addBadgeClass = catchAsync(async (req, res, next) => {
         startedDate,
         expiredDate,
         issuerId,
-        Issuer,
         Achievements,
         Criterias,
+        institutionId, // Directly associate institutionId
     } = req.body;
-
-    // Add the image URL from S3 to the badge data
-    req.body.imageUrl = badgeImg;
 
     // Start transaction
     const transaction = await sequelize.transaction();
     try {
-        // 1. Create BadgeClass
-
+        // 1. Create BadgeClass with institutionId and issuerId directly
         const newBadgeClass = await BadgeClasses.create(
             {
                 name,
@@ -81,33 +76,12 @@ exports.addBadgeClass = catchAsync(async (req, res, next) => {
                 startedDate,
                 expiredDate,
                 issuerId,
+                institutionId, // Associate institutionId with BadgeClass directly
             },
             { transaction },
         );
 
-        // 2. Create Issuer (if applicable)
-        if (Issuer) {
-            const newIssuer = await Issuers.create(
-                {
-                    ...Issuer,
-                    badgeClassId: newBadgeClass.id,
-                },
-                { transaction },
-            );
-
-            // Create institution (if provided)
-            if (Issuer.institution) {
-                await Institutions.create(
-                    {
-                        ...Issuer.institution,
-                        issuerId: newIssuer.id,
-                    },
-                    { transaction },
-                );
-            }
-        }
-
-        // 3. Create Achievements (if applicable)
+        // 2. Create Achievements (if applicable)
         if (Achievements && Achievements.length > 0) {
             for (const achievement of Achievements) {
                 const newAchievement = await AchievementModel.create(
@@ -135,7 +109,7 @@ exports.addBadgeClass = catchAsync(async (req, res, next) => {
             }
         }
 
-        // 4. Create Criterias (if applicable)
+        // 3. Create Criterias (if applicable)
         if (Criterias && Criterias.length > 0) {
             for (const criteria of Criterias) {
                 await CriteriaModel.create(
@@ -151,13 +125,15 @@ exports.addBadgeClass = catchAsync(async (req, res, next) => {
         // Commit transaction
         await transaction.commit();
 
-        // Fetch the newly created BadgeClass
+        // Fetch the newly created BadgeClass, including issuer and institution
         const createdBadgeClass = await BadgeClasses.findOne({
             where: { id: newBadgeClass.id },
             include: [
                 {
                     model: Issuers,
-                    include: [Institutions],
+                },
+                {
+                    model: Institutions, // Include institution in the response
                 },
                 {
                     model: AchievementModel,
