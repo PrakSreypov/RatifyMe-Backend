@@ -232,6 +232,14 @@ Issuers.hasMany(BadgeClasses, {
 BadgeClasses.belongsTo(Issuers, {
     foreignKey: "issuerId",
 });
+Institutions.hasMany(BadgeClasses, {
+    foreignKey: "institutionId",
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+});
+BadgeClasses.belongsTo(Institutions, {
+    foreignKey: "institutionId",
+});
 // ============ End BadgeClass Association ============
 
 // ============ Start Achievements  Association ============

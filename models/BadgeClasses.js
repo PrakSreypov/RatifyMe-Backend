@@ -1,3 +1,4 @@
+//BadgeClasses.js model
 const { DataTypes } = require("sequelize");
 const sequelize = require("../configs/database");
 
@@ -70,6 +71,15 @@ const BadgeClasses = sequelize.define(
                     return endDate - startDate;
                 }
                 return null;
+            },
+        },
+        institutionId: {
+            type: DataTypes.INTEGER,
+            references: {
+                model: "Institutions",
+                key: "id",
+                onDelete: "CASCADE",
+                onUpdate: "CASCADE",
             },
         },
     },

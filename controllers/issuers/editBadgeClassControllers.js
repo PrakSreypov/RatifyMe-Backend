@@ -12,14 +12,14 @@ const sequelize = require("../../configs/database");
 const catchAsync = require("../../utils/catchAsync");
 const AppError = require("../../utils/appError");
 
-// Configure AWS S3
+// Configure AWS S3 (same as in the add controller)
 const s3 = new AWS.S3({
     accessKeyId: process.env.AWS_ACCESS_KEY,
     secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
     region: process.env.AWS_BUCKET_REGION,
 });
 
-// Upload PDF to S3
+// Function to upload to S3 (same as in the add controller)
 const uploadToS3 = async (fileBuffer, fileName, mimetype) => {
     const uniqueFileName = `${v4()}_${fileName}`;
     const uploadParams = {
@@ -38,17 +38,22 @@ const uploadToS3 = async (fileBuffer, fileName, mimetype) => {
     }
 };
 
-exports.addBadgeClass = catchAsync(async (req, res, next) => {
-    // Check if file buffer exists
-    const { buffer: badgeBuffer, originalname, mimetype } = req.file;
-    if (!badgeBuffer || badgeBuffer.length === 0) {
-        return next(new AppError("There is no buffer", 405));
+exports.editBadgeClass = catchAsync(async (req, res, next) => {
+    const { badgeId } = req.params;
+
+    // Check if the badge exists
+    const badgeClass = await BadgeClasses.findByPk(badgeId, {
+        include: [Issuers, AchievementModel, CriteriaModel],
+    });
+    if (!badgeClass) {
+        return next(new AppError("BadgeClass not found", 404));
     }
 
-    // Upload to S3
-    const badgeImg = await uploadToS3(badgeBuffer, originalname, mimetype);
-    if (!badgeImg) {
-        return next(new AppError("Upload badge image failed", 405));
+    // Handle file upload if a new badge image is provided
+    let badgeImg = badgeClass.imageUrl; // Keep existing image by default
+    if (req.file) {
+        const { buffer: badgeBuffer, originalname, mimetype } = req.file;
+        badgeImg = await uploadToS3(badgeBuffer, originalname, mimetype);
     }
 
     const {
@@ -58,16 +63,16 @@ exports.addBadgeClass = catchAsync(async (req, res, next) => {
         startedDate,
         expiredDate,
         issuerId,
+        Issuer,
         Achievements,
         Criterias,
-        institutionId, // Directly associate institutionId
     } = req.body;
 
-    // Start transaction
+    // Start transaction for the update operation
     const transaction = await sequelize.transaction();
     try {
-        // 1. Create BadgeClass with institutionId and issuerId directly
-        const newBadgeClass = await BadgeClasses.create(
+        // Update BadgeClass
+        await badgeClass.update(
             {
                 name,
                 description,
@@ -76,18 +81,62 @@ exports.addBadgeClass = catchAsync(async (req, res, next) => {
                 startedDate,
                 expiredDate,
                 issuerId,
-                institutionId, // Associate institutionId with BadgeClass directly
             },
             { transaction },
         );
 
-        // 2. Create Achievements (if applicable)
+        // Update Issuer (if applicable)
+        if (Issuer) {
+            let existingIssuer = await Issuers.findOne({ where: { badgeClassId: badgeClass.id } });
+            if (existingIssuer) {
+                await existingIssuer.update(Issuer, { transaction });
+
+                // Update Institution (if applicable)
+                if (Issuer.institution) {
+                    const existingInstitution = await Institutions.findOne({
+                        where: { issuerId: existingIssuer.id },
+                    });
+                    if (existingInstitution) {
+                        await existingInstitution.update(Issuer.institution, { transaction });
+                    } else {
+                        const newInstitution = await Institutions.create(
+                            {
+                                ...Issuer.institution,
+                                issuerId: existingIssuer.id,
+                            },
+                            { transaction },
+                        );
+                    }
+                }
+            } else {
+                const newIssuer = await Issuers.create(
+                    {
+                        ...Issuer,
+                        badgeClassId: badgeClass.id,
+                    },
+                    { transaction },
+                );
+                if (Issuer.institution) {
+                    await Institutions.create(
+                        {
+                            ...Issuer.institution,
+                            issuerId: newIssuer.id,
+                        },
+                        { transaction },
+                    );
+                }
+            }
+        }
+
+        // Update Achievements (if applicable)
         if (Achievements && Achievements.length > 0) {
+            await AchievementModel.destroy({ where: { badgeClassId: badgeClass.id }, transaction });
+
             for (const achievement of Achievements) {
                 const newAchievement = await AchievementModel.create(
                     {
                         ...achievement,
-                        badgeClassId: newBadgeClass.id,
+                        badgeClassId: badgeClass.id,
                     },
                     { transaction },
                 );
@@ -109,31 +158,31 @@ exports.addBadgeClass = catchAsync(async (req, res, next) => {
             }
         }
 
-        // 3. Create Criterias (if applicable)
+        // Update Criterias (if applicable)
         if (Criterias && Criterias.length > 0) {
+            await CriteriaModel.destroy({ where: { badgeClassId: badgeClass.id }, transaction });
+
             for (const criteria of Criterias) {
                 await CriteriaModel.create(
                     {
                         ...criteria,
-                        badgeClassId: newBadgeClass.id,
+                        badgeClassId: badgeClass.id,
                     },
                     { transaction },
                 );
             }
         }
 
-        // Commit transaction
+        // Commit the transaction
         await transaction.commit();
 
-        // Fetch the newly created BadgeClass, including issuer and institution
-        const createdBadgeClass = await BadgeClasses.findOne({
-            where: { id: newBadgeClass.id },
+        // Fetch the updated BadgeClass
+        const updatedBadgeClass = await BadgeClasses.findOne({
+            where: { id: badgeClass.id },
             include: [
                 {
                     model: Issuers,
-                },
-                {
-                    model: Institutions, // Include institution in the response
+                    include: [Institutions],
                 },
                 {
                     model: AchievementModel,
@@ -145,14 +194,13 @@ exports.addBadgeClass = catchAsync(async (req, res, next) => {
             ],
         });
 
-        res.status(201).json({
+        res.status(200).json({
             status: "success",
-            data: createdBadgeClass,
+            data: updatedBadgeClass,
         });
     } catch (error) {
-        // Rollback the transaction in case of errors
         console.error("Error during transaction:", error);
         await transaction.rollback();
-        return next(new AppError("Error creating BadgeClass", 500));
+        return next(new AppError("Error updating BadgeClass", 500));
     }
 });

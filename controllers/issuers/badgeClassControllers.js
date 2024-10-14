@@ -10,22 +10,76 @@ const BaseControllers = require("../../utils/baseControllers");
 const EarnerAchievements = require("../../models/EarnerAchievements");
 const catchAsync = require("../../utils/catchAsync");
 
+const AWS = require("aws-sdk");
+
+const s3 = new AWS.S3({
+    accessKeyId: process.env.AWS_ACCESS_KEY,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    region: process.env.AWS_BUCKET_REGION,
+});
+
 // Define the associated models
 const associated = [
     {
         model: Issuers,
-        include: [Institutions, Users],
+        include: [{ model: Users, attributes: ["firstName", "lastName"] }],
     },
     {
         model: Achievements,
         include: [AchievementTypes, Earners],
         required: true,
     },
-    Criterias,
+    { model: Criterias },
+    { model: Institutions, attributes: ["institutionName"] },
 ];
 
+class BadgeClassControllers extends BaseControllers {
+    constructor() {
+        super(BadgeClasses, ["name"], associated, "imageUrl");
+    }
+    deleteOne = catchAsync(async (req, res, next) => {
+        const { id } = req.params;
+
+        // Find and check if the record exists
+        const record = await this.checkRecordExists(id);
+
+        // Extract the image URL before deleting the record
+        const imageUrl = record[this.imageField];
+
+        // Delete the record from the database first
+        const deletedBadge = await record.destroy();
+
+        // Ensure the record is deleted from the database
+        if (!deletedBadge) {
+            return next(new AppError("Failed to delete badge from the database", 500));
+        }
+
+        // If imageUrl exists, proceed to delete the image from S3
+        if (imageUrl) {
+            // Extract the key and handle special characters
+            const url = imageUrl.replace(/\+/g, "%20");
+            const key = decodeURIComponent(url.split("/").slice(-2).join("/"));
+
+            const params = {
+                Bucket: process.env.AWS_BUCKET_NAME,
+                Key: key,
+            };
+
+            // Delete the image from S3
+            await s3
+                .deleteObject(params)
+                .promise()
+                .catch((err) => {
+                    return next(new AppError("Failed to delete image from S3", 500, err));
+                });
+        }
+        // Send a successful response after the badge has been deleted from the database
+        this.sendResponse(res, 200, null, "Badge deleted successfully");
+    });
+}
+
 // Create an instance of BaseControllers with BadgeClasses
-const badgeClassControllers = new BaseControllers(BadgeClasses, ["name"], associated);
+const badgeClassControllers = new BadgeClassControllers();
 
 // Custom method to get BadgeClasses by earnerId
 badgeClassControllers.getBadgeClassesByEarnerId = catchAsync(async (req, res) => {
@@ -33,32 +87,7 @@ badgeClassControllers.getBadgeClassesByEarnerId = catchAsync(async (req, res) =>
 
     // Find all BadgeClasses that are associated with Achievements for the specified earnerId
     const badgeClasses = await BadgeClasses.findAll({
-        include: [
-            {
-                model: Achievements,
-                include: [
-                    {
-                        model: Earners,
-                        where: { id: earnerId },
-                        required: true,
-                    },
-                    {
-                        model: Earners,
-                        through: {
-                            model: EarnerAchievements,
-                            where: { status: false },
-                        },
-                    },
-                    AchievementTypes,
-                ],
-                required: true,
-            },
-            {
-                model: Issuers,
-                include: [Institutions, Users],
-            },
-            Criterias,
-        ],
+        include: associated,
     });
 
     if (!badgeClasses || badgeClasses.length === 0) {
@@ -73,32 +102,7 @@ badgeClassControllers.getBadgeClaimByEarner = catchAsync(async (req, res) => {
 
     // Find all BadgeClasses that are associated with Achievements for the specified earnerId
     const badgeClasses = await BadgeClasses.findAll({
-        include: [
-            {
-                model: Achievements,
-                include: [
-                    {
-                        model: Earners,
-                        where: { id: earnerId },
-                        required: true,
-                    },
-                    {
-                        model: Earners,
-                        through: {
-                            model: EarnerAchievements,
-                            where: { status: true },
-                        },
-                    },
-                    AchievementTypes,
-                ],
-                required: true,
-            },
-            {
-                model: Issuers,
-                include: [Institutions, Users],
-            },
-            Criterias,
-        ],
+        include: associated,
     });
 
     if (!badgeClasses || badgeClasses.length === 0) {

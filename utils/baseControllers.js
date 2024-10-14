@@ -19,6 +19,7 @@ const s3 = new AWS.S3({
  * @param {Object} Model - Sequelize model
  * @param {Array} [uniqueFields=[]] - Array of unique fields to check for uniqueness
  * @param {Array} [associations=[]] - Array of associated models to include in queries
+ * @param {Array} [imageField=[]] - Image field of table
  */
 class BaseController {
     constructor(Model, uniqueFields = [], associations = [], imageField = null) {
@@ -87,7 +88,8 @@ class BaseController {
             .filtering() // Apply filtering
             .sorting() // Apply sorting
             .limitFields() // Apply field limiting
-            .pagination(); // Apply pagination
+            .pagination()
+            .search(); // Apply pagination
 
         // Execute the query with associated models included
         const records = await apiFeature.execute({
@@ -286,9 +288,9 @@ class BaseController {
         const record = await this.checkRecordExists(id);
 
         // Ensure the image field is present
-        if (!record[this.imageField]) {
-            return next(new AppError("No image associated with this record", 404));
-        }
+        // if (!record[this.imageField]) {
+        //     return next(new AppError("No image associated with this record", 404));
+        // }
 
         // Extract the key and handle special characters
         const url = record[this.imageField].replace(/\+/g, "%20");
@@ -300,7 +302,7 @@ class BaseController {
         };
 
         // Attempt to delete the image from S3
-        const result = await s3
+        await s3
             .deleteObject(params)
             .promise()
             .catch((err) => {
@@ -310,8 +312,9 @@ class BaseController {
         // Set the image field to null or delete the field as per your requirement
         record[this.imageField] = null; // or `delete record[this.imageField];`
         await record.save(); // Save the updated record
+        next();
 
-        this.sendResponse(res, 200, null, "Image successfully deleted");
+        // this.sendResponse(res, 200, null, "Image successfully deleted");
     });
 
     // End Delete image
