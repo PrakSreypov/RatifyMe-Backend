@@ -22,14 +22,15 @@ const s3 = new AWS.S3({
 const associated = [
     {
         model: Issuers,
-        include: [Institutions, Users],
+        include: [{ model: Users, attributes: ["firstName", "lastName"] }],
     },
     {
         model: Achievements,
         include: [AchievementTypes, Earners],
         required: true,
     },
-    Criterias,
+    { model: Criterias },
+    { model: Institutions, attributes: ["institutionName"] },
 ];
 
 class BadgeClassControllers extends BaseControllers {
@@ -86,31 +87,7 @@ badgeClassControllers.getBadgeClassesByEarnerId = catchAsync(async (req, res) =>
 
     // Find all BadgeClasses that are associated with Achievements for the specified earnerId
     const badgeClasses = await BadgeClasses.findAll({
-        include: [
-            {
-                model: Achievements,
-                include: [
-                    {
-                        model: Earners,
-                        where: { id: earnerId },
-                        required: true,
-                    },
-                    {
-                        model: Earners,
-                        through: {
-                            model: EarnerAchievements,
-                        },
-                    },
-                    AchievementTypes,
-                ],
-                required: true,
-            },
-            {
-                model: Issuers,
-                include: [Institutions, Users],
-            },
-            Criterias,
-        ],
+        include: associated,
     });
 
     if (!badgeClasses || badgeClasses.length === 0) {
@@ -125,32 +102,7 @@ badgeClassControllers.getBadgeClaimByEarner = catchAsync(async (req, res) => {
 
     // Find all BadgeClasses that are associated with Achievements for the specified earnerId
     const badgeClasses = await BadgeClasses.findAll({
-        include: [
-            {
-                model: Achievements,
-                include: [
-                    {
-                        model: Earners,
-                        where: { id: earnerId },
-                        required: true,
-                    },
-                    {
-                        model: Earners,
-                        through: {
-                            model: EarnerAchievements,
-                            where: { status: true },
-                        },
-                    },
-                    AchievementTypes,
-                ],
-                required: true,
-            },
-            {
-                model: Issuers,
-                include: [Institutions, Users],
-            },
-            Criterias,
-        ],
+        include: associated,
     });
 
     if (!badgeClasses || badgeClasses.length === 0) {
