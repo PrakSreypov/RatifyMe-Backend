@@ -41,7 +41,7 @@ const corsOptions = {
 };
 
 app.use(cors(corsOptions));
-app.options('*', cors(corsOptions));
+// app.options('*', cors(corsOptions));
 // app.use(cors({ origin: process.env.CLIENT_BASE_URL, credentials: true }));
 app.use(cookieParser());
 app.use(helmet());
