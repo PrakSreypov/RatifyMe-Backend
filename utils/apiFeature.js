@@ -79,7 +79,7 @@ class ApiFeature {
 
     sorting() {
         // Determine the default sorting field based on the query string or a parameter
-        const defaultSortField = "name" || "institutionName" || "inviteEmail";
+        const defaultSortField = 'name' || "institutionName" || 'inviteEmail';
 
         if (this.queryString.sort) {
             const sortBy = this.queryString.sort

@@ -84,7 +84,7 @@ class BaseController {
 
         // Count total records based on filters
         const totalRecords = await this.Model.count({
-            where: apiFeature.query.where, // Apply filtering here
+            where: apiFeature.query.where,
         });
 
         // Execute the query with associated models included
