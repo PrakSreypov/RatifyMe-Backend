@@ -1,16 +1,15 @@
 stages:
-
     - build
     - deploy
 
 variables:
     NODE_VERSION: "21"
+    BRANCH: "develop"
 
 before_script:
     # This will run before each job in all stages
     - echo "Setting up environment"
     - whoami
-
 
 Build:
     stage: build
@@ -23,7 +22,9 @@ Build:
         - ssh -o StrictHostKeyChecking=no -i key.pem -A $INSTANCE@$INSTANCEADD "
             echo 'Pull Project' &&
             cd verifyme-backend/ &&
-            git pull origin feature/CI/CD &&
+            git checkout $BRANCH &&
+            git pull origin $BRANCH &&
+            git pull --rebase origin $BRANCH &&
             echo 'Install node_module' &&
             npm i &&
             npm i -g pm2 &&
@@ -56,7 +57,8 @@ Build:
         paths:
             - key.pem
     only:
-        - feature/CI/CD
+        - develop
+
 Deploy:
     stage: deploy
     needs:
@@ -70,5 +72,4 @@ Deploy:
             npm run pm2 &&
             pm2 status"
     only:
-        - feature/CI/CD
-# 1
+        - develop
