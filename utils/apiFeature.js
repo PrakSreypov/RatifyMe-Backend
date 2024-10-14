@@ -1,9 +1,8 @@
 const { Op } = require("sequelize");
 
-
 /**
  *
- * @param queryString : take operation from endpoint and apply by output 
+ * @param queryString : take operation from endpoint and apply by output
  * @class ApiFeature
  */
 class ApiFeature {
@@ -16,7 +15,7 @@ class ApiFeature {
     // Filtering logic
     filtering() {
         const queryObj = { ...this.queryString }; // req.query is passed as queryString
-        const excludedFields = ["page", "sort", "limit", "fields"];
+        const excludedFields = ["page", "sort", "limit", "fields", "search"]; // Exclude 'search' in filtering
         excludedFields.forEach((el) => delete queryObj[el]);
 
         // Advanced filtering
@@ -92,9 +91,29 @@ class ApiFeature {
         return this;
     }
 
-    // Execute the query and return results
-    async execute(options = {}) {
-        return await this.model.findAll({ ...this.query, ...options });
+    // Search logic
+    search() {
+        if (this.queryString.search) {
+            const searchTerm = this.queryString.search;
+            const searchFields = Object.keys(this.model.rawAttributes);
+
+            this.query.where = {
+                ...this.query.where,
+                [Op.or]: searchFields.map((field) => ({
+                    [field]: { [Op.like]: `%${searchTerm}%` },
+                })),
+            };
+        }
+        return this;
+    }
+
+    async execute(options) {
+        // Make sure to handle the model and include associations correctly
+        const records = await this.model.findAll({
+            where: this.query.where,
+            ...options,
+        });
+        return records;
     }
 }
 

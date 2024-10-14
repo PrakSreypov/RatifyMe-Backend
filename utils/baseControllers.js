@@ -88,7 +88,8 @@ class BaseController {
             .filtering() // Apply filtering
             .sorting() // Apply sorting
             .limitFields() // Apply field limiting
-            .pagination(); // Apply pagination
+            .pagination()
+            .search(); // Apply pagination
 
         // Execute the query with associated models included
         const records = await apiFeature.execute({
