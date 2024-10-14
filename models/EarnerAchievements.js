@@ -25,7 +25,7 @@ const EarnerAchievements = sequelize.define(
                 key: "id",
             },
         },
-        isssuedOn: {
+        issuedOn: {
             type: DataTypes.DATE,
             defaultValue: DataTypes.NOW,
         },
