@@ -87,8 +87,35 @@ badgeClassControllers.getBadgeClassesByEarnerId = catchAsync(async (req, res) =>
 
     // Find all BadgeClasses that are associated with Achievements for the specified earnerId
     const badgeClasses = await BadgeClasses.findAll({
-        include: associated,
+        include: [
+            {
+                model: Achievements,
+                include: [
+                    {
+                        model: Earners,
+                        where: { id: earnerId },
+                        required: true,
+                    },
+                    {
+                        model: Earners,
+                        through: {
+                            model: EarnerAchievements,
+                            where: { status: false },
+                        },
+                    },
+                    AchievementTypes,
+                ],
+                required: true,
+            },
+            {
+                model: Issuers,
+                include: [{ model: Users, attributes: ["firstName", "lastName"] }],
+            },
+            { model: Institutions, attributes: ["institutionName"] },
+            Criterias,
+        ],
     });
+    console.log("badge", badgeClasses);
 
     if (!badgeClasses || badgeClasses.length === 0) {
         return res.status(404).json({ message: "No BadgeClasses found for this earner" });
@@ -102,7 +129,33 @@ badgeClassControllers.getBadgeClaimByEarner = catchAsync(async (req, res) => {
 
     // Find all BadgeClasses that are associated with Achievements for the specified earnerId
     const badgeClasses = await BadgeClasses.findAll({
-        include: associated,
+        include: [
+            {
+                model: Achievements,
+                include: [
+                    {
+                        model: Earners,
+                        where: { id: earnerId },
+                        required: true,
+                    },
+                    {
+                        model: Earners,
+                        through: {
+                            model: EarnerAchievements,
+                            where: { status: true },
+                        },
+                    },
+                    AchievementTypes,
+                ],
+                required: true,
+            },
+            {
+                model: Issuers,
+                include: [{ model: Users, attributes: ["firstName", "lastName"] }],
+            },
+            { model: Institutions, attributes: ["institutionName"] },
+            Criterias,
+        ],
     });
 
     if (!badgeClasses || badgeClasses.length === 0) {
