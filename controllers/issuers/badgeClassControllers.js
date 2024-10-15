@@ -110,7 +110,6 @@ badgeClassControllers.getBadgeClassesByEarnerId = catchAsync(async (req, res) =>
             { model: Institutions, attributes: ["institutionName"] },
         ],
     });
-    console.log("badge", badgeClasses);
 
     if (!badgeClasses || badgeClasses.length === 0) {
         return res.status(404).json({ message: "No BadgeClasses found for this earner" });
