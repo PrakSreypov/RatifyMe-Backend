@@ -95,15 +95,11 @@ badgeClassControllers.getBadgeClassesByEarnerId = catchAsync(async (req, res) =>
                         model: Earners,
                         where: { id: earnerId },
                         required: true,
-                    },
-                    {
-                        model: Earners,
                         through: {
                             model: EarnerAchievements,
                             where: { status: false },
                         },
                     },
-                    AchievementTypes,
                 ],
                 required: true,
             },
@@ -112,7 +108,6 @@ badgeClassControllers.getBadgeClassesByEarnerId = catchAsync(async (req, res) =>
                 include: [{ model: Users, attributes: ["firstName", "lastName"] }],
             },
             { model: Institutions, attributes: ["institutionName"] },
-            Criterias,
         ],
     });
     console.log("badge", badgeClasses);
@@ -137,15 +132,11 @@ badgeClassControllers.getBadgeClaimByEarner = catchAsync(async (req, res) => {
                         model: Earners,
                         where: { id: earnerId },
                         required: true,
-                    },
-                    {
-                        model: Earners,
                         through: {
                             model: EarnerAchievements,
                             where: { status: true },
                         },
                     },
-                    AchievementTypes,
                 ],
                 required: true,
             },
@@ -154,7 +145,6 @@ badgeClassControllers.getBadgeClaimByEarner = catchAsync(async (req, res) => {
                 include: [{ model: Users, attributes: ["firstName", "lastName"] }],
             },
             { model: Institutions, attributes: ["institutionName"] },
-            Criterias,
         ],
     });
 
