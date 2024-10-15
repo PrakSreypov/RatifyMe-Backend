@@ -9,6 +9,7 @@ router.route("/").get(earnerControllers.getAll).post(earnerControllers.createOne
 router.route("/achievement/:earnerId").patch(earnerControllers.updateAchievementStatus);
 
 router.route("/earnerAchievement").get(earnerAchievementControllers.getAll);
+router.route("/earnerAchievement/:achievementId/earner/:earnerId").get(earnerAchievementControllers.getOne);
 
 router
     .route("/:id")
