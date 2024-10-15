@@ -266,7 +266,7 @@ class AuthControllers extends BaseController {
 
             // Fetch subscription related to the institution
             const subscription = await Subscriptions.findOne({
-                where: { institutionId: institution.id },
+                where: { institutionId: institution.id, status: true },
             });
 
             // Determine subscription status based on its existence and status value
