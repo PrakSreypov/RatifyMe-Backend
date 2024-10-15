@@ -12,7 +12,7 @@ const sequelize = require("../../configs/database");
 const Addresses = require("../../models/Addresses");
 const Institutions = require("../../models/Institutions");
 const { generateVerificationCode } = require("../../utils/auth/generateVerificationCode");
-const { Issuers, Earners } = require("../../models");
+const { Issuers, Earners, Subscriptions } = require("../../models");
 const EmailService = require("../../services/mailServices");
 const { getUserFromToken } = require("../../utils/auth/getUserFromToken");
 
@@ -189,10 +189,7 @@ class AuthControllers extends BaseController {
         user.verifyDigitNumExpires = null;
         await user.save();
 
-        res.status(200).json({
-            status: "Account Verified.",
-            data: user,
-        });
+        createSendToken(user, 200, res);
     });
     // ============ End Verify Email controller   ============
 
@@ -254,7 +251,33 @@ class AuthControllers extends BaseController {
             return next(new AppError("Incorrect email or password", 401));
         }
 
-        createSendToken(user, 200, res);
+        let subscriptionStatus;
+
+        // Check if the user has roleId = 2 (specific role that requires subscription check)
+        if (user.roleId === 2) {
+            // Find the institution associated with the user
+            const institution = await Institutions.findOne({
+                where: { userId: user.id },
+            });
+
+            if (!institution) {
+                return next(new AppError("Institution not found."));
+            }
+
+            // Fetch subscription related to the institution
+            const subscription = await Subscriptions.findOne({
+                where: { institutionId: institution.id },
+            });
+
+            // Determine subscription status based on its existence and status value
+            if (!subscription || subscription.status === false) {
+                subscriptionStatus = "inactive";
+            } else {
+                subscriptionStatus = "active";
+            }
+        }
+
+        createSendToken(user, 200, res, false, { subscriptionStatus });
     });
     // ============ End Signin controller ============
 

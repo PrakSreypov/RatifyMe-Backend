@@ -72,11 +72,9 @@ exports.createCheckoutSession = catchAsync(async (req, res, next) => {
             servicePlanId,
         },
     });
-    // console.log("Session created completed : ", session);
     if (!session) {
         return next(new AppError("Failed to create Stripe session", 400));
     }
-    console.log("Session created:", session.id);
 
     // Respond with the session ID
     res.status(200).json({ sessionId: session.id });

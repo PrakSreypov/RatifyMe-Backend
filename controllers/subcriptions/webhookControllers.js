@@ -46,7 +46,6 @@ const updateSubscription = catchAsync(async (subscriptionId, stripeSubscriptionI
         stripeSubscriptionId: stripeSubscriptionId,
     });
 
-    console.log("Subscription updated successfully.");
 });
 
 exports.webhook = catchAsync(async (req, res, next) => {
@@ -76,7 +75,6 @@ exports.webhook = catchAsync(async (req, res, next) => {
     // Handle the event based on its type
     switch (event.type) {
         case "checkout.session.completed":
-            console.log("Checkout session completed:", session);
             // Use this data to update your database, e.g., update the subscription
             await updateSubscription(subscriptionId, stripeSubscriptionId);
 

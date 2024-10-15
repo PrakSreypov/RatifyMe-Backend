@@ -27,7 +27,7 @@ const signToken = (id) => {
 };
 
 // ============ Start Send Token ============
-exports.createSendToken = (user, statusCode, res, isSignup = false) => {
+exports.createSendToken = (user, statusCode, res, isSignup = false, additionalInfo = {}) => {
     const token = signToken(isSignup ? user.newUser.id : user.id);
 
     // Helper function to extract numeric
@@ -39,7 +39,11 @@ exports.createSendToken = (user, statusCode, res, isSignup = false) => {
     const cookieOptions = {
         expires: new Date(
             Date.now() +
-                parseJwtCookiesExpiresInDays(process.env.JWT_COOKIE_EXPIRES_IN) * 24 * 60 * 60 * 1000,
+                parseJwtCookiesExpiresInDays(process.env.JWT_COOKIE_EXPIRES_IN) *
+                    24 *
+                    60 *
+                    60 *
+                    1000,
         ),
         httpOnly: true,
         sameSite: "Strict",
@@ -53,6 +57,7 @@ exports.createSendToken = (user, statusCode, res, isSignup = false) => {
         status: "success",
         token,
         user,
+        ...additionalInfo,
     });
 };
 // ============ End Send Token ============
