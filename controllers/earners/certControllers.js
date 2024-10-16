@@ -5,6 +5,8 @@ const AWS = require("aws-sdk");
 const catchAsync = require("../../utils/catchAsync");
 const AppError = require("../../utils/appError");
 
+const EarnerAchievements = require("../../models/EarnerAchievements");
+
 // Configure AWS S3
 const s3 = new AWS.S3({
     accessKeyId: process.env.AWS_ACCESS_KEY,
@@ -70,6 +72,7 @@ const uploadToS3 = async (pdfBuffer, fileName) => {
 
 // Endpoint to handle file upload and processing
 exports.uploadCerti = catchAsync(async (req, res, next) => {
+    // Start upload certificate
     const { buffer: jpegBuffer, originalname } = req.file;
 
     if (!jpegBuffer) {
@@ -85,6 +88,18 @@ exports.uploadCerti = catchAsync(async (req, res, next) => {
     if (!pdfUrl) {
         return next(new AppError("Upload failed", 405));
     }
+    // End upload certificate
+
+    // Start add pdf to EarnerAchievements
+    const { achievementId, earnerId } = req.params;
+    const earnerAchieve = await EarnerAchievements.update(
+        { certUrl: pdfUrl },
+        {
+            where: { achievementId, earnerId },
+        },
+    );
+    // End add pdf to EarnerAchievements
+
     res.json({
         message: "File uploaded successfully",
         pdfUrl,
