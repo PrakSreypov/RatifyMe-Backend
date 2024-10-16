@@ -7,17 +7,11 @@ const {
     AchievementTypes,
     Criterias: CriteriaModel,
 } = require("../../models");
-const AWS = require("aws-sdk");
+
 const sequelize = require("../../configs/database");
 const catchAsync = require("../../utils/catchAsync");
 const AppError = require("../../utils/appError");
-
-// Configure AWS S3
-const s3 = new AWS.S3({
-    accessKeyId: process.env.AWS_ACCESS_KEY,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-    region: process.env.AWS_BUCKET_REGION,
-});
+const s3 = require("../../configs/s3")
 
 // Upload PDF to S3
 const uploadToS3 = async (fileBuffer, fileName, mimetype) => {

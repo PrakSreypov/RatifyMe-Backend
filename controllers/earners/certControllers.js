@@ -1,18 +1,11 @@
 const sharp = require("sharp");
 const PDFDocument = require("pdfkit");
-const AWS = require("aws-sdk");
 
 const catchAsync = require("../../utils/catchAsync");
 const AppError = require("../../utils/appError");
+const s3 = require("../../configs/s3")
 
 const EarnerAchievements = require("../../models/EarnerAchievements");
-
-// Configure AWS S3
-const s3 = new AWS.S3({
-    accessKeyId: process.env.AWS_ACCESS_KEY,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-    region: process.env.AWS_BUCKET_REGION,
-});
 
 // Function to convert SVG to PDF using Sharp and PDFKit
 const convertSvgToPdf = async (jpegBuffer) => {
