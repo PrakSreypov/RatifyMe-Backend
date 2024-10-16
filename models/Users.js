@@ -70,9 +70,6 @@ const Users = sequelize.define(
                     args: [3, 30],
                     msg: "Username must be between 3 and 30 characters long.",
                 },
-                isAlphanumeric: {
-                    msg: "Username can only contain letters and numbers.",
-                },
                 noSpaces(value) {
                     if (/\s/.test(value)) {
                         throw new Error("Username cannot contain spaces.");

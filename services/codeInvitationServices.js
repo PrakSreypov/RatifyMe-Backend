@@ -3,7 +3,7 @@ const { inviteCodeTemplate } = require("../public/templates/inviteCodeTemplate")
 const { InviteUsers, Users } = require("../models");
 const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/appError");
-const { Op } = require("sequelize");
+const { Op, where } = require("sequelize");
 const { generateVerificationCode } = require("../utils/auth/generateVerificationCode");
 
 class CodeInvitationService {
@@ -38,6 +38,39 @@ class CodeInvitationService {
 
         const inviterCodeValues = inviter[this.inviterCode];
         const inviterNameValue = inviter[this.inviterName];
+
+        // Check if the inviteEmail exists and if the invite has not yet expired
+        const existGuest = await InviteUsers.findOne({
+            where: {
+                inviteEmail: email,
+                inviteExpires: { [Op.gt]: Date.now() },
+                inviterCode: inviterCodeValues,
+            },
+        });
+
+        if (existGuest) {
+            return next(new AppError("This email has already been invited."));
+        }
+
+        const existAccount = await Users.findOne({ where: { email: email } });
+
+        if (existAccount) {
+            let errorMessage;
+
+            // Determine the error message based on the roleId
+            switch (existAccount.roleId) {
+                case 3:
+                    errorMessage = "Account already an issuer";
+                    break;
+                case 4:
+                    errorMessage = "Account already an earner";
+                    break;
+                default:
+                    errorMessage = "Account already has a specific role";
+            }
+
+            return next(new AppError(errorMessage));
+        }
 
         // Create an invitation in the database
         const guest = await InviteUsers.create({
@@ -82,6 +115,7 @@ class CodeInvitationService {
             const codeExists = await InviteUsers.findOne({ where: { inviterCode } });
             const emailExists = await InviteUsers.findOne({ where: { inviteEmail } });
 
+            // Handle the case where both inviter code and email are invalid
             if (!codeExists && !emailExists) {
                 return next(
                     new AppError(
@@ -89,21 +123,28 @@ class CodeInvitationService {
                         400,
                     ),
                 );
-            } else if (!codeExists) {
+            }
+
+            // Handle case where only the inviter code is invalid
+            if (!codeExists) {
                 return next(new AppError(`The inviter code '${inviterCode}' is invalid.`, 400));
-            } else if (!emailExists) {
+            }
+
+            // Handle case where only the invite email is invalid or expired
+            if (!emailExists) {
                 return next(
-                    new AppError(
-                        `The invitation for email '${inviteEmail}' has expired or is invalid.`,
-                        400,
-                    ),
+                    new AppError(`The invitation for email '${inviteEmail}' is invalid.`, 400),
                 );
             }
+
+            return next(
+                new AppError(`The invitation for email '${inviteEmail}' has expired.`, 400),
+            );
         }
 
         // Retrieve inviter's info from Institutions based on the valid inviterCode
         const inviter = await this.inviterModel.findOne({
-            where: { code: inviterCode }, // Assuming 'code' is the inviter's field in Institutions model
+            where: { code: inviterCode },
         });
 
         // Check if inviter info is found
@@ -123,7 +164,10 @@ class CodeInvitationService {
 
                 if (existingIssuer) {
                     return next(
-                        new AppError("Your account already exists in this institution.", 400),
+                        new AppError(
+                            "Your account already exists in this institution. Go to login to join your new issuer invitation.",
+                            400,
+                        ),
                     );
                 }
                 await this.guestModel.create({
@@ -137,7 +181,10 @@ class CodeInvitationService {
 
                 if (existingIssuer) {
                     return next(
-                        new AppError("Your account already exists in this institution.", 400),
+                        new AppError(
+                            "Your account already exists in this institution. Go to login to join your new institution invitation.",
+                            400,
+                        ),
                     );
                 }
                 await this.guestModel.create({
