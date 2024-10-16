@@ -41,13 +41,4 @@ const EarnerAchievements = sequelize.define(
     },
 );
 
-// Adding a beforeSave hook to check the status and set claimedOn
-EarnerAchievements.beforeSave(async (earnerAchievement) => {
-    // Check if the status is true and claimedOn is not already set
-    if (earnerAchievement.status === true && !earnerAchievement.claimedOn) {
-        // Set claimedOn to the current date
-        earnerAchievement.claimedOn = new Date.now();
-    }
-});
-
 module.exports = EarnerAchievements;

@@ -91,7 +91,6 @@ badgeClassControllers.getBadgeClassesByEarnerId = catchAsync(async (req, res) =>
                         required: true,
                         through: {
                             model: EarnerAchievements,
-                            where: { status: false },
                         },
                     },
                 ],
