@@ -87,7 +87,28 @@ badgeClassControllers.getBadgeClassesByEarnerId = catchAsync(async (req, res) =>
 
     // Find all BadgeClasses that are associated with Achievements for the specified earnerId
     const badgeClasses = await BadgeClasses.findAll({
-        include: associated,
+        include: [
+            {
+                model: Achievements,
+                include: [
+                    {
+                        model: Earners,
+                        where: { id: earnerId },
+                        required: true,
+                        through: {
+                            model: EarnerAchievements,
+                            where: { status: false },
+                        },
+                    },
+                ],
+                required: true,
+            },
+            {
+                model: Issuers,
+                include: [{ model: Users, attributes: ["firstName", "lastName"] }],
+            },
+            { model: Institutions, attributes: ["institutionName"] },
+        ],
     });
 
     if (!badgeClasses || badgeClasses.length === 0) {
@@ -102,7 +123,28 @@ badgeClassControllers.getBadgeClaimByEarner = catchAsync(async (req, res) => {
 
     // Find all BadgeClasses that are associated with Achievements for the specified earnerId
     const badgeClasses = await BadgeClasses.findAll({
-        include: associated,
+        include: [
+            {
+                model: Achievements,
+                include: [
+                    {
+                        model: Earners,
+                        where: { id: earnerId },
+                        required: true,
+                        through: {
+                            model: EarnerAchievements,
+                            where: { status: true },
+                        },
+                    },
+                ],
+                required: true,
+            },
+            {
+                model: Issuers,
+                include: [{ model: Users, attributes: ["firstName", "lastName"] }],
+            },
+            { model: Institutions, attributes: ["institutionName"] },
+        ],
     });
 
     if (!badgeClasses || badgeClasses.length === 0) {

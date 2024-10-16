@@ -21,14 +21,14 @@ app.use("/api/v1/subscriptions/webhook", express.raw({ type: "application/json" 
 // Global Middleware
 app.use(express.json());
 const allowedDomains = [
-    process.env.CLIENT_BASE_URL, 
-    'https://www.ratifyme.digital',   
+    process.env.CLIENT_BASE_URL,
+    'https://www.ratifyme.digital',
 ];
 
 const corsOptions = {
     origin: (origin, callback) => {
         if (!origin) return callback(null, true); // Allow requests with no origin (like curl or mobile apps)
-        
+
         if (allowedDomains.includes(origin)) {
             callback(null, true); // Allow the origin if it's in the allowedDomains list
         } else {
@@ -36,7 +36,7 @@ const corsOptions = {
         }
     },
     credentials: true, // Allow credentials (cookies, HTTP authentication)
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // Allow specific methods
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'], // Allow specific methods
     allowedHeaders: ['Content-Type', 'Authorization'], // Allow specific headers
 };
 
