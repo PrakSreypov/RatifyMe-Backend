@@ -43,10 +43,9 @@ const InviteUsers = sequelize.define("InviteUsers", {
     inviteExpires: {
         type: DataTypes.DATE,
         defaultValue: () => {
-            // Calculate 30 days from now
+            // Calculate 10mn from now
             const currentDate = new Date();
-            return new Date(currentDate.setDate(currentDate.getDate() + 30)); // 30 days
-            // return new Date(currentDate.getTime() + 5 * 60 * 1000); // 5mn 
+            return new Date(currentDate.getTime() + 10 * 60 * 1000); // 10mn 
         },
     },
     status: {

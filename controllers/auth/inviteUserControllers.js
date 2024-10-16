@@ -38,30 +38,6 @@ const inviteEarnerService = new CodeInvitationService(
     earnerModel,
 );
 
-// // Controller to handle inviting issuers
-// exports.inviteIssuer = (req, res, next) => {
-//     inviteIssuerService.sendInvitation(req, res, next);
-// };
-
-// exports.inviteEarner = (req, res, next) => {
-//     inviteEarnerService.sendInvitation(req, res, next);
-// };
-
-// exports.verifyInvitation = (req, res, next) => {
-//     const { as } = req.query;
-
-//     if (as === "issuer") {
-//         inviteIssuerService.verifyInvitation(req, res, next);
-//     } else if (as === "earner") {
-//         inviteEarnerService.verifyInvitation(req, res, next);
-//     } else {
-//         return res.status(400).json({
-//             message:
-//                 "Invalid role. Please specify 'as' query parameter as either 'issuer' or 'earner'.",
-//         });
-//     }
-// };
-
 class InviteUserControllers extends BaseController {
     constructor() {
         super(InviteUsers, [], [Roles]);
