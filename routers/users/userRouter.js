@@ -3,7 +3,7 @@ const router = express.Router();
 const { upload } = require("../../app");
 
 const userControllers = require("../../controllers/users/userControllers");
-const imageController = require("../../controllers/users/imageControllers");
+const imageController = require("../../controllers/users/userImageControllers");
 
 // User-related routes
 router
