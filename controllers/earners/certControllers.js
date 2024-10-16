@@ -102,6 +102,6 @@ exports.uploadCerti = catchAsync(async (req, res, next) => {
 
     res.json({
         message: "File uploaded successfully",
-        pdfUrl,
+        uploadCert : earnerAchieve.certUrl,
     });
 });
