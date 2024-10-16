@@ -85,19 +85,20 @@ class BaseController {
             .search(); // Apply pagination
 
         // Execute the query with associated models included
-        const records = await apiFeature.execute({
-            include: this.associations,
-        });
+        const totalRecords = await this.Model.count(); // Total records before pagination
+        const records = await apiFeature.execute({ include: this.associations });
 
-        return records; // Return the data to be handled by the derived class
+        return { totalRecords, records };
+
     };
 
     // Default getAll method that can be overridden
     getAll = catchAsync(async (req, res, next) => {
-        const records = await this.getAllWithApiFeatures(req);
+        const {records, totalRecords} = await this.getAllWithApiFeatures(req);
 
         res.status(200).json({
             status: "success",
+            total: totalRecords,
             results: records.length,
             data: records,
         });
