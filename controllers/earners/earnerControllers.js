@@ -14,6 +14,7 @@ const Addresses = require("../../models/Addresses");
 const Issuers = require("../../models/Issuers");
 const EarnerAchievements = require("../../models/EarnerAchievements");
 const catchAsync = require("../../utils/catchAsync");
+const { FieldOfStudies } = require("../../models");
 
 // Set up the base controller
 const earnerControllers = new BaseControllers(
@@ -26,7 +27,7 @@ const earnerControllers = new BaseControllers(
         },
         {
             model: AcademicBackgrounds,
-            include: [AcademicLevels, Institutions],
+            include: [AcademicLevels, Institutions, FieldOfStudies, ],
         },
         {
             model: Achievements,
