@@ -46,7 +46,15 @@ app.use(cors(corsOptions));
 // app.options('*', cors(corsOptions));
 // app.use(cors({ origin: process.env.CLIENT_BASE_URL, credentials: true }));
 app.use(cookieParser());
-// app.use(helmet());
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'", "https://www.ratifyme.digital"],
+            scriptSrc: ["'self'", "'unsafe-inline'"]
+        }
+    }
+}));
+
 
 if (process.env.NODE_ENV === "development") {
     app.use(morgan("dev"));
