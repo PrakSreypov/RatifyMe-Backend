@@ -4,7 +4,7 @@ stages:
 
 variables:
     NODE_VERSION: "21"
-    BRANCH: "develop"
+    BRANCH: "feature/testCors"
 
 before_script:
     # This will run before each job in all stages
@@ -57,7 +57,7 @@ Build:
         paths:
             - key.pem
     only:
-        - develop
+        - feature/testCors
 
 Deploy:
     stage: deploy
@@ -72,4 +72,4 @@ Deploy:
             npm run pm2 &&
             pm2 status"
     only:
-        - develop
+        - feature/testCors
