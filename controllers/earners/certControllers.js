@@ -85,15 +85,16 @@ exports.uploadCerti = catchAsync(async (req, res, next) => {
 
     // Start add pdf to EarnerAchievements
     const { achievementId, earnerId } = req.params;
-    const earnerAchieve = await EarnerAchievements.update(
-        { certUrl: pdfUrl },
-        {
-            where: { achievementId, earnerId },
-        },
-    );
-    // End add pdf to EarnerAchievements
+    const earnerAchieve = await EarnerAchievements.findOne({ where: { achievementId, earnerId }})
+    if (!earnerAchieve){
+        return next(new AppError("There's no earner achivement to update", 400))
+    }
+    earnerAchieve.update({
+        certUrl: pdfUrl
+    })
+    earnerAchieve.save()
 
-    res.json({
+    res.status(200).json({
         message: "File uploaded successfully",
         uploadCert : earnerAchieve.certUrl,
     });
