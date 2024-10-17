@@ -20,7 +20,7 @@ router
 router.post("/instiImage", upload.single("institutionImg"), instituImageControllers.createOne);
 
 router
-    .route("instiImage/:institutionId")
+    .route("/instiImage/:id")
     .get(instituImageControllers.getOne)
     .put(upload.single("institutionImg"), instituImageControllers.updateImage)
     .delete(instituImageControllers.deleteImage);
