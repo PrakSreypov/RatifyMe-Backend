@@ -8,9 +8,16 @@ const Users = require("../../models/Users");
 const Earners = require("../../models/Earners");
 const BaseControllers = require("../../utils/baseControllers");
 const EarnerAchievements = require("../../models/EarnerAchievements");
-
 const catchAsync = require("../../utils/catchAsync");
-const s3 = require("../../configs/s3")
+const ApiFeatures = require("../../utils/apiFeature");
+
+const AWS = require("aws-sdk");
+
+const s3 = new AWS.S3({
+    accessKeyId: process.env.AWS_ACCESS_KEY,
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+    region: process.env.AWS_BUCKET_REGION,
+});
 
 // Define the associated models
 const associated = [
@@ -79,7 +86,38 @@ const badgeClassControllers = new BadgeClassControllers();
 badgeClassControllers.getBadgeClassesByEarnerId = catchAsync(async (req, res) => {
     const { earnerId } = req.params;
 
-    // Find all BadgeClasses that are associated with Achievements for the specified earnerId
+    // Initialize ApiFeatures with query parameters and the BadgeClasses model
+    const apiFeature = new ApiFeatures(req.query, BadgeClasses)
+        .filtering()
+        .sorting()
+        .limitFields()
+        .pagination()
+        .search();
+
+    // Log where conditions to debug
+    console.log("Where conditions for totalRecords:", apiFeature.query.where);
+
+    // Count total records based on filters applied (without pagination)
+    const totalRecords = await BadgeClasses.findAll({
+        include: [
+            {
+                model: Achievements,
+                include: [
+                    {
+                        model: Earners,
+                        where: { id: earnerId },
+                        required: true,
+                        through: {
+                            model: EarnerAchievements,
+                        },
+                    },
+                ],
+                required: true,
+            },
+        ],
+    });
+
+    // Build the query for fetching BadgeClasses with pagination (limit & offset applied)
     const badgeClasses = await BadgeClasses.findAll({
         include: [
             {
@@ -102,20 +140,60 @@ badgeClassControllers.getBadgeClassesByEarnerId = catchAsync(async (req, res) =>
             },
             { model: Institutions, attributes: ["institutionName"] },
         ],
+        ...apiFeature.query,
     });
+
+    // Log the fetched badgeClasses for debugging
+    console.log("Fetched badgeClasses:", badgeClasses.length, badgeClasses);
 
     if (!badgeClasses || badgeClasses.length === 0) {
         return res.status(404).json({ message: "No BadgeClasses found for this earner" });
     }
 
-    res.json({ status: "success", badgeClasses });
+    // Send a successful response with the results and totalRecords (not affected by pagination)
+    res.json({
+        status: "success",
+        totalRecords: totalRecords.length,
+        results: badgeClasses.length,
+        badgeClasses,
+    });
 });
 
 badgeClassControllers.getBadgeClaimByEarner = catchAsync(async (req, res) => {
     const { earnerId } = req.params;
 
-    // Find all BadgeClasses that are associated with Achievements for the specified earnerId
-    const badgeClasses = await BadgeClasses.findAll({
+    // Initialize ApiFeatures with the model and query parameters
+    const apiFeature = new ApiFeatures(req.query, BadgeClasses)
+        .filtering()
+        .sorting()
+        .limitFields()
+        .pagination()
+        .search();
+
+    // Count total records based on filters applied
+    const totalRecords = await BadgeClasses.count({
+        include: [
+            {
+                model: Achievements,
+                include: [
+                    {
+                        model: Earners,
+                        where: { id: earnerId },
+                        required: true,
+                        through: {
+                            model: EarnerAchievements,
+                            where: { status: true },
+                        },
+                    },
+                ],
+                required: true,
+            },
+        ],
+    });
+
+    // Build the final query with necessary includes
+    const finalQuery = {
+        ...apiFeature.query,
         include: [
             {
                 model: Achievements,
@@ -138,13 +216,22 @@ badgeClassControllers.getBadgeClaimByEarner = catchAsync(async (req, res) => {
             },
             { model: Institutions, attributes: ["institutionName"] },
         ],
-    });
+    };
+
+    // Find all BadgeClasses based on the final query
+    const badgeClasses = await BadgeClasses.findAll(finalQuery);
 
     if (!badgeClasses || badgeClasses.length === 0) {
         return res.status(404).json({ message: "No BadgeClasses found for this earner" });
     }
 
-    res.json({ status: "success", badgeClasses });
+    // Send a successful response with the results
+    res.json({
+        status: "success",
+        totalRecords,
+        results: badgeClasses.length,
+        badgeClasses,
+    });
 });
 
 module.exports = badgeClassControllers;
