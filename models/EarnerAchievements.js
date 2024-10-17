@@ -4,6 +4,11 @@ const { DataTypes } = require("sequelize");
 const EarnerAchievements = sequelize.define(
     "EarnerAchievements",
     {
+        id: {
+            type: DataTypes.INTEGER,
+            autoIncrement: true,
+            primaryKey: true,
+        },
         status: {
             type: DataTypes.BOOLEAN,
             allowNull: false,

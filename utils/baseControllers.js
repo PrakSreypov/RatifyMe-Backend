@@ -80,7 +80,8 @@ class BaseController {
             .filtering() // Apply filtering
             .sorting() // Apply sorting
             .limitFields() // Apply field limiting
-            .pagination(); // Apply pagination
+            .pagination()
+            .search();
 
         // Count total records based on filters
         const totalRecords = await this.Model.count({
