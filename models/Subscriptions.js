@@ -1,6 +1,7 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../configs/database");
 const ServicePlans = require("./ServicePlans");
+const Institutions = require("./Institutions")
 
 const Subscriptions = sequelize.define(
     "Subscriptions",
@@ -10,6 +11,9 @@ const Subscriptions = sequelize.define(
             allowNull: false,
             autoIncrement: true,
             primaryKey: true,
+        },
+        name: {
+            type: DataTypes.STRING
         },
         institutionId: {
             type: DataTypes.INTEGER,
@@ -120,5 +124,34 @@ const Subscriptions = sequelize.define(
         },
     },
 );
+
+
+Subscriptions.addHook("beforeCreate", async (subscriptions, options) => {
+    const institution = await Institutions.findByPk(subscriptions.institutionId);
+    if (!institution) {
+        throw new Error("User does not exist. Cannot create institution.");
+    }
+
+    // Properly format the name by adding a space between firstName and lastName
+    subscriptions.name = institution.institutionName
+});
+
+// After syncing the database, update all existing earners' names based on the Users model
+Subscriptions.addHook("afterSync", async (options) => {
+    const subscriptions = await Subscriptions.findAll({
+        include: {
+            model: Institutions,
+            as: 'Institution', 
+        },
+    });
+
+    // Iterate over each subscription and update the name field
+    for (const subscription of subscriptions) {
+        if (subscription.Institution && subscription.name !== subscription.Institution.institutionName) {
+            subscription.name = subscription.Institution.institutionName;
+            await subscription.save();  
+        }
+    }
+});
 
 module.exports = Subscriptions;
