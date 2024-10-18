@@ -1,7 +1,6 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../configs/database");
 const Users = require("./Users");
-const AcademicBackgrounds = require("./AcademicBackgrounds");
 
 const Earners = sequelize.define("Earners", {
     id: {
@@ -69,7 +68,7 @@ Earners.addHook("afterSync", async (options) => {
     const earners = await Earners.findAll({
         include: {
             model: Users,
-            as: 'User',  // Assuming you have associations set up properly
+            as: 'User', 
         },
     });
 
