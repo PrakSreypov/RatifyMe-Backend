@@ -2,12 +2,16 @@ const { DataTypes } = require("sequelize");
 const sequelize = require("../configs/database");
 const Users = require("./Users");
 const AcademicBackgrounds = require("./AcademicBackgrounds");
+
 const Earners = sequelize.define("Earners", {
     id: {
         autoIncrement: true,
         primaryKey: true,
         type: DataTypes.INTEGER,
         allowNull: false,
+    },
+    name: {
+        type: DataTypes.STRING
     },
     userId: {
         type: DataTypes.INTEGER,
@@ -49,24 +53,35 @@ const Earners = sequelize.define("Earners", {
     },
 });
 
-// Earners.addHook("beforeCreate", async (earner, options) => {
-//     const user = await Users.findByPk(earner.userId);
-//     if (!user) {
-//         throw new Error("User does not exists. Cannot create earner.");
-//     }
-//     if (user.roleId !== 4) {
-//         throw new Error("User must have the role of an earner (roleID = 4) to be associate as an earner.");
-//     }
+// Before creating a new Earner, set the name based on the associated user's firstName and lastName
+Earners.addHook("beforeCreate", async (earner, options) => {
+    const user = await Users.findByPk(earner.userId);
+    if (!user) {
+        throw new Error("User does not exist. Cannot create earner.");
+    }
 
-//     const academicBackground = await AcademicBackgrounds.findByPk(earner.academicBackgroundId);
-//     if (!academicBackground) {
-//         throw new Error("Academic background does not exist.");
-//     }
+    // Properly format the name by adding a space between firstName and lastName
+    earner.name = `${user.firstName} ${user.lastName}`;
+});
 
-//     // Ensure that the userId in the Earners table matches the recipientId in the AcademicBackgrounds table
-//     if (academicBackground.userId !== earner.userId) {
-//         throw new Error("The userId in the Earner record must match the recipientId in the AcademicBackground record.");
-//     }
-// });
+// After syncing the database, update all existing earners' names based on the Users model
+Earners.addHook("afterSync", async (options) => {
+    const earners = await Earners.findAll({
+        include: {
+            model: Users,
+            as: 'User',  // Assuming you have associations set up properly
+        },
+    });
+
+    // Iterate over each earner and update the name field
+    for (const earner of earners) {
+        if (earner.User && `${earner.User.firstName} ${earner.User.lastName}` !== earner.name) {
+            earner.name = `${earner.User.firstName} ${earner.User.lastName}`;
+
+            await earner.save();  
+        }
+    }
+});
+
 
 module.exports = Earners;
