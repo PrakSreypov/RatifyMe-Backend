@@ -67,12 +67,6 @@ const Institutions = sequelize.define(
         },
         institutionWebsiteUrl: {
             type: DataTypes.STRING,
-            allowNull: true,
-            validate: {
-                isUrl: {
-                    msg: "Please provide a valid URL.",
-                },
-            },
         },
         institutionProfileImage: {
             type: DataTypes.STRING,

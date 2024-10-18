@@ -1,16 +1,11 @@
 const sharp = require("sharp");
 const PDFDocument = require("pdfkit");
-const AWS = require("aws-sdk");
 
 const catchAsync = require("../../utils/catchAsync");
 const AppError = require("../../utils/appError");
+const s3 = require("../../configs/s3")
 
-// Configure AWS S3
-const s3 = new AWS.S3({
-    accessKeyId: process.env.AWS_ACCESS_KEY,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-    region: process.env.AWS_BUCKET_REGION,
-});
+const EarnerAchievements = require("../../models/EarnerAchievements");
 
 // Function to convert SVG to PDF using Sharp and PDFKit
 const convertSvgToPdf = async (jpegBuffer) => {
@@ -70,6 +65,7 @@ const uploadToS3 = async (pdfBuffer, fileName) => {
 
 // Endpoint to handle file upload and processing
 exports.uploadCerti = catchAsync(async (req, res, next) => {
+    // Start upload certificate
     const { buffer: jpegBuffer, originalname } = req.file;
 
     if (!jpegBuffer) {
@@ -85,8 +81,21 @@ exports.uploadCerti = catchAsync(async (req, res, next) => {
     if (!pdfUrl) {
         return next(new AppError("Upload failed", 405));
     }
-    res.json({
+    // End upload certificate
+
+    // Start add pdf to EarnerAchievements
+    const { achievementId, earnerId } = req.params;
+    const earnerAchieve = await EarnerAchievements.findOne({ where: { achievementId, earnerId }})
+    if (!earnerAchieve){
+        return next(new AppError("There's no earner achivement to update", 400))
+    }
+    earnerAchieve.update({
+        certUrl: pdfUrl
+    })
+    earnerAchieve.save()
+
+    res.status(200).json({
         message: "File uploaded successfully",
-        pdfUrl,
+        uploadCert : earnerAchieve.certUrl,
     });
 });

@@ -1,18 +1,11 @@
 // Utils module
 require("dotenv").config();
 const { Op } = require("sequelize");
+const { v4 } = require("uuid");
 const AppError = require("./appError");
 const catchAsync = require("./catchAsync");
 const ApiFeatures = require("./apiFeature");
-
-const AWS = require("aws-sdk");
-
-// Configure AWS S3
-const s3 = new AWS.S3({
-    accessKeyId: process.env.AWS_ACCESS_KEY,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-    region: process.env.AWS_BUCKET_REGION,
-});
+const s3 = require("../configs/s3")
 
 /**
  * @class BaseController : CRUD default controller
@@ -126,10 +119,10 @@ class BaseController {
         if (req.file) {
             const imageFile = req.file;
             const { originalname, mimetype, buffer } = imageFile;
-
+            const uniqueFileName = `${v4()}_${originalname}`;
             const params = {
                 Bucket: process.env.AWS_BUCKET_NAME,
-                Key: `UserProfile/${Date.now()}_${originalname}`,
+                Key: `UserProfile/${uniqueFileName}`,
                 Body: buffer,
                 ContentType: mimetype,
             };
@@ -255,9 +248,10 @@ class BaseController {
 
         // Upload the new image to S3
         const { originalname, mimetype, buffer } = imageFile;
+        const uniqueFileName = `${v4()}_${originalname}`;
         const uploadParams = {
             Bucket: process.env.AWS_BUCKET_NAME,
-            Key: `UserProfile/${originalname}`,
+            Key: `UserProfile/${uniqueFileName}`,
             Body: buffer,
             ContentType: mimetype,
         };
@@ -312,9 +306,7 @@ class BaseController {
         // Set the image field to null or delete the field as per your requirement
         record[this.imageField] = null; // or `delete record[this.imageField];`
         await record.save(); // Save the updated record
-        next();
-
-        // this.sendResponse(res, 200, null, "Image successfully deleted");
+        this.sendResponse(res, 200, null, "Image successfully deleted");
     });
 
     // End Delete image

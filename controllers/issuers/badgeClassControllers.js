@@ -8,15 +8,9 @@ const Users = require("../../models/Users");
 const Earners = require("../../models/Earners");
 const BaseControllers = require("../../utils/baseControllers");
 const EarnerAchievements = require("../../models/EarnerAchievements");
+
 const catchAsync = require("../../utils/catchAsync");
-
-const AWS = require("aws-sdk");
-
-const s3 = new AWS.S3({
-    accessKeyId: process.env.AWS_ACCESS_KEY,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-    region: process.env.AWS_BUCKET_REGION,
-});
+const s3 = require("../../configs/s3")
 
 // Define the associated models
 const associated = [
