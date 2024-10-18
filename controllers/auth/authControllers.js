@@ -258,7 +258,7 @@ class AuthControllers extends BaseController {
             return next(new AppError("Your current password is wrong.", 401));
         }
 
-        user.password = req.body.password;
+        user.password = req.body.newPassword;
         user.passwordConfirm = req.body.passwordConfirm;
         await user.save({ validate: true });
 
