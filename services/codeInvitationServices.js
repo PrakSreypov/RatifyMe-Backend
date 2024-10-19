@@ -3,7 +3,7 @@ const { inviteCodeTemplate } = require("../public/templates/inviteCodeTemplate")
 const { InviteUsers, Users } = require("../models");
 const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/appError");
-const { Op, where } = require("sequelize");
+const { Op } = require("sequelize");
 const { generateVerificationCode } = require("../utils/auth/generateVerificationCode");
 
 class CodeInvitationService {
@@ -52,13 +52,17 @@ class CodeInvitationService {
             return next(new AppError("This email has already been invited."));
         }
 
-        const existAccount = await Users.findOne({ where: { email: email } });
+        const existAccount = await Users.findOne({ where: { email: email, isVerified: 1 } });
 
         if (existAccount) {
             let errorMessage;
 
             // Determine the error message based on the roleId
             switch (existAccount.roleId) {
+                case 1:
+                case 2:
+                    errorMessage = "Account already has a specific role";
+                    break;
                 case 3:
                     errorMessage = "Account already an issuer";
                     break;
@@ -66,7 +70,7 @@ class CodeInvitationService {
                     errorMessage = "Account already an earner";
                     break;
                 default:
-                    errorMessage = "Account already has a specific role";
+                    errorMessage = "Unable to invite this account!";
             }
 
             return next(new AppError(errorMessage));
@@ -195,6 +199,11 @@ class CodeInvitationService {
             }
         }
 
+        const isAccCreated = await Users.findOne({ email: guest.inviteEmail, isVerified: true });
+        if (isAccCreated) {
+            guest.isAccountCreated = true;
+        }
+
         // Mark the invitation as verified
         guest.status = true;
         guest.updatedAt = new Date();
@@ -205,6 +214,57 @@ class CodeInvitationService {
             inviter: inviter,
             guest: guest,
             user: existingUser,
+        });
+    });
+
+    resendInvitation = catchAsync(async (req, res, next) => {
+        const { email } = req.body; // Email to resend invitation
+        const inviterId = req.params[this.inviterParamName];
+
+        // Find inviter by ID
+        const inviter = await this.inviterModel.findByPk(inviterId);
+
+        if (!inviter) {
+            return next(new AppError("Inviter not found", 404));
+        }
+
+        // Find the invitation associated with the email and inviter
+        const guest = await InviteUsers.findOne({
+            where: {
+                inviteEmail: email,
+                inviterCode: inviter[this.inviterCode],
+            },
+        });
+
+        if (!guest) {
+            return next(new AppError("No valid invitation found for this email.", 404));
+        }
+
+        // Update the expiration date of the invitation
+        const newExpirationDate = new Date();
+        // Set new expiration (7 days later)
+        newExpirationDate.setDate(newExpirationDate.getDate() + 7);
+
+        guest.inviteExpires = newExpirationDate;
+        await guest.save();
+
+        // Prepare the invite email template dynamically
+        const emailTemplate = inviteCodeTemplate
+            .replace(/\[Institution Name\]/g, inviter[this.inviterName])
+            .replace("[Badge Platform]", "RatifyMe")
+            .replace("[INVITE CODE]", inviter[this.inviterCode])
+            .replace("[SIGNUP_LINK]", this.signupLink)
+            .replace("[Badge Platform Name]", "RatifyMe");
+
+        // Send the updated invitation email
+        const emailService = new EmailService();
+        await emailService.sendInviteCode(email, emailTemplate);
+
+        // Return success response
+        res.status(200).json({
+            message: `Invitation resent to ${email} successfully with an updated expiration date!`,
+            guest,
+            inviter,
         });
     });
 }

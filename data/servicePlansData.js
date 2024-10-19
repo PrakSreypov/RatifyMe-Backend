@@ -5,7 +5,7 @@ const servicePlansData = [
     {
         name: "Free Starter",
         description: "A free plan with limited access to badge platform features.",
-        duration: 0,
+        duration: 1,
         price: 0.0,
         badgeLimit: 5,
         peopleLimit: 10,

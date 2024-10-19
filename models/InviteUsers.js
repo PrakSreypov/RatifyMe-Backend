@@ -45,13 +45,15 @@ const InviteUsers = sequelize.define("InviteUsers", {
         defaultValue: () => {
             // Calculate 10mn from now
             const currentDate = new Date();
-            return new Date(currentDate.getTime() + 10 * 60 * 1000); // 10mn 
+            return new Date(currentDate.setDate(currentDate.getDate() + 7)); // 7 days
+            // return new Date(currentDate.getTime() + 1 * 60 * 1000);
         },
     },
     status: {
         type: DataTypes.BOOLEAN,
         defaultValue: false,
     },
+    isAccountCreated: DataTypes.BOOLEAN,
 });
 
 module.exports = InviteUsers;
