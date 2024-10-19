@@ -13,56 +13,70 @@ class ApiFeature {
         this.model = model;
     }
 
-    // Filtering logic
     filtering() {
         const queryObj = { ...this.queryString };
         const excludedFields = ["page", "sort", "limit", "page", "search"];
         excludedFields.forEach((el) => delete queryObj[el]);
-
+    
         const filters = {};
-        Object.keys(queryObj).forEach((page) => {
-            if (typeof queryObj[page] === "object") {
-                for (const op in queryObj[page]) {
-                    const value = queryObj[page][op];
-                    if (op === "gte") filters[page] = { [Op.gte]: value };
-                    else if (op === "gt") filters[page] = { [Op.gt]: value };
-                    else if (op === "lte") filters[page] = { [Op.lte]: value };
-                    else if (op === "lt") filters[page] = { [Op.lt]: value };
+        Object.keys(queryObj).forEach((field) => {
+            if (typeof queryObj[field] === "object") {
+                for (const op in queryObj[field]) {
+                    const value = queryObj[field][op];
+                    if (op === "gte") filters[field] = { [Op.gte]: value };
+                    else if (op === "gt") filters[field] = { [Op.gt]: value };
+                    else if (op === "lte") filters[field] = { [Op.lte]: value };
+                    else if (op === "lt") filters[field] = { [Op.lt]: value };
                 }
             } else {
                 filters[field] = queryObj[field];
             }
         });
-
-        // Apply search logic if search query is present
+    
+        // Apply search logic only if the search query is present and fields exist in the model
         if (this.queryString.search) {
-            filters[Op.or] = [
-                { id: { [Op.like]: `%${this.queryString.search}%` } },
-                { name: { [Op.like]: `%${this.queryString.search}%` } },
-            ];
+            const searchConditions = [];
+    
+            if (this.model.rawAttributes.name) {
+                searchConditions.push({ name: { [Op.like]: `%${this.queryString.search}%` } });
+            }
+    
+            if (this.model.rawAttributes.institutionName) {
+                searchConditions.push({institutionName: { [Op.like]: `%${this.queryString.search}%` } });
+            }
+    
+            if (searchConditions.length > 0) {
+                filters[Op.or] = searchConditions;
+            }
         }
+    
         this.query.where = filters;
         return this;
     }
-
-    // Sorting logic
+    
     sorting() {
         if (this.queryString.sort) {
             const sortBy = this.queryString.sort.split(",").map((el) => {
-                let field = el;
-                let order = "ASC";
-                if (el.startsWith("-")) {
-                    field = el.slice(1);
-                    order = "DESC";
+                let field = el.startsWith("-") ? el.slice(1) : el;
+                const order = el.startsWith("-") ? "DESC" : "ASC";
+    
+                // Check if the field exists in rawAttributes
+                if (this.model.rawAttributes[field]) {
+                    // Return valid field and order
+                    return [field, order]; 
                 }
-                return [field, order];
-            });
-            this.query.order = sortBy;
+                return null; 
+            }).filter(Boolean);
+    
+            this.query.order = sortBy.length ? sortBy : [["institutionName", "DESC"]]; 
         } else {
-            this.query.order = [["name", "ASC"]];
+            this.query.order = [["institutionName", "DESC"]]; 
         }
+    
         return this;
     }
+    
+    
 
     // Field limiting logic
     limitFields() {
