@@ -1,74 +1,82 @@
 const { Op } = require("sequelize");
 
+
 /**
  *
- * @param queryString : take operation from endpoint and apply by output
+ * @param queryString : take operation from endpoint and apply by output 
  * @class ApiFeature
  */
 class ApiFeature {
     constructor(queryString, model) {
-        this.query = {}; // Start with an empty query object
-        this.queryString = queryString; // Holds req.query
-        this.model = model; // The Sequelize model to query
+        this.query = {}; 
+        this.queryString = queryString; 
+        this.model = model;
     }
 
-    // Filtering logic
     filtering() {
-        const queryObj = { ...this.queryString }; // req.query is passed as queryString
-        const excludedFields = ["page", "sort", "limit", "fields", "search"]; // Exclude 'search' in filtering
+        const queryObj = { ...this.queryString };
+        const excludedFields = ["page", "sort", "limit", "page", "search"];
         excludedFields.forEach((el) => delete queryObj[el]);
-
-        // Advanced filtering
+    
         const filters = {};
-
-        // Loop through each query object key and handle Sequelize operators
         Object.keys(queryObj).forEach((field) => {
             if (typeof queryObj[field] === "object") {
-                // Handle nested objects like duration[gt]
                 for (const op in queryObj[field]) {
                     const value = queryObj[field][op];
-
-                    // Map query string operators (gte, gt, lte, lt) to Sequelize operators
-                    if (op === "gte") {
-                        filters[field] = { [Op.gte]: value };
-                    } else if (op === "gt") {
-                        filters[field] = { [Op.gt]: value };
-                    } else if (op === "lte") {
-                        filters[field] = { [Op.lte]: value };
-                    } else if (op === "lt") {
-                        filters[field] = { [Op.lt]: value };
-                    }
+                    if (op === "gte") filters[field] = { [Op.gte]: value };
+                    else if (op === "gt") filters[field] = { [Op.gt]: value };
+                    else if (op === "lte") filters[field] = { [Op.lte]: value };
+                    else if (op === "lt") filters[field] = { [Op.lt]: value };
                 }
             } else {
-                // Direct assignment for non-object fields
                 filters[field] = queryObj[field];
             }
         });
-
-        // Apply filters in Sequelize query
+    
+        // Apply search logic only if the search query is present and fields exist in the model
+        if (this.queryString.search) {
+            const searchConditions = [];
+    
+            if (this.model.rawAttributes.name) {
+                searchConditions.push({ name: { [Op.like]: `%${this.queryString.search}%` } });
+            }
+    
+            if (this.model.rawAttributes.institutionName) {
+                searchConditions.push({institutionName: { [Op.like]: `%${this.queryString.search}%` } });
+            }
+    
+            if (searchConditions.length > 0) {
+                filters[Op.or] = searchConditions;
+            }
+        }
+    
         this.query.where = filters;
-
         return this;
     }
-
-    // Sorting logic
+    
     sorting() {
         if (this.queryString.sort) {
             const sortBy = this.queryString.sort.split(",").map((el) => {
-                let field = el;
-                let order = "ASC";
-                if (el.startsWith("-")) {
-                    field = el.slice(1);
-                    order = "DESC";
+                let field = el.startsWith("-") ? el.slice(1) : el;
+                const order = el.startsWith("-") ? "DESC" : "ASC";
+    
+                // Check if the field exists in rawAttributes
+                if (this.model.rawAttributes[field]) {
+                    // Return valid field and order
+                    return [field, order]; 
                 }
-                return [field, order];
-            });
-            this.query.order = sortBy;
+                return null; 
+            }).filter(Boolean);
+    
+            this.query.order = sortBy.length ? sortBy : [["institutionName", "DESC"]]; 
         } else {
-            this.query.order = [["id", "ASC"]];
+            this.query.order = [["institutionName", "DESC"]]; 
         }
+    
         return this;
     }
+    
+    
 
     // Field limiting logic
     limitFields() {
@@ -81,8 +89,8 @@ class ApiFeature {
 
     // Pagination logic
     pagination() {
-        const page = this.queryString.page * 1 || 1; // Default to page 1
-        const limit = this.queryString.limit * 1 || 100; // Default limit to 100
+        const page = this.queryString.page * 1 || 1; 
+        const limit = this.queryString.limit * 1 || 100;
         const offset = (page - 1) * limit;
 
         this.query.limit = limit;
@@ -91,29 +99,9 @@ class ApiFeature {
         return this;
     }
 
-    // Search logic
-    search() {
-        if (this.queryString.search) {
-            const searchTerm = this.queryString.search;
-            const searchFields = Object.keys(this.model.rawAttributes);
-
-            this.query.where = {
-                ...this.query.where,
-                [Op.or]: searchFields.map((field) => ({
-                    [field]: { [Op.like]: `%${searchTerm}%` },
-                })),
-            };
-        }
-        return this;
-    }
-
-    async execute(options) {
-        // Make sure to handle the model and include associations correctly
-        const records = await this.model.findAll({
-            where: this.query.where,
-            ...options,
-        });
-        return records;
+    // Execute the query and return results
+    async execute(options = {}) {
+        return await this.model.findAll({ ...this.query, ...options });
     }
 }
 
