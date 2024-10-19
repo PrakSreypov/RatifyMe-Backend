@@ -73,6 +73,22 @@ class InviteUserControllers extends BaseController {
             });
         }
     };
+
+    resendInviteIssuer = async (req, res, next) => {
+        try {
+            await inviteIssuerService.resendInvitation(req, res, next);
+        } catch (error) {
+            return res.status(500).json({ message: "Error inviting issuer", error: error.message });
+        }
+    };
+
+    resendInviteEarner = async (req, res, next) => {
+        try {
+            await inviteEarnerService.resendInvitation(req, res, next);
+        } catch (error) {
+            return res.status(500).json({ message: "Error inviting earner", error: error.message });
+        }
+    }
 }
 
 module.exports = new InviteUserControllers();
