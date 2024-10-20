@@ -91,8 +91,7 @@ badgeClassControllers.getBadgeClassesByEarnerId = catchAsync(async (req, res) =>
         .filtering()
         .sorting()
         .limitFields()
-        .pagination()
-        .search();
+        .pagination();
 
     // Log where conditions to debug
     console.log("Where conditions for totalRecords:", apiFeature.query.where);
@@ -167,8 +166,7 @@ badgeClassControllers.getBadgeClaimByEarner = catchAsync(async (req, res) => {
         .filtering()
         .sorting()
         .limitFields()
-        .pagination()
-        .search();
+        .pagination();
 
     // Count total records based on filters applied
     const totalRecords = await BadgeClasses.count({
