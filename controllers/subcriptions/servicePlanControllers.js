@@ -1,6 +1,33 @@
 const BaseControllers = require("../../utils/baseControllers");
-const ServicePlans = require('../../models/ServicePlans')
+const ServicePlans = require("../../models/ServicePlans");
 
-const servicePlanControllers = new BaseControllers(ServicePlans, ["name", "stripeProductId"])
+class ServicePlanControllers extends BaseControllers {
+    constructor(model, attributes) {
+        super(model, attributes);
+    }
 
-module.exports = servicePlanControllers
+    // Define the simple getAll method
+    async getAllServices(req, res, next) {
+        try {
+            // Fetch all service plans from the database
+            const records = await ServicePlans.findAll();
+
+            // Send response
+            res.status(200).json({
+                status: "success",
+                results: records.length,
+                data: records,
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+}
+
+// Instantiate the servicePlanControllers with ServicePlans model and attributes
+const servicePlanControllers = new ServicePlanControllers(ServicePlans, [
+    "name",
+    "stripeProductId",
+]);
+
+module.exports = servicePlanControllers;
