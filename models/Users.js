@@ -1,4 +1,4 @@
-const { DataTypes, Sequelize } = require("sequelize");
+const { DataTypes } = require("sequelize");
 const sequelize = require("../configs/database");
 const bcrypt = require("bcryptjs");
 const crypto = require("crypto");
@@ -69,9 +69,6 @@ const Users = sequelize.define(
                 len: {
                     args: [3, 30],
                     msg: "Username must be between 3 and 30 characters long.",
-                },
-                isAlphanumeric: {
-                    msg: "Username can only contain letters and numbers.",
                 },
                 noSpaces(value) {
                     if (/\s/.test(value)) {
@@ -144,9 +141,13 @@ const Users = sequelize.define(
                 },
             },
         },
+        isVerified: {
+            type: DataTypes.BOOLEAN,
+            defaultValue: false,
+        },
         active: {
             type: DataTypes.BOOLEAN,
-            defaultValue: true,
+            defaultValue: false,
         },
         password: {
             type: DataTypes.STRING,
@@ -163,6 +164,8 @@ const Users = sequelize.define(
                 },
             },
         },
+        verifyDigitNum: DataTypes.STRING,
+        verifyDigitNumExpires: DataTypes.DATE,
         passwordChangedAt: DataTypes.DATE,
         passwordResetToken: DataTypes.STRING,
         passwordResetExpires: DataTypes.DATE,
@@ -186,7 +189,7 @@ const Users = sequelize.define(
     },
 );
 
-// Ensure password and passwordConfirm are not included in the response
+// Ensure the specific field are not included in the response
 Users.prototype.toJSON = function () {
     const values = Object.assign({}, this.get());
 

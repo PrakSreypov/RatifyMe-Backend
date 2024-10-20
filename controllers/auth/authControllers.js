@@ -1,3 +1,5 @@
+const { Op } = require("sequelize");
+const crypto = require("crypto");
 const BaseController = require("../../utils/baseControllers");
 const catchAsync = require("../../utils/catchAsync");
 const AppError = require("../../utils/appError");
@@ -9,13 +11,14 @@ const Roles = require("../../models/Roles");
 const sequelize = require("../../configs/database");
 const Addresses = require("../../models/Addresses");
 const Institutions = require("../../models/Institutions");
-const { generateVerificationCode } = require("../../utils/generateVerificationCode");
-const { Issuers, Earners } = require("../../models");
+const { generateVerificationCode } = require("../../utils/auth/generateVerificationCode");
+const { Issuers, Earners, Subscriptions } = require("../../models");
 const EmailService = require("../../services/mailServices");
 const { getUserFromToken } = require("../../utils/auth/getUserFromToken");
 
 const uniqueFields = ["email", "username", "phoneNumber"];
 const associations = [Roles, Genders];
+const emailService = new EmailService();
 
 class AuthControllers extends BaseController {
     constructor() {
@@ -38,12 +41,20 @@ class AuthControllers extends BaseController {
         try {
             // Check for unique fields
             await this.checkUniqueFields(userData);
+            const verifyDigitNum = crypto.randomInt(1000, 10000).toString();
 
             // Create the user
-            const newUser = await Users.create(userData, { transaction });
+            const newUser = await Users.create(
+                {
+                    ...userData,
+                    verifyDigitNum,
+                    verifyDigitNumExpires: Date.now() + 15 * 60 * 1000, // 10mn
+                },
+                { transaction },
+            );
 
             if (!newUser || !newUser.id) {
-                return next(new AppError("User creation failed.", 500)); // Handle user creation failure
+                return next(new AppError("User creation failed.", 500));
             }
 
             const role = newUser.roleId;
@@ -69,11 +80,10 @@ class AuthControllers extends BaseController {
                         { transaction },
                     );
                 }
-
-                // Optionally handle any issuer creation here if needed
             } else if (role === 3) {
                 const { institutionId } = issuerData;
                 const issuerCode = generateVerificationCode();
+
                 // Check that institutionId is provided for the Issuer role
                 if (!issuerData || !institutionId) {
                     return next(new AppError("Institution ID or Issuer data is missing.", 400));
@@ -105,13 +115,13 @@ class AuthControllers extends BaseController {
                     return next(new AppError("Issuer ID or Issuer data is missing.", 400));
                 }
 
-                // Verify that the institution exists using the institutionId
+                // Verify that the issuer exists using the issuerId
                 const issuer = await Issuers.findByPk(issuerId, { transaction });
                 if (!issuer) {
-                    return next(new AppError(`Institution with ID ${issuerId} not found.`, 404));
+                    return next(new AppError(`Issuer with ID ${issuerId} not found.`, 404));
                 }
 
-                // Create the issuer with the userId and institutionId
+                // Create the earner with the userId and issuerId
                 await Earners.create(
                     {
                         ...earnerData,
@@ -125,13 +135,28 @@ class AuthControllers extends BaseController {
             // Commit the transaction once all operations are successful
             await transaction.commit();
 
-            // Generate and send a token back to the client
-            createSendToken(
-                { newUser, addressData, institutionData, issuerData, earnerData },
-                201,
-                res,
-                true,
-            );
+            try {
+                await emailService.sendVerificationEmail(
+                    userData.email,
+                    verifyDigitNum,
+                    userData.firstName,
+                    userData.lastName,
+                );
+            } catch (emailError) {
+                return next(new AppError("Failed to send verification email.", 500));
+            }
+
+            // Send the response with full user data
+            res.status(201).json({
+                status: "Account Created.",
+                data: {
+                    userData,
+                    addressData,
+                    institutionData,
+                    issuerData,
+                    earnerData,
+                },
+            });
         } catch (error) {
             // Rollback transaction if it hasn't been committed yet
             if (!transaction.finished) {
@@ -142,6 +167,71 @@ class AuthControllers extends BaseController {
     });
 
     // ============ End Signup controller ============
+
+    // ============ Start Verify Email controller ============
+    verifyEmail = catchAsync(async (req, res, next) => {
+        const { verifyCode } = req.body;
+
+        const user = await Users.findOne({
+            where: {
+                verifyDigitNum: verifyCode,
+                verifyDigitNumExpires: { [Op.gt]: Date.now() },
+            },
+        });
+
+        if (!user) {
+            return next(new AppError("Verification code is invalid or has expired."));
+        }
+
+        user.isVerified = true;
+        user.active = true;
+        user.verifyDigitNum = null;
+        user.verifyDigitNumExpires = null;
+        await user.save();
+
+        createSendToken(user, 200, res);
+    });
+    // ============ End Verify Email controller   ============
+
+    // ============ Start Resend Email controller ============
+    resendVerificationEmail = catchAsync(async (req, res, next) => {
+        const { email } = req.body;
+
+        // Find the user by email
+        const user = await Users.findOne({ where: { email } });
+
+        // Check if user exists and is not verified
+        if (!user) {
+            return next(new AppError("User not found.", 404));
+        }
+
+        if (user.isVerified) {
+            return next(new AppError("User is already verified.", 400));
+        }
+
+        // Generate a new verification code
+        const verifyDigitNum = crypto.randomInt(1000, 10000).toString();
+        user.verifyDigitNum = verifyDigitNum;
+        user.verifyDigitNumExpires = Date.now() + 15 * 60 * 1000; // 15 minutes
+        await user.save();
+
+        try {
+            // Send the verification email
+            await emailService.sendVerificationEmail(
+                user.email,
+                verifyDigitNum,
+                user.firstName,
+                user.lastName,
+            );
+        } catch (emailError) {
+            return next(new AppError("Failed to send verification email.", 500));
+        }
+
+        res.status(200).json({
+            status: "Verification email resent.",
+        });
+    });
+    // ============ End Resend Email controller   ============
 
     // ============ Start Signin controller ============
     signin = catchAsync(async (req, res, next) => {
@@ -161,7 +251,33 @@ class AuthControllers extends BaseController {
             return next(new AppError("Incorrect email or password", 401));
         }
 
-        createSendToken(user, 200, res);
+        let subscriptionStatus;
+
+        // Check if the user has roleId = 2 (specific role that requires subscription check)
+        if (user.roleId === 2) {
+            // Find the institution associated with the user
+            const institution = await Institutions.findOne({
+                where: { userId: user.id },
+            });
+
+            if (!institution) {
+                return next(new AppError("Institution not found."));
+            }
+
+            // Fetch subscription related to the institution
+            const subscription = await Subscriptions.findOne({
+                where: { institutionId: institution.id, status: true },
+            });
+
+            // Determine subscription status based on its existence and status value
+            if (!subscription || subscription.status === false) {
+                subscriptionStatus = "inactive";
+            } else {
+                subscriptionStatus = "active";
+            }
+        }
+
+        createSendToken(user, 200, res, false, { subscriptionStatus });
     });
     // ============ End Signin controller ============
 
@@ -188,7 +304,6 @@ class AuthControllers extends BaseController {
         const resetURL = `${process.env.CLIENT_BASE_URL}/reset-password/${resetToken}`;
 
         try {
-            const emailService = new EmailService();
             await emailService.sendPasswordResetEmail(user.email, resetURL);
 
             res.status(200).json({
@@ -198,7 +313,7 @@ class AuthControllers extends BaseController {
         } catch (error) {
             user.passwordResetToken = undefined;
             user.passwordResetExpires = undefined;
-            await user.save({ validate: false }); // Save without the token if email fails
+            await user.save({ validate: false });
 
             return next(
                 new AppError("There was an error sending the email. Try again later!", 500),

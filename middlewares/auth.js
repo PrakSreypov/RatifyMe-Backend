@@ -14,20 +14,37 @@ const {
     Achievements,
 } = require("../models");
 
+const parseJwtExpiresIn = (expiresIn) => {
+    return expiresIn.replace("day", "d");
+};
+
 // Sign Token
 const signToken = (id) => {
+    const jwtExpiresIn = parseJwtExpiresIn(process.env.JWT_EXPIRES_IN);
     return jwt.sign({ id }, process.env.JWT_SECRET, {
-        expiresIn: process.env.JWT_EXPIRES_IN,
+        expiresIn: jwtExpiresIn,
     });
 };
 
 // ============ Start Send Token ============
-exports.createSendToken = (user, statusCode, res, isSignup = false) => {
+exports.createSendToken = (user, statusCode, res, isSignup = false, additionalInfo = {}) => {
     const token = signToken(isSignup ? user.newUser.id : user.id);
 
+    // Helper function to extract numeric
+    const parseJwtCookiesExpiresInDays = (expiresIn) => {
+        const days = parseInt(expiresIn, 10);
+        return days;
+    };
+
     const cookieOptions = {
-        expires: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 24 * 60 * 60 * 1000),
-        // expires: new Date(Date.now() + process.env.JWT_COOKIE_EXPIRES_IN * 60 * 1000),
+        expires: new Date(
+            Date.now() +
+                parseJwtCookiesExpiresInDays(process.env.JWT_COOKIE_EXPIRES_IN) *
+                    24 *
+                    60 *
+                    60 *
+                    1000,
+        ),
         httpOnly: true,
         sameSite: "Strict",
     };
@@ -40,6 +57,7 @@ exports.createSendToken = (user, statusCode, res, isSignup = false) => {
         status: "success",
         token,
         user,
+        ...additionalInfo,
     });
 };
 // ============ End Send Token ============

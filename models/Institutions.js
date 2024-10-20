@@ -67,6 +67,8 @@ const Institutions = sequelize.define(
         },
         institutionWebsiteUrl: {
             type: DataTypes.STRING,
+            allowNull: true,
+            defaultValue: null
         },
         institutionProfileImage: {
             type: DataTypes.STRING,

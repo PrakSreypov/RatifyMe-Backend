@@ -1,5 +1,4 @@
-// inviteCodeTemplate.js
-exports.inviteCodeTemplate = `
+exports.verifyEmailTemplate = `
     <!DOCTYPE html>
     <html lang="en">
         <head>
@@ -48,39 +47,18 @@ exports.inviteCodeTemplate = `
                 p {
                     font-size: 16px;
                     line-height: 1.5;
-                    color: #000;
+                    color: #000
                 }
                 .content .greeting {
                     font-size: 18px;
                 }
-                .code-block {
-                    background-color: #f0f0f0;
-                    color: #000;
-                    padding: 24px;
-                    text-align: center;
-                    border-radius: 4px;
-                    font-size: 32px;
-                    font-weight: bold;
-                    letter-spacing: 1.5px;
-                }
+
                 .link-platform,
                 .email {
                     text-decoration: none;
                     color: #1a87ec;
                     font-size: 18px;
                 }
-                .cta-button {
-                        display: block;
-                        width: 200px;
-                        margin: 30px auto;
-                        padding: 10px 20px;
-                        background-color: #1A87EC;
-                        color: #ffffff !important;
-                        text-align: center;
-                        text-decoration: none;
-                        border-radius: 5px;
-                        font-size: 18px;
-                    }
 
                 .footer {
                     text-align: center;
@@ -100,16 +78,32 @@ exports.inviteCodeTemplate = `
                         />
                     </div>
                     <div class="content">
-                        <p class="greeting">Hello,</p>
-                        <p>
-                            You’ve been invited to join the
-                            badge-issuing program on the <strong>[Badge Platform]</strong>.
+                        <p class="greeting">Dear, <span>[FIRSTNAME] [LASTNAME].</span></p>
+                        <p >
+                            Thank you for signing up on <span class="link-platform">RatifyMe</span>.
                         </p>
-                        <p>To join, please use the following invitation code when signing up:</p>
-                        <div class="code-block">[INVITE CODE]</div>
-                        <p>Click the button below to get started and create your account.</p>
-                        <a href="[SIGNUP_LINK]" class="cta-button">Create Account</a>
-                        <p>If you have any questions or need assistance, feel free to contact us.</p>
+                        <p>Enter the code on the verification page to complete your registration.</p>
+                        <p>Your verification code is:</p>
+                        <div
+                            style="
+                                text-align: center;
+                                margin: 30px 0;
+                                background-color: #F4F4F4;
+                                padding: 20px;
+                            "
+                        >
+                            <span
+                                style="
+                                    font-size: 48px;
+                                    font-weight: bold;
+                                    letter-spacing: 5px;
+                                    color: #1a87ec;
+                                "
+                                >[VERIFICATION_CODE]</span
+                            >
+                        </div>
+                        <p>This code will expire in 15 minutes for security reasons.</p>
+                        <p>If you didn't create an account with us, please ignore this email.</p>
                         <p>Best regards,<br /><b>The RatifyMe Team</b></p>
                     </div>
                     <div class="footer">
@@ -119,5 +113,6 @@ exports.inviteCodeTemplate = `
             </div>
         </body>
     </html>
+
 
 `;
