@@ -70,7 +70,7 @@ exports.addBadgeClass = catchAsync(async (req, res, next) => {
                 startedDate,
                 expiredDate,
                 issuerId,
-                institutionId, // Associate institutionId with BadgeClass directly
+                institutionId,
             },
             { transaction },
         );
@@ -127,7 +127,7 @@ exports.addBadgeClass = catchAsync(async (req, res, next) => {
                     model: Issuers,
                 },
                 {
-                    model: Institutions, // Include institution in the response
+                    model: Institutions,
                 },
                 {
                     model: AchievementModel,

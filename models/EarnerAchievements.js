@@ -4,6 +4,11 @@ const { DataTypes } = require("sequelize");
 const EarnerAchievements = sequelize.define(
     "EarnerAchievements",
     {
+        id: {
+            type: DataTypes.INTEGER,
+            autoIncrement: true,
+            primaryKey: true,
+        },
         status: {
             type: DataTypes.BOOLEAN,
             allowNull: false,
@@ -40,14 +45,5 @@ const EarnerAchievements = sequelize.define(
         timestamps: true,
     },
 );
-
-// Adding a beforeSave hook to check the status and set claimedOn
-EarnerAchievements.beforeSave(async (earnerAchievement) => {
-    // Check if the status is true and claimedOn is not already set
-    if (earnerAchievement.status === true && !earnerAchievement.claimedOn) {
-        // Set claimedOn to the current date
-        earnerAchievement.claimedOn = new Date.now();
-    }
-});
 
 module.exports = EarnerAchievements;

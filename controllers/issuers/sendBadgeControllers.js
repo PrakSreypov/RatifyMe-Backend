@@ -37,14 +37,18 @@ exports.assignBadgeToEarners = catchAsync(async (req, res) => {
 });
 
 exports.updateIssuedOnForAchievements = catchAsync(async (req, res) => {
-    const { achievementId } = req.body; // Array of achievement IDs to update
+    let { achievementId } = req.body;
 
-    // Check if achievementId is provided and is an array
-    if (!achievementId || !Array.isArray(achievementId)) {
+    if (!achievementId) {
         return res.status(400).json({
             status: "fail",
-            message: "achievementId must be provided as an array.",
+            message: "achievementId must be provided.",
         });
+    }
+
+    // If achievementId is not an array, convert it to an array
+    if (!Array.isArray(achievementId)) {
+        achievementId = [achievementId];
     }
 
     // Get the current date
@@ -55,13 +59,14 @@ exports.updateIssuedOnForAchievements = catchAsync(async (req, res) => {
         { issuedOn: currentDate },
         {
             where: {
-                achievementId: achievementId, // Use the provided achievementId array
-                issuedOn: null, // Only update if issuedOn is currently null
+                achievementId: achievementId,
+                issuedOn: null,
             },
         },
     );
 
-    if (updatedCount === 0) {
+    if (updatedCount[0] === 0) {
+        // Sequelize returns an array where the first element is the number of updated rows
         return res.status(404).json({
             status: "fail",
             message: "No achievements found for the specified achievement IDs to update.",
