@@ -37,6 +37,9 @@ const EarnerAchievements = sequelize.define(
         claimedOn: {
             type: DataTypes.DATE,
         },
+        credId: {
+            type : DataTypes.STRING
+        },
         certUrlPdf: {
             type: DataTypes.STRING,
         },
@@ -49,6 +52,12 @@ const EarnerAchievements = sequelize.define(
     },
     {
         timestamps: true,
+        indexes : [
+            {
+                unique: true,
+                fields: ["credId"],
+            },
+        ],
     },
 );
 
