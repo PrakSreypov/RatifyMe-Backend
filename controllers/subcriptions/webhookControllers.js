@@ -2,6 +2,7 @@ const catchAsync = require("../../utils/catchAsync");
 const AppError = require("../../utils/appError");
 const Subscriptions = require("../../models/Subscriptions");
 const Payments = require("../../models/Payments");
+const ServicePlans = require("../../models/ServicePlans");
 require("dotenv").config();
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
@@ -11,14 +12,49 @@ const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
  * @returns {...} updating the subscription table {status, enddate, stripeSubscriptionId}
  */
 const updateSubscription = catchAsync(async (subscriptionId, stripeSubscriptionId) => {
-    // Find the subscription record by its primary key or stripeSubscriptionId
-    const subscription = await Subscriptions.findOne({
-        where: { id: subscriptionId },
-    });
+    try {
+        // Find the subscription record by its primary key or stripeSubscriptionId
+        const subscription = await Subscriptions.findOne({
+            where: { id: subscriptionId },
+            include: { model: ServicePlans, attributes: ["name"] },
+        });
 
-    if (!subscription) {
-        return next(new AppError("Subscription not found.", 404));
+        if (!subscription) {
+            throw new AppError("Subscription not found.", 404);
+        }
+
+        // Update the subscription status to active, set the stripeSubscriptionId, startDate, and endDate
+        const currentDate = new Date();
+        let endDate;
+
+        // Calculate end date based on service plan duration (this is just an example)
+        switch (subscription.ServicePlan.name) {
+            case "Free Starter": // Quarterly (3 months)
+                endDate = new Date(currentDate.setMonth(currentDate.getMonth() + 3));
+                break;
+            case 'Pro Plan': // Midyear (6 months)
+                endDate = new Date(currentDate.setMonth(currentDate.getMonth() + 6));
+                break;
+            case "Enterprise Plan": // Annual (12 months)
+                endDate = new Date(currentDate.setFullYear(currentDate.getFullYear() + 1));
+                break;
+            default:
+                throw new AppError("Can't find the service plan with that id", 404);
+        }
+
+        // Update the subscription
+        await subscription.update({
+            status: true,
+            startDate: new Date(),
+            endDate: endDate,
+            stripeSubscriptionId: stripeSubscriptionId,
+        });
+
+    } catch (err) {
+        console.error(err);
+        throw err; // Rethrow the error so it can be caught by your catchAsync wrapper
     }
+
 
     // Update the subscription status to active, set the stripeSubscriptionId, startDate, and endDate
     const currentDate = new Date();
