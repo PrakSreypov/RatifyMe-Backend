@@ -64,7 +64,7 @@ class BaseController {
     async checkRecordExists(id) {
         const record = await this.Model.findByPk(id, { include: this.associations });
         if (!record) {
-            throw new AppError("No record found with this ID", 404); // This error only applies to valid routes with missing records
+            throw new AppError("No record found with this ID", 404);
         }
         return record;
     }
@@ -77,11 +77,10 @@ class BaseController {
     getAllWithApiFeatures = async (req) => {
         // Initialize ApiFeatures with the model and query parameters
         const apiFeature = new ApiFeatures(req.query, this.Model)
-            .filtering() // Apply filtering
-            .sorting() // Apply sorting
-            .limitFields() // Apply field limiting
-            .pagination()
-            .search();
+            .filtering()
+            .sorting()
+            .limitFields()
+            .pagination();
 
         // Count total records based on filters
         const totalRecords = await this.Model.count({
@@ -136,12 +135,12 @@ class BaseController {
                     if (err) {
                         return reject(new AppError("S3 upload failed", 500));
                     }
-                    resolve(data.Location); // Return the image URL from S3
+                    resolve(data.Location);
                 });
             });
 
             imageUrl = s3Upload;
-            req.body[this.imageField] = imageUrl; // Add image URL to the request body
+            req.body[this.imageField] = imageUrl;
         }
 
         // Create the new record
@@ -213,8 +212,8 @@ class BaseController {
     // Start Delete all records
     deleteAll = catchAsync(async (req, res, next) => {
         await this.Model.destroy({
-            where: {}, // No conditions, so this will delete all records
-            truncate: false, // Optional: Also reset auto-increment counter if needed
+            where: {},
+            truncate: false,
         });
         this.sendResponse(res, 200, null, "All Records successfully deleted.");
     });
@@ -307,8 +306,8 @@ class BaseController {
             });
 
         // Set the image field to null or delete the field as per your requirement
-        record[this.imageField] = null; // or `delete record[this.imageField];`
-        await record.save(); // Save the updated record
+        record[this.imageField] = null;
+        await record.save();
         this.sendResponse(res, 200, null, "Image successfully deleted");
     });
 
