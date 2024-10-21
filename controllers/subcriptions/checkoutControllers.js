@@ -54,7 +54,7 @@ exports.createCheckoutSession = catchAsync(async (req, res, next) => {
     });
 
     // Create a new payment record with a unpaid status
-    await Payments.create({
+    const newPayment =  await Payments.create({
         subscriptionId: subscription.id,
         paymentDate: new Date(),
         amount: 0,
@@ -65,7 +65,7 @@ exports.createCheckoutSession = catchAsync(async (req, res, next) => {
     const session = await stripe.checkout.sessions.create({
         mode: "subscription",
         line_items: [{ price: stripePriceId, quantity: 1 }],
-        success_url: `${process.env.CLIENT_BASE_URL}/dashboard`,
+        success_url: `${process.env.CLIENT_BASE_URL}/success-payment/${newPayment.dataValues.id}`,
         cancel_url: `${process.env.CLIENT_BASE_URL}/price`,
         metadata: {
             subscriptionId: subscription.id,

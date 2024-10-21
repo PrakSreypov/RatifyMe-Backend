@@ -45,24 +45,21 @@ const updateSubscription = catchAsync(async (subscriptionId, stripeSubscriptionI
         endDate: endDate,
         stripeSubscriptionId: stripeSubscriptionId,
     });
-
 });
 
 exports.webhook = catchAsync(async (req, res, next) => {
     const sig = req.headers["stripe-signature"];
     let event;
 
-    try {
-        // Construct the event using the raw body
-        event = stripe.webhooks.constructEvent(
-            // Use req.body directly, which will be a Buffer due to express.raw()
-            req.body,
-            sig,
-            process.env.STRIPE_WEBHOOK_SECRET_KEY,
-        );
-    } catch (err) {
-        console.error(`Webhook Error: ${err.message}`);
-        return res.status(400).send(`Webhook Error: ${err.message}`);
+    // Construct the event using the raw body
+    event = stripe.webhooks.constructEvent(
+        // Use req.body directly, which will be a Buffer due to express.raw()
+        req.body,
+        sig,
+        process.env.STRIPE_WEBHOOK_SECRET_KEY,
+    );
+    if (!event) {
+        return next(new AppError(`Webhook Error`, 400));
     }
 
     // Access the session object
@@ -91,6 +88,8 @@ exports.webhook = catchAsync(async (req, res, next) => {
                     },
                 },
             );
+            // Acknowledge receipt of the event
+            res.redirect(`${process.env.CLIENT_BASE_URL}/success-payment`);
             break;
         case "checkout.session.expired":
             await Subscriptions.destroy({
@@ -111,7 +110,4 @@ exports.webhook = catchAsync(async (req, res, next) => {
             console.log(`Unhandled event type ${event.type}`);
             return next(new AppError(`Unhandled event type ${event.type}`));
     }
-
-    // Acknowledge receipt of the event
-    res.status(200).send("Received");
 });
