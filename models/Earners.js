@@ -53,22 +53,22 @@ const Earners = sequelize.define("Earners", {
 });
 
 // Before creating a new Earner, set the name based on the associated user's firstName and lastName
-Earners.addHook("beforeCreate", async (earner, options) => {
-    const user = await Users.findByPk(earner.userId);
-    if (!user) {
-        throw new Error("User does not exist. Cannot create earner.");
-    }
+// Earners.addHook("beforeCreate", async (earner, options) => {
+//     const user = await Users.findByPk(earner.userId);
+//     if (!user) {
+//         throw new Error("User does not exist. Cannot create earner.");
+//     }
 
-    // Properly format the name by adding a space between firstName and lastName
-    earner.name = `${user.firstName} ${user.lastName}`;
-});
+//     // Properly format the name by adding a space between firstName and lastName
+//     earner.name = `${user.firstName} ${user.lastName}`;
+// });
 
 // After syncing the database, update all existing earners' names based on the Users model
 Earners.addHook("afterSync", async (options) => {
     const earners = await Earners.findAll({
         include: {
             model: Users,
-            as: 'User', 
+            as: 'User',
         },
     });
 
@@ -77,7 +77,7 @@ Earners.addHook("afterSync", async (options) => {
         if (earner.User && `${earner.User.firstName} ${earner.User.lastName}` !== earner.name) {
             earner.name = `${earner.User.firstName} ${earner.User.lastName}`;
 
-            await earner.save();  
+            await earner.save();
         }
     }
 });

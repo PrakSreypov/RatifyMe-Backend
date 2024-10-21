@@ -127,6 +127,7 @@ class AuthControllers extends BaseController {
                         ...earnerData,
                         userId: newUser.id,
                         issuerId,
+                        name: `${newUser.firstName} ${newUser.lastName}`,
                     },
                     { transaction },
                 );
