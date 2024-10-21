@@ -1,15 +1,14 @@
 const { Op } = require("sequelize");
 
-
 /**
  *
- * @param queryString : take operation from endpoint and apply by output 
+ * @param queryString : take operation from endpoint and apply by output
  * @class ApiFeature
  */
 class ApiFeature {
     constructor(queryString, model) {
-        this.query = {}; 
-        this.queryString = queryString; 
+        this.query = {};
+        this.queryString = queryString;
         this.model = model;
     }
 
@@ -17,7 +16,7 @@ class ApiFeature {
         const queryObj = { ...this.queryString };
         const excludedFields = ["page", "sort", "limit", "page", "search"];
         excludedFields.forEach((el) => delete queryObj[el]);
-    
+
         const filters = {};
         Object.keys(queryObj).forEach((field) => {
             if (typeof queryObj[field] === "object") {
@@ -32,51 +31,81 @@ class ApiFeature {
                 filters[field] = queryObj[field];
             }
         });
-    
+
         // Apply search logic only if the search query is present and fields exist in the model
         if (this.queryString.search) {
             const searchConditions = [];
-    
+
             if (this.model.rawAttributes.name) {
                 searchConditions.push({ name: { [Op.like]: `%${this.queryString.search}%` } });
             }
-    
+
             if (this.model.rawAttributes.institutionName) {
-                searchConditions.push({institutionName: { [Op.like]: `%${this.queryString.search}%` } });
+                searchConditions.push({
+                    institutionName: { [Op.like]: `%${this.queryString.search}%` },
+                });
             }
-    
+
             if (searchConditions.length > 0) {
                 filters[Op.or] = searchConditions;
             }
         }
-    
+
         this.query.where = filters;
         return this;
     }
-    
+
+    // sorting() {
+    //     if (this.queryString.sort) {
+    //         const sortBy = this.queryString.sort.split(",").map((el) => {
+    //             let field = el.startsWith("-") ? el.slice(1) : el;
+    //             const order = el.startsWith("-") ? "DESC" : "ASC";
+
+    //             // Check if the field exists in rawAttributes
+    //             if (this.model.rawAttributes[field]) {
+    //                 // Return valid field and order
+    //                 return [field, order];
+    //             }
+    //             return null;
+    //         }).filter(Boolean);
+
+    //         this.query.order = sortBy.length ? sortBy : [["institutionName", "DESC"]];
+    //     } else {
+    //         this.query.order = [["institutionName", "DESC"]];
+    //     }
+
+    //     return this;
+    // }
+
     sorting() {
+        // Determine the default sorting field based on the query string or a parameter
+        const defaultSortField = 'name' || "institutionName" || 'inviteEmail';
+
         if (this.queryString.sort) {
-            const sortBy = this.queryString.sort.split(",").map((el) => {
-                let field = el.startsWith("-") ? el.slice(1) : el;
-                const order = el.startsWith("-") ? "DESC" : "ASC";
-    
-                // Check if the field exists in rawAttributes
-                if (this.model.rawAttributes[field]) {
-                    // Return valid field and order
-                    return [field, order]; 
-                }
-                return null; 
-            }).filter(Boolean);
-    
-            this.query.order = sortBy.length ? sortBy : [["institutionName", "DESC"]]; 
+            const sortBy = this.queryString.sort
+                .split(",")
+                .map((el) => {
+                    let field = el.startsWith("-") ? el.slice(1) : el;
+                    const order = el.startsWith("-") ? "DESC" : "ASC";
+
+                    // Check if the field exists in rawAttributes
+                    if (this.model.rawAttributes[field]) {
+                        // Return valid field and order
+                        return [field, order];
+                    }
+                    return null;
+                })
+                .filter(Boolean);
+
+            // If no valid sort fields provided, fall back to the dynamic default sort field
+            this.query.order = sortBy.length ? sortBy : [[defaultSortField, "DESC"]];
         } else {
-            this.query.order = [["institutionName", "DESC"]]; 
+            // If no sort is specified, fall back to the dynamic default sort field
+            this.query.order = [[defaultSortField, "DESC"]];
         }
-    
+
         return this;
     }
-    
-    
 
     // Field limiting logic
     limitFields() {
@@ -89,7 +118,7 @@ class ApiFeature {
 
     // Pagination logic
     pagination() {
-        const page = this.queryString.page * 1 || 1; 
+        const page = this.queryString.page * 1 || 1;
         const limit = this.queryString.limit * 1 || 100;
         const offset = (page - 1) * limit;
 

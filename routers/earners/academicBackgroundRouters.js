@@ -14,4 +14,6 @@ router
     .patch(academicBackgroundControllers.updateOne)
     .delete(academicBackgroundControllers.deleteOne);
 
+router.route("/academicByUserId/:userId").get(academicBackgroundControllers.getAcademicByUserId);
+
 module.exports = router;
