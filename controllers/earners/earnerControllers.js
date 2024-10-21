@@ -68,9 +68,12 @@ earnerControllers.updateAchievementStatus = catchAsync(async (req, res) => {
 
     // Update the status of all achievements in the EarnerAchievements join table
     for (let achievement of earner.Achievements) {
-        // Update the status in the EarnerAchievements join table
+        // Update the status and claimedOn fields in the EarnerAchievements join table
         await EarnerAchievements.update(
-            { status: status },
+            {
+                status: status,
+                claimedOn: status === true ? new Date() : null,
+            },
             {
                 where: {
                     earnerId: earnerId,

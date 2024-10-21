@@ -19,6 +19,7 @@ const Achievements = require("./Achievements");
 const BadgeCriteriaItems = require("./BadgeCriteriaItems");
 const Earners = require("./Earners");
 const InviteUsers = require("./InviteUsers");
+const EarnerAchievements = require("./EarnerAchievements");
 
 // ============ Start Users Association ============
 // User & Addresses association
@@ -308,13 +309,25 @@ AcademicBackgrounds.hasMany(Earners, {
 
 // Achievements & Earner
 Achievements.belongsToMany(Earners, {
-    through: "EarnerAchievements",
+    through: EarnerAchievements, // Junction table
+    foreignKey: "achievementId", // Foreign key in the junction table
+    otherKey: "earnerId", // The other foreign key
     onDelete: "CASCADE",
     onUpdate: "CASCADE",
 });
+
 Earners.belongsToMany(Achievements, {
-    through: "EarnerAchievements",
+    through: EarnerAchievements, // Junction table
+    foreignKey: "earnerId", // Foreign key in the junction table
+    otherKey: "achievementId", // The other foreign key
 });
+
+Earners.hasMany(EarnerAchievements, { foreignKey: "earnerId" });
+Achievements.hasMany(EarnerAchievements, { foreignKey: "achievementId" });
+
+EarnerAchievements.belongsTo(Earners, { foreignKey: "earnerId" });
+EarnerAchievements.belongsTo(Achievements, { foreignKey: "achievementId" });
+
 // ============ End Earners Association ============
 
 // ============ Start Invite User ============

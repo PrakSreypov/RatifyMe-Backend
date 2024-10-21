@@ -5,7 +5,7 @@ const { v4 } = require("uuid");
 const AppError = require("./appError");
 const catchAsync = require("./catchAsync");
 const ApiFeatures = require("./apiFeature");
-const s3 = require("../configs/s3")
+const s3 = require("../configs/s3");
 
 /**
  * @class BaseController : CRUD default controller
@@ -80,23 +80,23 @@ class BaseController {
             .filtering() // Apply filtering
             .sorting() // Apply sorting
             .limitFields() // Apply field limiting
-            .pagination(); // Apply pagination
-    
+            .pagination()
+            .search();
+
         // Count total records based on filters
         const totalRecords = await this.Model.count({
-            where: apiFeature.query.where, // Apply filtering here
+            where: apiFeature.query.where,
         });
-    
+
         // Execute the query with associated models included
         const records = await apiFeature.execute({ include: this.associations });
-    
+
         return { totalRecords, records };
     };
-    
 
     // Default getAll method that can be overridden
     getAll = catchAsync(async (req, res, next) => {
-        const {records, totalRecords} = await this.getAllWithApiFeatures(req);
+        const { records, totalRecords } = await this.getAllWithApiFeatures(req);
 
         res.status(200).json({
             status: "success",
