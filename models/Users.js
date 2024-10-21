@@ -80,18 +80,6 @@ const Users = sequelize.define(
         phoneNumber: {
             type: DataTypes.STRING,
             allowNull: false,
-            validate: {
-                notEmpty: {
-                    msg: "Phone Number is required!",
-                },
-                isNumeric: {
-                    msg: "Phone number must contain only numbers.",
-                },
-                len: {
-                    args: [8, 30],
-                    msg: "Phone number must be between 8 and 30 digits long.",
-                },
-            },
         },
         nationality: {
             type: DataTypes.STRING,
