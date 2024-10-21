@@ -67,7 +67,7 @@ Deploy:
         - ssh -o StrictHostKeyChecking=no -i key.pem -A $INSTANCE@$INSTANCEADD "
             cd verifyme-backend/ &&
             pm2 kill &&
-            npm run pm2 &&
+            npm run pm2:prod &&
             pm2 status"
     only:
         - develop
