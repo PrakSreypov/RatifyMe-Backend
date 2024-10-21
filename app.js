@@ -26,7 +26,7 @@ const allowedDomains = [
     process.env.CLIENT_BASE_URL,
     'https://www.ratifyme.digital',
     'https://ratifyme.digital',
-    'https://stripe'
+    'https://r.stripe.com'
 ];
 
 const corsOptions = {
