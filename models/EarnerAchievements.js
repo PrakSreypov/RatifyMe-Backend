@@ -37,7 +37,13 @@ const EarnerAchievements = sequelize.define(
         claimedOn: {
             type: DataTypes.DATE,
         },
-        certUrl: {
+        certUrlPdf: {
+            type: DataTypes.STRING,
+        },
+        certUrlJpeg: {
+            type: DataTypes.STRING,
+        },
+        credUrl: {
             type: DataTypes.STRING,
         },
     },
