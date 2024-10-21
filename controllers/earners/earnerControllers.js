@@ -15,6 +15,7 @@ const Issuers = require("../../models/Issuers");
 const EarnerAchievements = require("../../models/EarnerAchievements");
 const catchAsync = require("../../utils/catchAsync");
 const FieldOfStudies = require("../../models/FieldOfStudies");
+const {v4} = require('uuid')
 
 // Set up the base controller
 const earnerControllers = new BaseControllers(
@@ -71,6 +72,7 @@ earnerControllers.updateAchievementStatus = catchAsync(async (req, res) => {
         // Update the status and claimedOn fields in the EarnerAchievements join table
         await EarnerAchievements.update(
             {
+                credId: v4(),
                 status: status,
                 claimedOn: status === true ? new Date() : null,
             },
