@@ -55,55 +55,29 @@ class ApiFeature {
         return this;
     }
 
-    // sorting() {
-    //     if (this.queryString.sort) {
-    //         const sortBy = this.queryString.sort.split(",").map((el) => {
-    //             let field = el.startsWith("-") ? el.slice(1) : el;
-    //             const order = el.startsWith("-") ? "DESC" : "ASC";
-
-    //             // Check if the field exists in rawAttributes
-    //             if (this.model.rawAttributes[field]) {
-    //                 // Return valid field and order
-    //                 return [field, order];
-    //             }
-    //             return null;
-    //         }).filter(Boolean);
-
-    //         this.query.order = sortBy.length ? sortBy : [["institutionName", "DESC"]];
-    //     } else {
-    //         this.query.order = [["institutionName", "DESC"]];
-    //     }
-
-    //     return this;
-    // }
-
-    sorting() {
-        // Determine the default sorting field based on the query string or a parameter
-        const defaultSortField = "name" || "institutionName" || "inviteEmail";
-
+    sorting(defaultSortField = 'id') {
         if (this.queryString.sort) {
             const sortBy = this.queryString.sort
                 .split(",")
                 .map((el) => {
                     let field = el.startsWith("-") ? el.slice(1) : el;
                     const order = el.startsWith("-") ? "DESC" : "ASC";
-
-                    // Check if the field exists in rawAttributes
+    
+                    // Validate if the field exists in rawAttributes of the model
                     if (this.model.rawAttributes[field]) {
-                        // Return valid field and order
                         return [field, order];
                     }
                     return null;
                 })
-                .filter(Boolean);
-
-            // If no valid sort fields provided, fall back to the dynamic default sort field
+                .filter(Boolean); // Remove any invalid fields
+    
+            // If no valid fields are provided, use the dynamic default sort field
             this.query.order = sortBy.length ? sortBy : [[defaultSortField, "DESC"]];
         } else {
-            // If no sort is specified, fall back to the dynamic default sort field
+            // Default to dynamic sort field if none specified
             this.query.order = [[defaultSortField, "DESC"]];
         }
-
+    
         return this;
     }
 
