@@ -20,7 +20,7 @@ const associated = [
 
 class EarnerAchievementControllers extends BaseControllers {
     constructor() {
-        super(EarnerAchievements, [], associated);
+        super(EarnerAchievements, ["credId"], associated);
     }
     getOne = catchAsync(async (req, res, next) => {
         const { achievementId, earnerId } = req.params;
