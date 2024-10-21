@@ -77,8 +77,10 @@ exports.uploadCerti = catchAsync(async (req, res, next) => {
     if (pdfBuffer.length === 0) {
         return next(new AppError("Failed to convert into pdf buffer", 405));
     }
+    // Upload image to S3
     const pdfUrl = await uploadToS3(pdfBuffer, originalname.replace(".jpeg", ""));
-    if (!pdfUrl) {
+    const jpegUrl = await uploadToS3(jpegBuffer, originalname)
+    if (!pdfUrl && !jpegUrl) {
         return next(new AppError("Upload failed", 405));
     }
     // End upload certificate
@@ -87,15 +89,16 @@ exports.uploadCerti = catchAsync(async (req, res, next) => {
     const { achievementId, earnerId } = req.params;
     const earnerAchieve = await EarnerAchievements.findOne({ where: { achievementId, earnerId }})
     if (!earnerAchieve){
-        return next(new AppError("There's no earner achivement to update", 400))
+        return next(new AppError("There's no earner achievement to update", 400))
     }
     earnerAchieve.update({
-        certUrl: pdfUrl
+        certUrlPdf: pdfUrl,
+        certUrlJpeg: jpegUrl
     })
     earnerAchieve.save()
 
     res.status(200).json({
         message: "File uploaded successfully",
-        uploadCert : earnerAchieve.certUrl,
+        uploadCert : earnerAchieve.certUrlPdf,
     });
 });
