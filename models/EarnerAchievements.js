@@ -32,7 +32,7 @@ const EarnerAchievements = sequelize.define(
         },
         issuedOn: {
             type: DataTypes.DATE,
-            defaultValue: DataTypes.NOW,
+            defaultValue: null,
         },
         claimedOn: {
             type: DataTypes.DATE,

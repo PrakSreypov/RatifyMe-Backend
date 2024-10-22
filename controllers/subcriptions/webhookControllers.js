@@ -31,15 +31,15 @@ const updateSubscription = catchAsync(async (subscriptionId, stripeSubscriptionI
         // Calculate end date based on service plan duration (make sure not to modify the original date)
         switch (subscription.ServicePlan.name) {
             case "Free Starter": // Quarterly (3 months)
-                endDate = new Date(currentDate); // Make a copy of currentDate
+                endDate = new Date(currentDate);
                 endDate.setMonth(endDate.getMonth() + 3);
                 break;
             case "Pro Plan": // Midyear (6 months)
-                endDate = new Date(currentDate); // Make a copy of currentDate
+                endDate = new Date(currentDate);
                 endDate.setMonth(endDate.getMonth() + 6);
                 break;
             case "Enterprise Plan": // Annual (12 months)
-                endDate = new Date(currentDate); // Make a copy of currentDate
+                endDate = new Date(currentDate);
                 endDate.setFullYear(endDate.getFullYear() + 1);
                 break;
             default:
@@ -60,7 +60,7 @@ const updateSubscription = catchAsync(async (subscriptionId, stripeSubscriptionI
         });
     } catch (err) {
         console.error(err);
-        throw err; // Rethrow the error so it can be caught by your catchAsync wrapper
+        throw err;
     }
 });
 
