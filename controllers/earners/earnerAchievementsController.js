@@ -32,6 +32,17 @@ class EarnerAchievementControllers extends BaseControllers {
         }
         this.sendResponse(res, 200, earnerAchieve, "success");
     });
+
+    getEarnerAchiveByUid = catchAsync(async (req, res, next) => {
+        const { credId } = req.params;
+        const earnerAchieve = await EarnerAchievements.findOne({
+            where: { credId },
+        });
+        if (!earnerAchieve) {
+            return next(new AppError("Credential ID is invalid", 404));
+        }
+        this.sendResponse(res, 200, earnerAchieve, "success");
+    });
 }
 
 module.exports = new EarnerAchievementControllers();

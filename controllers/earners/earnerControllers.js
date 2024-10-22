@@ -15,7 +15,9 @@ const Issuers = require("../../models/Issuers");
 const EarnerAchievements = require("../../models/EarnerAchievements");
 const catchAsync = require("../../utils/catchAsync");
 const FieldOfStudies = require("../../models/FieldOfStudies");
-const {v4} = require('uuid')
+const { v4 } = require("uuid");
+const AppError = require("../../utils/appError");
+const { Criterias } = require("../../models");
 
 // Set up the base controller
 const earnerControllers = new BaseControllers(
@@ -88,6 +90,40 @@ earnerControllers.updateAchievementStatus = catchAsync(async (req, res) => {
     res.status(200).json({
         status: "success",
         message: `${earner.Achievements.length} achievement(s) updated successfully.`,
+    });
+});
+earnerControllers.getOneAchievement = catchAsync(async (req, res, next) => {
+    const { achievementId } = req.params;
+    const achievement = await Achievements.findByPk(achievementId, {
+        include: {
+            model: BadgeClasses,
+            include: [
+                {
+                    model: Issuers,
+                    include: {
+                        model: Users,
+                        attributes: ["firstName", "lastName"],
+                    },
+                },
+                {
+                    model: Criterias,
+                },
+                {
+                    model: Achievements,
+                    include: {
+                        model : AchievementTypes,
+                        attributes: ["name"]
+                    }
+                },
+            ],
+        },
+    });
+    if (!achievement) {
+        return next(new AppError("There is no achievement with this ID"));
+    }
+    res.status(200).json({
+        status: "success",
+        data: achievement,
     });
 });
 
