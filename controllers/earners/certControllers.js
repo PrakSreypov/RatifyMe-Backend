@@ -3,7 +3,7 @@ const PDFDocument = require("pdfkit");
 
 const catchAsync = require("../../utils/catchAsync");
 const AppError = require("../../utils/appError");
-const s3 = require("../../configs/s3")
+const s3 = require("../../configs/s3");
 
 const EarnerAchievements = require("../../models/EarnerAchievements");
 
@@ -46,12 +46,12 @@ const convertSvgToPdf = async (jpegBuffer) => {
 };
 
 // Upload PDF to S3
-const uploadToS3 = async (pdfBuffer, fileName) => {
+const uploadToS3 = async (buffer, fileName, contentType) => {
     const uploadParams = {
         Bucket: process.env.AWS_BUCKET_NAME,
-        Key: `Certificate/${fileName}.pdf`,
-        Body: pdfBuffer,
-        ContentType: "application/pdf",
+        Key: `Certificate/${fileName}`,
+        Body: buffer,
+        ContentType: contentType,  // Ensure the correct contentType is passed here
     };
 
     try {
@@ -63,39 +63,56 @@ const uploadToS3 = async (pdfBuffer, fileName) => {
     }
 };
 
+
 // Endpoint to handle file upload and processing
 exports.uploadCerti = catchAsync(async (req, res, next) => {
-    // Start upload certificate
     const { buffer: jpegBuffer, originalname } = req.file;
 
     if (!jpegBuffer) {
         return next(new AppError("There is no buffer provided", 400));
     }
-    // Convert the uploaded SVG to PDF
+
+    // Convert the uploaded image to PDF
     const pdfBuffer = await convertSvgToPdf(jpegBuffer);
 
-    if (pdfBuffer.length === 0) {
-        return next(new AppError("Failed to convert into pdf buffer", 405));
+    // Check if the conversion to PDF was successful
+    if (!pdfBuffer || pdfBuffer.length === 0) {
+        return next(new AppError("Failed to convert into PDF buffer", 405));
     }
-    const pdfUrl = await uploadToS3(pdfBuffer, originalname.replace(".jpeg", ""));
-    if (!pdfUrl) {
+
+    // Upload both the JPEG and PDF to S3
+    const pdfUrl = await uploadToS3(
+        pdfBuffer,
+        `${originalname.replace(".jpeg", "")}.pdf`,
+        "application/pdf",
+    );
+    const jpegUrl = await uploadToS3(
+        jpegBuffer,
+        `${originalname.replace(".jpeg", "")}.jpeg`,
+        "image/jpeg",
+    );
+
+
+    if (!pdfUrl || !jpegUrl) {
         return next(new AppError("Upload failed", 405));
     }
-    // End upload certificate
 
-    // Start add pdf to EarnerAchievements
+    // Start updating the EarnerAchievements record
     const { achievementId, earnerId } = req.params;
-    const earnerAchieve = await EarnerAchievements.findOne({ where: { achievementId, earnerId }})
-    if (!earnerAchieve){
-        return next(new AppError("There's no earner achivement to update", 400))
+    const earnerAchieve = await EarnerAchievements.findOne({ where: { achievementId, earnerId } });
+
+    if (!earnerAchieve) {
+        return next(new AppError("There's no earner achievement to update", 400));
     }
-    earnerAchieve.update({
-        certUrl: pdfUrl
-    })
-    earnerAchieve.save()
+
+    // Update the database with the S3 URLs
+    await earnerAchieve.update({
+        certUrlPdf: pdfUrl,
+        certUrlJpeg: jpegUrl,
+    });
 
     res.status(200).json({
         message: "File uploaded successfully",
-        uploadCert : earnerAchieve.certUrl,
+        uploadCert: earnerAchieve.certUrlPdf,
     });
 });

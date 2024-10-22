@@ -32,17 +32,32 @@ const EarnerAchievements = sequelize.define(
         },
         issuedOn: {
             type: DataTypes.DATE,
-            defaultValue: DataTypes.NOW,
+            defaultValue: null,
         },
         claimedOn: {
             type: DataTypes.DATE,
         },
-        certUrl: {
+        credId: {
+            type : DataTypes.STRING
+        },
+        certUrlPdf: {
+            type: DataTypes.STRING,
+        },
+        certUrlJpeg: {
+            type: DataTypes.STRING,
+        },
+        credUrl: {
             type: DataTypes.STRING,
         },
     },
     {
         timestamps: true,
+        indexes : [
+            {
+                unique: true,
+                fields: ["credId"],
+            },
+        ],
     },
 );
 

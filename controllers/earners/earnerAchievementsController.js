@@ -20,7 +20,7 @@ const associated = [
 
 class EarnerAchievementControllers extends BaseControllers {
     constructor() {
-        super(EarnerAchievements, [], associated);
+        super(EarnerAchievements, ["credId"], associated);
     }
     getOne = catchAsync(async (req, res, next) => {
         const { achievementId, earnerId } = req.params;
@@ -29,6 +29,17 @@ class EarnerAchievementControllers extends BaseControllers {
         });
         if (!earnerAchieve) {
             return next(new AppError("There is no earner achievement with these id", 404));
+        }
+        this.sendResponse(res, 200, earnerAchieve, "success");
+    });
+
+    getEarnerAchiveByUid = catchAsync(async (req, res, next) => {
+        const { credId } = req.params;
+        const earnerAchieve = await EarnerAchievements.findOne({
+            where: { credId },
+        });
+        if (!earnerAchieve) {
+            return next(new AppError("Credential ID is invalid", 404));
         }
         this.sendResponse(res, 200, earnerAchieve, "success");
     });

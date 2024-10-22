@@ -6,14 +6,14 @@ const BaseController = require("../../utils/baseControllers");
 const institutionModel = Institutions;
 const institutionParamName = "institutionId";
 const issuerRoleId = 3;
-const signupLinkIssuer = "http://localhost:5173/join-invitation?as=issuer";
+const signupLinkIssuer = `${process.env.CLIENT_BASE_URL}/join-invitation?as=issuer`;
 const institutionCode = "code";
 const institutionName = "institutionName";
 
 const issuerModel = Issuers;
 const issuerParamName = "issuerId";
 const earnerRoleId = 4;
-const signupLinkEarner = "http://localhost:5173/join-invitation?as=earner";
+const signupLinkEarner = `${process.env.CLIENT_BASE_URL}/join-invitation?as=earner`;
 const issuerCode = "code";
 const issuerName = "institutionName";
 const earnerModel = Earners;
@@ -88,7 +88,7 @@ class InviteUserControllers extends BaseController {
         } catch (error) {
             return res.status(500).json({ message: "Error inviting earner", error: error.message });
         }
-    }
+    };
 }
 
 module.exports = new InviteUserControllers();
