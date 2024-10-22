@@ -145,10 +145,6 @@ badgeClassControllers.getBadgeClassesByEarnerId = catchAsync(async (req, res) =>
     // Log the fetched badgeClasses for debugging
     console.log("Fetched badgeClasses:", badgeClasses.length, badgeClasses);
 
-    if (!badgeClasses || badgeClasses.length === 0) {
-        return res.status(404).json({ message: "No BadgeClasses found for this earner" });
-    }
-
     // Send a successful response with the results and totalRecords (not affected by pagination)
     res.json({
         status: "success",
@@ -218,10 +214,6 @@ badgeClassControllers.getBadgeClaimByEarner = catchAsync(async (req, res) => {
 
     // Find all BadgeClasses based on the final query
     const badgeClasses = await BadgeClasses.findAll(finalQuery);
-
-    if (!badgeClasses || badgeClasses.length === 0) {
-        return res.status(404).json({ message: "No BadgeClasses found for this earner" });
-    }
 
     // Send a successful response with the results
     res.json({
