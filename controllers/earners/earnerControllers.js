@@ -68,15 +68,17 @@ earnerControllers.updateAchievementStatus = catchAsync(async (req, res) => {
                 "No achievements found for the specified earner, badgeClass, and achievement IDs.",
         });
     }
+    const credId = `RMC-${v4()}`
 
     // Update the status of all achievements in the EarnerAchievements join table
     for (let achievement of earner.Achievements) {
         // Update the status and claimedOn fields in the EarnerAchievements join table
         await EarnerAchievements.update(
             {
-                credId: `RMC-${v4()}`,
+                credId,
                 status: status,
                 claimedOn: status === true ? new Date() : null,
+                credUrl: status === true ? `${process.env.CLIENT_BASE_URL}/credential/${credId}` : null
             },
             {
                 where: {
