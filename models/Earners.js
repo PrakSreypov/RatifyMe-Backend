@@ -1,6 +1,7 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../configs/database");
 const Users = require("./Users");
+const Issuers = require("./Issuers");
 
 const Earners = sequelize.define("Earners", {
     id: {
@@ -11,6 +12,9 @@ const Earners = sequelize.define("Earners", {
     },
     name: {
         type: DataTypes.STRING
+    },
+    institutionId: {
+        type: DataTypes.INTEGER
     },
     userId: {
         type: DataTypes.INTEGER,
@@ -52,16 +56,26 @@ const Earners = sequelize.define("Earners", {
     },
 });
 
-// Before creating a new Earner, set the name based on the associated user's firstName and lastName
-// Earners.addHook("beforeCreate", async (earner, options) => {
-//     const user = await Users.findByPk(earner.userId);
-//     if (!user) {
-//         throw new Error("User does not exist. Cannot create earner.");
-//     }
+//Before creating a new Earner, set the name based on the associated user's firstName and lastName
+Earners.addHook("beforeCreate", async (earner, options) => {
+    // Fetch the associated user to set the name field
+    const user = await Users.findByPk(earner.userId);
+    if (!user) {
+        throw new Error("User does not exist. Cannot create earner.");
+    }
 
-//     // Properly format the name by adding a space between firstName and lastName
-//     earner.name = `${user.firstName} ${user.lastName}`;
-// });
+    // Set the name field using the user's first and last name
+    earner.name = `${user.firstName} ${user.lastName}`;
+
+    // Fetch the issuer to get the institutionId
+    const issuer = await Issuers.findByPk(earner.issuerId);
+    if (!issuer) {
+        throw new Error("Issuer does not exist. Cannot set institutionId.");
+    }
+
+    // Set the institutionId on the earner record
+    earner.institutionId = issuer.institutionId;
+});
 
 // After syncing the database, update all existing earners' names based on the Users model
 Earners.addHook("afterSync", async (options) => {
@@ -77,6 +91,23 @@ Earners.addHook("afterSync", async (options) => {
         if (earner.User && `${earner.User.firstName} ${earner.User.lastName}` !== earner.name) {
             earner.name = `${earner.User.firstName} ${earner.User.lastName}`;
 
+            await earner.save();
+        }
+    }
+});
+
+Earners.addHook("afterSync", async (options) => {
+    const earners = await Earners.findAll({
+        include: {
+            model: Issuers,
+            as: 'Issuer',
+        },
+    });
+
+    // Iterate over each earner and update the institutionId if needed
+    for (const earner of earners) {
+        if (earner.Issuer && earner.institutionId !== earner.Issuer.institutionId) {
+            earner.institutionId = earner.Issuer.institutionId;
             await earner.save();
         }
     }
