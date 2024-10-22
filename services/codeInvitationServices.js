@@ -53,7 +53,7 @@ class CodeInvitationService {
         }
 
         const existAccount = await Users.findOne({
-            where: { email: email, isVerified: 1, code: inviterCodeValues },
+            where: { email: email, isVerified: 1 },
         });
 
         if (existAccount) {
@@ -69,7 +69,7 @@ class CodeInvitationService {
                     errorMessage = "Account already an issuer";
                     break;
                 case 4:
-                    const errorMessage = "Account already an earner";
+                    errorMessage = "Account already an earner";
                     break;
                 default:
                     errorMessage = "Unable to invite this account!";
