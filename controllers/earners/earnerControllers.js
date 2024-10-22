@@ -72,7 +72,7 @@ earnerControllers.updateAchievementStatus = catchAsync(async (req, res) => {
         // Update the status and claimedOn fields in the EarnerAchievements join table
         await EarnerAchievements.update(
             {
-                credId: v4(),
+                credId: `RMC-${v4()}`,
                 status: status,
                 claimedOn: status === true ? new Date() : null,
             },
