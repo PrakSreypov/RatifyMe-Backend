@@ -1,6 +1,6 @@
 const sequelize = require("../configs/database");
 const { DataTypes } = require("sequelize");
-
+const Earners = require("./Earners")
 const EarnerAchievements = sequelize.define(
     "EarnerAchievements",
     {
@@ -8,6 +8,9 @@ const EarnerAchievements = sequelize.define(
             type: DataTypes.INTEGER,
             autoIncrement: true,
             primaryKey: true,
+        },
+        name: {
+            type: DataTypes.STRING
         },
         status: {
             type: DataTypes.BOOLEAN,
@@ -60,5 +63,34 @@ const EarnerAchievements = sequelize.define(
         ],
     },
 );
+
+
+EarnerAchievements.addHook("beforeCreate", async (earnerAchievements, options) => {
+    const earner = await Earners.findByPk(earnerAchievements.earnerId);
+    if (!earner) {
+        throw new Error("Earner does not exist. Cannot create EarnerAchievements.");
+    }
+
+    // Properly format the name by adding a space between firstName and lastName
+    earnerAchievements.name = earner.name
+});
+
+// After syncing the database, update all existing earners' names based on the Users model
+EarnerAchievements.addHook("afterSync", async (options) => {
+    const earnerAchievements = await EarnerAchievements.findAll({
+        include: {
+            model: Earners,
+            as: 'Earner', 
+        },
+    });
+
+    // Iterate over each subscription and update the name field
+    for (const earnerAchievement of earnerAchievements) {
+        if (earnerAchievement.Earner && earnerAchievement.name !== earnerAchievement.Earner.name) {
+            earnerAchievement.name = earnerAchievement.Earner.name;
+            await earnerAchievement.save();  
+        }
+    }
+});
 
 module.exports = EarnerAchievements;

@@ -46,6 +46,12 @@ class ApiFeature {
                 });
             }
 
+            if (this.model.rawAttributes.inviteEmail) {
+                searchConditions.push({
+                    inviteEmail: { [Op.like]: `%${this.queryString.search}%` },
+                });
+            }
+
             if (searchConditions.length > 0) {
                 filters[Op.or] = searchConditions;
             }

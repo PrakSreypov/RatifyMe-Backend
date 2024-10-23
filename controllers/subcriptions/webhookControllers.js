@@ -64,6 +64,7 @@ const updateSubscription = catchAsync(async (subscriptionId, stripeSubscriptionI
     }
 });
 
+
 exports.webhook = catchAsync(async (req, res, next) => {
     const sig = req.headers["stripe-signature"];
     let event;
