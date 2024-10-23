@@ -16,7 +16,7 @@ router.use("/fieldofstudies", fieldOfStudyRouters);
 router.use("/specializations", specializationRouters);
 router.use("/courses", courseRouters);
 router.use("/academicbackgrounds", academicBackgroundRouters);
-router.use("/verifications", verificationRouters);
+router.use("/verify-credential", verificationRouters);
 router.use("/uploadCerti", certRouters);
 router.use("/earnerAchievement", earnerAchievementRouters);
 router.use("/", earnerRouters);

@@ -3,6 +3,6 @@ const router = express.Router();
 
 const verificationControllers = require('../../controllers/earners/verificationControllers');
 
-router.route('/:id').get(verificationControllers.getVerificationData);
+router.route('/:credId').post(verificationControllers.verifyCredential);
 
 module.exports = router;
