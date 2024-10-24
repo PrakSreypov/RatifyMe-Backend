@@ -17,28 +17,51 @@ To run this project, you will need to add the following environment variables to
 
 ### Backend
 `PORT`
+
 `NODE_ENV`
+
 `DB_NAME`
+
 `DB_USER`
+
 `DB_PASSWORD`
+
 `DB_HOST`
+
 `DB_DIALECT`
+
 `JWT_SECRET`
+
 `JWT_EXPIRES_IN`
+
 `JWT_COOKIE_EXPIRES_IN`
+
 `EMAIL_USERNAME`
+
 `EMAIL_PASSWORD`
+
 `EMAIL_HOST`
+
 `EMAIL_PORT`
+
 `SENDER_NAME`
+
 `SENDER_EMAIL_ADDRESS`
+
 `CLIENT_BASE_URL`
+
 `STRIPE_SECRET_KEY`
+
 `STRIPE_CLI_ACC`
+
 `STRIPE_WEBHOOK_SECRET_KEY`
+
 `AWS_BUCKET_NAME`
+
 `AWS_BUCKET_REGION`
+
 `AWS_ACCESS_KEY`
+
 `AWS_SECRET_ACCESS_KEY`
 
 ## Demo
