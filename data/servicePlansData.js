@@ -20,7 +20,7 @@ const servicePlansData = [
     {
         name: "Pro Plan",
         description: "A plan for professionals and small teams with more badges and basic support.",
-        duration: 6,
+        duration: 3,
         price: 199.99,
         badgeLimit: 50,
         peopleLimit: 100,
@@ -36,7 +36,7 @@ const servicePlansData = [
         name: "Enterprise Plan",
         description: "An all-inclusive plan for enterprises with maximum badges, people, and premium support.",
         duration: 12,
-        price: 999.99,
+        price: 399.99,
         badgeLimit: 500,
         peopleLimit: 5000,
         isBadgeVerificationAvailable: true,
@@ -44,8 +44,8 @@ const servicePlansData = [
         isBadgeReportsAvailable: true,
         isBadgeCertificatesAvailable: true,
         isTechnicalSupportType: true,
-        stripeProductId: "prod_R1oY7nRQNdPOkg",
-        stripePriceId: "price_1Q9kuvEF0UjOYuRsBSNJbac1",
+        stripeProductId: "prod_R5ahGwVPRH4y9i",
+        stripePriceId: "price_1QDPWNEF0UjOYuRsgbThAOfE",
     },
 ];
 
