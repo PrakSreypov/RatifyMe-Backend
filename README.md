@@ -27,25 +27,25 @@ as our project is ready to be deploy this is the link to Demo our Project Showca
 **Server:** Node, Express, MySQL
 
 ## **Dependecies:** 
-**aws-sdk**: `^2.1691.0` - SDK for integrating with AWS services.
-**bcryptjs**: `^2.4.3` - For hashing passwords (used in authentication).
-**cookie-parser**: `^1.4.6` - To parse cookies in HTTP requests.
-**cors**: `^2.8.5` - Enables Cross-Origin Resource Sharing.
-**crypto-js**: `^4.2.0` - Library for encryption and hashing.
-**dotenv**: `^16.4.5` - Loads environment variables from a .env file.
-**express**: `^4.19.2` - Web framework for Node.js to create APIs or web apps.
-**helmet**: `^7.1.0` - For securing Express apps by setting various HTTP headers.
-**jsonwebtoken**: `^9.0.2` - For creating and verifying JSON Web Tokens (JWT) for authentication.
-**morgan**: `^1.10.0` - HTTP request logger middleware for Node.js.
-**multer**: `^1.4.5-lts.1` - Middleware for handling multipart/form-data, primarily for file uploads.
-**mysql2**: `^3.11.0` - MySQL client for Node.js, supports prepared statements.
-**nodemailer**: `^6.9.15` - For sending emails.
-**nodemon**: `^3.1.4` - Tool to automatically restart the server when file changes are detected (dev use).
-**pdfkit**: `^0.15.0` - For generating PDFs programmatically.
-**sequelize**: `^6.37.3` - ORM (Object-Relational Mapper) to interact with SQL databases.
-**sharp**: `^0.33.5` - High-performance image processing library.
-**stripe**: `^16.12.0` - Library for interacting with the Stripe API for payments.
-**uuid**: `^10.0.0` - For generating unique identifiers (UUIDs).
+- **aws-sdk**: `^2.1691.0` - SDK for integrating with AWS services.
+- **bcryptjs**: `^2.4.3` - For hashing passwords (used in authentication).
+- **cookie-parser**: `^1.4.6` - To parse cookies in HTTP requests.
+- **cors**: `^2.8.5` - Enables Cross-Origin Resource Sharing.
+- **crypto-js**: `^4.2.0` - Library for encryption and hashing.
+- **dotenv**: `^16.4.5` - Loads environment variables from a .env file.
+- **express**: `^4.19.2` - Web framework for Node.js to create APIs or web apps.
+- **helmet**: `^7.1.0` - For securing Express apps by setting various HTTP headers.
+- **jsonwebtoken**: `^9.0.2` - For creating and verifying JSON Web Tokens (JWT) for authentication.
+- **morgan**: `^1.10.0` - HTTP request logger middleware for Node.js.
+- **multer**: `^1.4.5-lts.1` - Middleware for handling multipart/form-data, primarily for file uploads.
+- **mysql2**: `^3.11.0` - MySQL client for Node.js, supports prepared statements.
+- **nodemailer**: `^6.9.15` - For sending emails.
+- **nodemon**: `^3.1.4` - Tool to automatically restart the server when file changes are detected (dev use).
+- **pdfkit**: `^0.15.0` - For generating PDFs programmatically.
+- **sequelize**: `^6.37.3` - ORM (Object-Relational Mapper) to interact with SQL databases.
+- **sharp**: `^0.33.5` - High-performance image processing library.
+- **stripe**: `^16.12.0` - Library for interacting with the Stripe API for payments.
+- **uuid**: `^10.0.0` - For generating unique identifiers (UUIDs).
 
 
 ## Project Structure
