@@ -11,10 +11,10 @@ const Earners = sequelize.define("Earners", {
         allowNull: false,
     },
     name: {
-        type: DataTypes.STRING
+        type: DataTypes.STRING,
     },
     institutionId: {
-        type: DataTypes.INTEGER
+        type: DataTypes.INTEGER,
     },
     userId: {
         type: DataTypes.INTEGER,
@@ -58,15 +58,6 @@ const Earners = sequelize.define("Earners", {
 
 //Before creating a new Earner, set the name based on the associated user's firstName and lastName
 Earners.addHook("beforeCreate", async (earner, options) => {
-    // Fetch the associated user to set the name field
-    const user = await Users.findByPk(earner.userId);
-    if (!user) {
-        throw new Error("User does not exist. Cannot create earner.");
-    }
-
-    // Set the name field using the user's first and last name
-    earner.name = `${user.firstName} ${user.lastName}`;
-
     // Fetch the issuer to get the institutionId
     const issuer = await Issuers.findByPk(earner.issuerId);
     if (!issuer) {
@@ -82,7 +73,7 @@ Earners.addHook("afterSync", async (options) => {
     const earners = await Earners.findAll({
         include: {
             model: Users,
-            as: 'User',
+            as: "User",
         },
     });
 
@@ -100,7 +91,7 @@ Earners.addHook("afterSync", async (options) => {
     const earners = await Earners.findAll({
         include: {
             model: Issuers,
-            as: 'Issuer',
+            as: "Issuer",
         },
     });
 
@@ -112,6 +103,5 @@ Earners.addHook("afterSync", async (options) => {
         }
     }
 });
-
 
 module.exports = Earners;
