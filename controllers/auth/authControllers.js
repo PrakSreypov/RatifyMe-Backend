@@ -252,6 +252,10 @@ class AuthControllers extends BaseController {
             return next(new AppError("Incorrect email or password", 401));
         }
 
+        if (user.isVerified === false) {
+            return next(new AppError("Your account has not been verified yet."));
+        }
+
         let subscriptionStatus;
 
         // Check if the user has roleId = 2 (specific role that requires subscription check)
