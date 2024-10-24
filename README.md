@@ -2,6 +2,19 @@
 
 RatifyME is a startup project to showcase our Fullstack Skill after we finished our course on Fullstack development. We will devote our time and commitment to this project to show how skillful we are in order to build a Fullstack web app. RatifyME is ideally a place where learner can come to claim their achievement such as E-Certificate and E-Badge that contain their metadata such as Their Achievement, Exam/test score, and activities to obtain their E-Certificate or E-Badge and it is secure that can confirm it authentic Certificate/Badge that issue by Organization/Institution.
 
+## Table of Contents
+- [RatifyME Project](#ratifyme-project)
+- [Table of Contents](#table-of-contents)
+    - [RatifyME: Showcase Your Digital Achievements with Confidence](#ratifyme-showcase-your-digital-achievements-with-confidence)
+- [Demo](#demo)
+- [Tech Stack](#tech-stack)
+- [Dependecies:](#dependecies)
+- [Project Structure](#project-structure)
+- [Environment Variables](#environment-variables)
+  - [Backend](#backend)
+- [Run Locally](#run-locally)
+- [Deployment](#deployment)
+
 #### RatifyME: Showcase Your Digital Achievements with Confidence
 
 Ready to turn your hard-earned skills and accomplishments into verifiable digital credentials? **RatifyME** is your go-to platform for earning and showcasing E-Certificates and E-Badges, complete with the metadata that matters: test scores, achievements, and the activities that helped you get there.
@@ -26,7 +39,7 @@ as our project is ready to be deploy this is the link to Demo our Project Showca
 
 **Server:** Node, Express, MySQL
 
-## **Dependecies:** 
+## Dependecies: 
 - **aws-sdk**: `^2.1691.0` - SDK for integrating with AWS services.
 - **bcryptjs**: `^2.4.3` - For hashing passwords (used in authentication).
 - **cookie-parser**: `^1.4.6` - To parse cookies in HTTP requests.
