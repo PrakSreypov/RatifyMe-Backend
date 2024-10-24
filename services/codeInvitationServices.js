@@ -57,25 +57,7 @@ class CodeInvitationService {
         });
 
         if (existAccount) {
-            let errorMessage;
-
-            // Determine the error message based on the roleId
-            switch (existAccount.roleId) {
-                case 1:
-                case 2:
-                    errorMessage = "Account already has a specific role";
-                    break;
-                case 3:
-                    errorMessage = "Account already an issuer";
-                    break;
-                case 4:
-                    errorMessage = "Account already an earner";
-                    break;
-                default:
-                    errorMessage = "Unable to invite this account!";
-            }
-
-            return next(new AppError(errorMessage));
+            return next(new AppError("Unable to invite this account!"));
         }
 
         // Create an invitation in the database
