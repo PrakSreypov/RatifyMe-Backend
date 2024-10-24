@@ -107,7 +107,7 @@ exports.webhook = catchAsync(async (req, res, next) => {
                 },
             );
             // Acknowledge receipt of the event
-            res.redirect(`${process.env.CLIENT_BASE_URL}/success-payment`);
+            res.redirect(`${process.env.CLIENT_BASE_URL}/auth/success-payment`);
             break;
         case "checkout.session.expired":
             await Subscriptions.destroy({

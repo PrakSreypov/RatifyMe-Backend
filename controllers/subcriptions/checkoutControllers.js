@@ -65,7 +65,7 @@ exports.createCheckoutSession = catchAsync(async (req, res, next) => {
     const session = await stripe.checkout.sessions.create({
         mode: "subscription",
         line_items: [{ price: stripePriceId, quantity: 1 }],
-        success_url: `${process.env.CLIENT_BASE_URL}/success-payment/${newPayment.dataValues.id}`,
+        success_url: `${process.env.CLIENT_BASE_URL}/auth/success-payment/${newPayment.dataValues.id}`,
         cancel_url: `${process.env.CLIENT_BASE_URL}/price`,
         metadata: {
             subscriptionId: subscription.id,
