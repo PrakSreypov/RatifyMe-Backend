@@ -65,62 +65,85 @@ as our project is ready to be deploy this is the link to Demo our Project Showca
 ## Project Structure
 
 ```Bash
-verifyme-backend/
-├── configs/
+verifyme-backend/ 
+├── configs/                        # Static assets (images, fonts, etc.)
+│   └── database.js
 │   └── <JS files>
-├── controllers/
+├── controllers/                    # Controller                   
 │   ├── auth/
+│   │   └── authControllers.js
 │   │   └── <JS files>
 │   ├── earners/
+│   │   └── academicBackgroundControllers.js
 │   │   └── <JS files>
 │   ├── institutions/
+│   │   └── insituImageControllers.js
 │   │   └── <JS files>
 │   ├── issuers/
+│   │   └── achievementControllers.js
 │   │   └── <JS files>
 │   ├── subscriptions/
+│   │   └── checkoutControllers.js
 │   │   └── <JS files>
 │   └── users/
+│   │   └── addressControllers.js
 │       └── <JS files>
-├── data/
+├── data/                           # Static data and constants
+│   └── academicBackgroundData.js
 │   └── <JS files>
-├── middlewares/
+├── middlewares/                    # Middlewares configuration
+│   └── auth.js
 │   └── <JS files>
-├── models/
+├── models/                         # Model configuration
+│   └── AcademicBackgrounds.js
 │   └── <JS files>
 ├── node_modules/
 │   └── <JS files>
-├── public/
-│   └── <JS files>
-├── routers/
+├── public/                         # Public Configuration
+│   └── assets
+│   │   └── image
+│   │       └── Ratifyme-logo.svg                        
+│   └── templates
+│       └── inviteCodeTemplate.js    
+├── routers/                        # Routing configuration
 │   ├── auth/
+│   │   └── index.js
 │   │   └── <JS files>
 │   ├── earners/
+│   │   └── index.js
 │   │   └── <JS files>
 │   ├── institutions/
+│   │   └── index.js
 │   │   └── <JS files>
 │   ├── issuers/
 │   │   └── <JS files>
+│   │   └── index.js
 │   ├── subscriptions/
+│   │   └── index.js
 │   │   └── <JS files>
 │   ├── users/
+│   │   └── index.js
 │   │   └── <JS files>
 │   └── <JS files>
-├── services/
+├── services/                       # Services configuration
+│   └── codeInvitationServices.js
 │   └── <JS files>
-├── utils/
+├── utils/                          # Utils configuration
 │   ├── auth/
+│   │   └── generateVerificationCode.js
 │   │   └── <JS files>
+│   └── apiFeature.js
 │   └── <JS files>
-├── .editorconfig
-├── .env
-├── .gitignore
-├── .gitlab-ci.yml
-├── .prettierrc
-├── app.js
-├── package-lock.json
-├── package.json
-├── README.md
-└── server.js
+├── .editorconfig                   # Editor configuration
+├── .env                            # Environment variables
+├── .gitignore                      # Git ignore rules
+├── .gitlab-ci.yml                  # GitLab CI/CD configuration
+├── .prettierrc                     # Prettier configuration
+├── app.js                          # App configuration
+├── package-lock.json               # Dependency lock file
+├── package.json                    # Project dependencies and scripts
+├── README.md                       # Project documentation
+└── server.js                       # Server configuration
 ```
 
 ## Environment Variables
