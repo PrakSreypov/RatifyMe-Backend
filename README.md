@@ -14,6 +14,7 @@ RatifyME is a startup project to showcase our Fullstack Skill after we finished 
   - [Backend](#backend)
 - [Run Locally](#run-locally)
 - [Deployment](#deployment)
+- [Contribution](#contribution)
 
 #### RatifyME: Showcase Your Digital Achievements with Confidence
 
@@ -227,3 +228,13 @@ as our project goes we use AMAZON LINUX for easy and noncomplex installation.
   sudo systemctl start nginx
   sudo systemctl status nginx
 ```
+
+## Contribution
+-   1 Prak Sreypov
+-   2 Phok Keomonnyratanak
+-   3 Samon Rotha
+-   4 Ly Diyamong
+-   5 Khun Malen
+-   6 Sreang Lyhour
+-   7 Rorn Bunthong
+-   8 Tep Chounan
