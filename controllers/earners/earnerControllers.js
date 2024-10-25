@@ -78,7 +78,7 @@ earnerControllers.updateAchievementStatus = catchAsync(async (req, res) => {
                 credId,
                 status: status,
                 claimedOn: status === true ? new Date() : null,
-                credUrl: status === true ? `${process.env.CLIENT_BASE_URL}/public/credential/${credId}` : null
+                credUrl: status === true ? `${process.env.CLIENT_BASE_URL}/credential/${credId}` : null
             },
             {
                 where: {
