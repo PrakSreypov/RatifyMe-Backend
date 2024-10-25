@@ -3,6 +3,8 @@ const router = express.Router();
 
 const roleControllers = require("../../controllers/users/roleControllers");
 
+const authMiddlewares = require("../../middlewares/auth");
+
 router
     .route("/")
     .get(authMiddlewares.authorizeRole(1), roleControllers.getAll)
