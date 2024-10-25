@@ -4,25 +4,26 @@ const { upload } = require("../../app");
 
 const institutionControllers = require("../../controllers/institutions/institutionControllers");
 const instituImageControllers = require("../../controllers/institutions/instituImageControllers");
+const authMiddlewares = require("../../middlewares/auth");
 
 router
     .route("/")
-    .get(institutionControllers.getAll)
-    .post(institutionControllers.createOne)
-    .delete(institutionControllers.deleteAll);
+    .get(authMiddlewares.protect, institutionControllers.getAll)
+    .post(authMiddlewares.protect, institutionControllers.createOne)
+    .delete(authMiddlewares.protect, institutionControllers.deleteAll);
 
 router
     .route("/:id")
-    .get(institutionControllers.getOne)
-    .patch(institutionControllers.updateOne)
-    .delete(institutionControllers.deleteOne);
+    .get(authMiddlewares.protect, institutionControllers.getOne)
+    .patch(authMiddlewares.protect, institutionControllers.updateOne)
+    .delete(authMiddlewares.protect, institutionControllers.deleteOne);
 
 router.post("/instiImage", upload.single("institutionImg"), instituImageControllers.createOne);
 
 router
     .route("/instiImage/:id")
-    .get(instituImageControllers.getOne)
+    .get(authMiddlewares.protect, instituImageControllers.getOne)
     .put(upload.single("institutionImg"), instituImageControllers.updateImage)
-    .delete(instituImageControllers.deleteImage);
+    .delete(authMiddlewares.protect, instituImageControllers.deleteImage);
 
 module.exports = router;

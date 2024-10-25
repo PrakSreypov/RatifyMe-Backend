@@ -1,7 +1,9 @@
-const express = require('express')
-const router = express.Router()
+const express = require("express");
+const router = express.Router();
 
-const subcriptionControllers = require('../../controllers/subcriptions/subcriptionControllers')
-router.route('/').get(subcriptionControllers.getAll)
+const subcriptionControllers = require("../../controllers/subcriptions/subcriptionControllers");
+const authMiddlewares = require("../../middlewares/auth");
 
-module.exports = router
+router.route("/").get(subcriptionControllers.getAll);
+
+module.exports = router;

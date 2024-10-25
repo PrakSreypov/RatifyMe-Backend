@@ -2,12 +2,17 @@ const express = require("express");
 const router = express.Router();
 
 const fieldOfStudyControllers = require("../../controllers/earners/fieldOfStudyControllers");
-
-router.route("/").get(fieldOfStudyControllers.getAll).post(fieldOfStudyControllers.createOne);
+const authMiddlewares = require("../../middlewares/auth");
 
 router
-    .route("/:id").get(fieldOfStudyControllers.getOne)
-    .patch(fieldOfStudyControllers.updateOne)
-    .delete(fieldOfStudyControllers.deleteOne);
+    .route("/")
+    .get(authMiddlewares.protect, fieldOfStudyControllers.getAll)
+    .post(authMiddlewares.protect, fieldOfStudyControllers.createOne);
+
+router
+    .route("/:id")
+    .get(authMiddlewares.protect, fieldOfStudyControllers.getOne)
+    .patch(authMiddlewares.protect, fieldOfStudyControllers.updateOne)
+    .delete(authMiddlewares.protect, fieldOfStudyControllers.deleteOne);
 
 module.exports = router;

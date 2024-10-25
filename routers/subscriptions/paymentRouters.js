@@ -1,8 +1,10 @@
-const express = require('express')
-const router = express.Router()
-const paymentControllers = require('../../controllers/subcriptions/paymentControllers')
+const express = require("express");
+const router = express.Router();
 
-router.route('/').get(paymentControllers.getAll)
-router.route('/:id').get(paymentControllers.getOne)
+const paymentControllers = require("../../controllers/subcriptions/paymentControllers");
+const authMiddlewares = require("../../middlewares/auth");
 
-module.exports = router
+router.route("/").get(authMiddlewares.protect, paymentControllers.getAll);
+router.route("/:id").get(authMiddlewares.protect, paymentControllers.getOne);
+
+module.exports = router;

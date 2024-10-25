@@ -2,16 +2,17 @@ const express = require("express");
 const router = express.Router();
 
 const achievementTypesControllers = require("../../controllers/issuers/achievementTypeControllers");
+const authMiddlewares = require("../../middlewares/auth");
 
 router
     .route("/")
-    .get(achievementTypesControllers.getAll)
-    .post(achievementTypesControllers.createOne);
+    .get(authMiddlewares.protect, achievementTypesControllers.getAll)
+    .post(authMiddlewares.protect, achievementTypesControllers.createOne);
 
 router
     .route("/:id")
-    .get(achievementTypesControllers.getOne)
-    .patch(achievementTypesControllers.updateOne)
-    .delete(achievementTypesControllers.deleteOne);
+    .get(authMiddlewares.protect, achievementTypesControllers.getOne)
+    .patch(authMiddlewares.protect, achievementTypesControllers.updateOne)
+    .delete(authMiddlewares.protect, achievementTypesControllers.deleteOne);
 
 module.exports = router;

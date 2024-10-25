@@ -2,16 +2,17 @@ const express = require("express");
 const router = express.Router();
 
 const badgeCriteriaItemsControllers = require("../../controllers/issuers/badgeCriteriaItemControllers");
+const authMiddlewares = require("../../middlewares/auth");
 
 router
     .route("/")
-    .get(badgeCriteriaItemsControllers.getAll)
-    .post(badgeCriteriaItemsControllers.createOne);
+    .get(authMiddlewares.protect, badgeCriteriaItemsControllers.getAll)
+    .post(authMiddlewares.protect, badgeCriteriaItemsControllers.createOne);
 
 router
     .route("/:id")
-    .get(badgeCriteriaItemsControllers.getOne)
-    .delete(badgeCriteriaItemsControllers.deleteOne)
-    .patch(badgeCriteriaItemsControllers.updateOne);
+    .get(authMiddlewares.protect, badgeCriteriaItemsControllers.getOne)
+    .delete(authMiddlewares.protect, badgeCriteriaItemsControllers.deleteOne)
+    .patch(authMiddlewares.protect, badgeCriteriaItemsControllers.updateOne);
 
 module.exports = router;
