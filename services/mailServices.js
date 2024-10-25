@@ -85,7 +85,7 @@ class EmailService {
         const html = resetPasswordTemplate
             .replace("[RESET_PASSWORD_LINK]", resetURL)
             .replace("[EMAIL_RESET_PASSWORD]", email)
-            .replace("[FORGOT_PASSWORD_LINK]", `${process.env.CLIENT_BASE_URL}/forgot-password`);
+            .replace("[FORGOT_PASSWORD_LINK]", `${process.env.CLIENT_BASE_URL}/auth/forgot-password`);
         await this.sendEmail({
             email,
             subject: "Reset your password",

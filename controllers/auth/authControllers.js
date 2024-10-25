@@ -306,7 +306,7 @@ class AuthControllers extends BaseController {
         await user.save({ validate: false });
 
         // Send to user's email
-        const resetURL = `${process.env.CLIENT_BASE_URL}/reset-password/${resetToken}`;
+        const resetURL = `${process.env.CLIENT_BASE_URL}/auth/reset-password/${resetToken}`;
 
         try {
             await emailService.sendPasswordResetEmail(user.email, resetURL);
