@@ -93,9 +93,6 @@ badgeClassControllers.getBadgeClassesByEarnerId = catchAsync(async (req, res) =>
         .limitFields()
         .pagination();
 
-    // Log where conditions to debug
-    console.log("Where conditions for totalRecords:", apiFeature.query.where);
-
     // Count total records based on filters applied (without pagination)
     const totalRecords = await BadgeClasses.findAll({
         include: [
@@ -141,13 +138,6 @@ badgeClassControllers.getBadgeClassesByEarnerId = catchAsync(async (req, res) =>
         ],
         ...apiFeature.query,
     });
-
-    // Log the fetched badgeClasses for debugging
-    console.log("Fetched badgeClasses:", badgeClasses.length, badgeClasses);
-
-    if (!badgeClasses || badgeClasses.length === 0) {
-        return res.status(404).json({ message: "No BadgeClasses found for this earner" });
-    }
 
     // Send a successful response with the results and totalRecords (not affected by pagination)
     res.json({
@@ -218,10 +208,6 @@ badgeClassControllers.getBadgeClaimByEarner = catchAsync(async (req, res) => {
 
     // Find all BadgeClasses based on the final query
     const badgeClasses = await BadgeClasses.findAll(finalQuery);
-
-    if (!badgeClasses || badgeClasses.length === 0) {
-        return res.status(404).json({ message: "No BadgeClasses found for this earner" });
-    }
 
     // Send a successful response with the results
     res.json({
