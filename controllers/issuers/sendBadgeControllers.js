@@ -1,36 +1,75 @@
 const Achievement = require("../../models/Achievements");
 const EarnerAchievements = require("../../models/EarnerAchievements");
+const Earners = require("../../models/Earners");
+const Issuers = require("../../models/Issuers");
+const Users = require("../../models/Users");
+const EmailService = require("../../services/mailServices");
 const catchAsync = require("../../utils/catchAsync");
+
+const emailService = new EmailService();
 
 exports.assignBadgeToEarners = catchAsync(async (req, res) => {
     const { badgeClass } = req;
     const { earners } = req;
 
-    // Find all achievements related to the badgeClassId
+    const earnerData = await Earners.findAll({
+        where: {
+            id: earners.map((earner) => earner.id),
+        },
+        include: [
+            {
+                model: Users,
+            },
+            {
+                model: Issuers,
+                include: [
+                    {
+                        model: Users,
+                    },
+                ],
+            },
+        ],
+    });
+
     const achievements = await Achievement.findAll({
         where: { badgeClassId: badgeClass.id },
     });
 
-    // If there are no achievements, return an error
     if (!achievements || achievements.length === 0) {
         return res.status(404).json({ message: "No achievements found for this badge" });
     }
 
-    // Update each earner with the corresponding achievements
-    for (const earner of earners) {
+    for (const earner of earnerData) {
         for (const achievement of achievements) {
-            // Associate the achievement with the earner
             await achievement.addEarner(earner);
+
+            const badgeLink = `${process.env.CLIENT_BASE_URL}/dashboard/management/badges/badgeDetail/${achievement.id}`;
+
+            const earnerEmail = earner.User?.email || null;
+            const issuerFullname = `${earner.Issuer?.User?.firstName || "Unknown"} ${
+                earner.Issuer?.User?.lastName || "Issuer"
+            }`;
+
+            try {
+                if (earnerEmail) {
+                    await emailService.sendBadgeToEarner(earnerEmail, issuerFullname, badgeLink);
+                }
+            } catch (error) {
+                console.log(
+                    `Error sending mail for earner ID: ${earner.id}, achievement ID: ${achievement.id} 🔴`,
+                    error,
+                );
+            }
         }
     }
 
-    // Send response with assigned achievements and earners
     res.status(200).json({
         status: "success",
         message: "Badge assigned to all earners successfully",
         data: {
             badgeClass,
             earners,
+            earnerData,
             achievements,
         },
     });
