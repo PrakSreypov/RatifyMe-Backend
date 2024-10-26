@@ -114,21 +114,20 @@ const ServicePlans = sequelize.define(
             defaultValue: false,
             allowNull: false,
         },
-        stripeProductId : {
-            type : DataTypes.STRING,
-            allowNull: false
+        stripeProductId: {
+            type: DataTypes.STRING,
+            allowNull: false,
         },
-        stripePriceId : {
-            type : DataTypes.STRING,
-            allowNull: false
+        stripePriceId: {
+            type: DataTypes.STRING,
+            allowNull: false,
         },
-
     },
     {
         indexes: [
             {
                 unique: true,
-                fields: ["name", "stripeProductId", "stripePriceId"],
+                fields: ["stripeProductId", "stripePriceId"],
             },
         ],
     },

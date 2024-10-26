@@ -1,7 +1,7 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../configs/database");
 const ServicePlans = require("./ServicePlans");
-const Institutions = require("./Institutions")
+const Institutions = require("./Institutions");
 
 const Subscriptions = sequelize.define(
     "Subscriptions",
@@ -13,7 +13,7 @@ const Subscriptions = sequelize.define(
             primaryKey: true,
         },
         name: {
-            type: DataTypes.STRING
+            type: DataTypes.STRING,
         },
         institutionId: {
             type: DataTypes.INTEGER,
@@ -125,7 +125,6 @@ const Subscriptions = sequelize.define(
     },
 );
 
-
 Subscriptions.addHook("beforeCreate", async (subscriptions, options) => {
     const institution = await Institutions.findByPk(subscriptions.institutionId);
     if (!institution) {
@@ -133,7 +132,7 @@ Subscriptions.addHook("beforeCreate", async (subscriptions, options) => {
     }
 
     // Properly format the name by adding a space between firstName and lastName
-    subscriptions.name = institution.institutionName
+    subscriptions.name = institution.institutionName;
 });
 
 // After syncing the database, update all existing earners' names based on the Users model
@@ -141,16 +140,31 @@ Subscriptions.addHook("afterSync", async (options) => {
     const subscriptions = await Subscriptions.findAll({
         include: {
             model: Institutions,
-            as: 'Institution', 
+            as: "Institution",
         },
     });
 
     // Iterate over each subscription and update the name field
     for (const subscription of subscriptions) {
-        if (subscription.Institution && subscription.name !== subscription.Institution.institutionName) {
+        if (
+            subscription.Institution &&
+            subscription.name !== subscription.Institution.institutionName
+        ) {
             subscription.name = subscription.Institution.institutionName;
-            await subscription.save();  
+            await subscription.save();
         }
+    }
+});
+
+Subscriptions.addHook("beforeFind", (options) => {
+    // Check if there's a specific option to skip the status filter
+    if (!options.where) {
+        options.where = {};
+    }
+
+    // Allow a flag to bypass the status check for certain queries
+    if (!options.skipStatusCheck) {
+        options.where.status = true;
     }
 });
 
