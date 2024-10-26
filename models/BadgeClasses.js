@@ -58,6 +58,10 @@ const BadgeClasses = sequelize.define(
             type: DataTypes.DATE,
             allowNull: true,
         },
+        endDate: {
+            type: DataTypes.DATE,
+            allowNull: true,
+        },
         expiredDate: {
             type: DataTypes.DATE,
             allowNull: true,
