@@ -25,9 +25,6 @@ class ServicePlanControllers extends BaseControllers {
 }
 
 // Instantiate the servicePlanControllers with ServicePlans model and attributes
-const servicePlanControllers = new ServicePlanControllers(ServicePlans, [
-    "name",
-    "stripeProductId",
-]);
+const servicePlanControllers = new ServicePlanControllers(ServicePlans, ["stripeProductId"]);
 
 module.exports = servicePlanControllers;

@@ -17,7 +17,9 @@ const updateSubscription = catchAsync(async (subscriptionId, stripeSubscriptionI
         // Find the subscription record by its primary key or stripeSubscriptionId
         const subscription = await Subscriptions.findOne({
             where: { id: subscriptionId },
-            include: { model: ServicePlans, attributes: ["name"] },
+            include: { model: ServicePlans, attributes: ["name", "duration"] },
+            // Skip status check
+            skipStatusCheck: true,
         });
 
         if (!subscription) {
@@ -29,18 +31,14 @@ const updateSubscription = catchAsync(async (subscriptionId, stripeSubscriptionI
         let endDate;
 
         // Calculate end date based on service plan duration (make sure not to modify the original date)
-        switch (subscription.ServicePlan.name) {
-            case "Free Starter": // Quarterly (3 months)
+        switch (subscription.ServicePlan.duration) {
+            case 1:
                 endDate = new Date(currentDate);
-                endDate.setMonth(endDate.getMonth() + 3);
+                endDate.setMonth(endDate.getMonth() + 1);
                 break;
-            case "Pro Plan": // Midyear (6 months)
+            case 12:
                 endDate = new Date(currentDate);
-                endDate.setMonth(endDate.getMonth() + 6);
-                break;
-            case "Enterprise Plan": // Annual (12 months)
-                endDate = new Date(currentDate);
-                endDate.setFullYear(endDate.getFullYear() + 1);
+                endDate.setMonth(endDate.getMonth() + 12);
                 break;
             default:
                 throw new AppError("Can't find the service plan with that name", 404);
@@ -63,7 +61,6 @@ const updateSubscription = catchAsync(async (subscriptionId, stripeSubscriptionI
         throw err;
     }
 });
-
 
 exports.webhook = catchAsync(async (req, res, next) => {
     const sig = req.headers["stripe-signature"];
