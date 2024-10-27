@@ -44,7 +44,6 @@ class CodeInvitationService {
             where: {
                 inviteEmail: email,
                 inviteExpires: { [Op.gt]: Date.now() },
-                inviterCode: inviterCodeValues,
             },
         });
 
