@@ -1,3 +1,4 @@
+const Achievements = require("../../models/Achievements");
 const Achievement = require("../../models/Achievements");
 const EarnerAchievements = require("../../models/EarnerAchievements");
 const Earners = require("../../models/Earners");
@@ -112,6 +113,47 @@ exports.updateIssuedOnForAchievements = catchAsync(async (req, res) => {
         });
     }
 
+    // Retrieve updated EarnerAchievements records with relevant data
+    const updatedEarnerAchievements = await EarnerAchievements.findAll({
+        where: {
+            achievementId: achievementId,
+        },
+        include: [
+            {
+                model: Earners,
+                include: [
+                    {
+                        model: Users,
+                    },
+                    {
+                        model: Issuers,
+                        include: [Users],
+                    },
+                ],
+            },
+        ],
+    });
+
+    // Send badge claim email to each earner
+    for (const record of updatedEarnerAchievements) {
+        const earnerEmail = record.Earner.User?.email || null;
+        const issuerFullName = `${record.Earner.Issuer.User?.firstName || "Unknown"} ${
+            record.Earner.Issuer.User?.lastName || "Issuer"
+        }`;
+        const badgeLink = `${process.env.CLIENT_BASE_URL}/dashboard/management/badges/badgeDetail/${record.achievementId}`;
+
+        if (earnerEmail) {
+            try {
+                await emailService.sendBadgeIssuedToEarner(earnerEmail, issuerFullName, badgeLink);
+            } catch (error) {
+                console.error(
+                    `Error sending claim badge email to earner ID: ${record.Earner.id}`,
+                    error,
+                );
+            }
+        }
+    }
+
     // Send response indicating success
     res.status(200).json({
         status: "success",
@@ -119,6 +161,7 @@ exports.updateIssuedOnForAchievements = catchAsync(async (req, res) => {
         data: {
             achievementId,
             issuedOn: currentDate,
+            updatedEarnerAchievements,
         },
     });
 });
