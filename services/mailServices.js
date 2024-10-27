@@ -2,6 +2,8 @@ const nodemailer = require("nodemailer");
 
 const { resetPasswordTemplate } = require("../public/templates/resetPasswordTemplate");
 const { verifyEmailTemplate } = require("../public/templates/verifyEmailTemplate");
+const { recievedBadgeTemplate } = require("../public/templates/recievedBadgeTemplate");
+const { claimBadgetemplate } = require("../public/templates/claimBadgeTemplate");
 class EmailService {
     constructor() {
         this.transporter = nodemailer.createTransport({
@@ -85,7 +87,10 @@ class EmailService {
         const html = resetPasswordTemplate
             .replace("[RESET_PASSWORD_LINK]", resetURL)
             .replace("[EMAIL_RESET_PASSWORD]", email)
-            .replace("[FORGOT_PASSWORD_LINK]", `${process.env.CLIENT_BASE_URL}/auth/forgot-password`);
+            .replace(
+                "[FORGOT_PASSWORD_LINK]",
+                `${process.env.CLIENT_BASE_URL}/auth/forgot-password`,
+            );
         await this.sendEmail({
             email,
             subject: "Reset your password",
@@ -105,7 +110,70 @@ class EmailService {
             html,
         });
     }
+
+    /**
+     * Send a badge notification email to the earner
+     * @param {string} email - Recipient's email
+     * @param {string} issuerName - The name of the issuer giving the badge
+     * @param {string} badgeLink - The link to view the badge
+     * @returns {Promise<void>}
+     */
+    async sendBadgeToEarner(email, issuerName = "", badgeLink = "") {
+        // Check if any value is missing, log it and return early
+        if (!email || !issuerName || !badgeLink) {
+            console.log("Error: Missing email, issuer name, or badge link data.");
+            return;
+        }
+
+        try {
+            // Replace placeholders, ensuring default values to avoid undefined errors
+            const html = recievedBadgeTemplate
+                .replace("[Issuer Name]", issuerName || "Unknown Issuer")
+                .replace("[LINK_TO_VIEW_BADGE]", badgeLink || "#");
+
+            await this.sendEmail({
+                email,
+                subject: "Congratulations on Receiving Your Badge!",
+                html,
+            });
+        } catch (error) {
+            console.log("Error preparing or sending badge email:", error);
+            throw error;
+        }
+    }
+
+    /**
+     * Sends an email to the earner notifying them to claim their badge.
+     *
+     * @param {string} email - Recipient's email address
+     * @param {string} issuerName - Name of the badge issuer
+     * @param {string} badgeLink - Link for the earner to claim their badge
+     * @memberof EmailService
+     */
+    async sendBadgeIssuedToEarner(email, issuerName, badgeLink) {
+        // Ensure the required parameters are present
+        if (!email || !issuerName || !badgeLink) {
+            console.log("Error: Missing email, issuer name, or badge link data.");
+            return;
+        }
+
+        // Customize the template with provided details
+        const html = claimBadgetemplate
+            .replace("{{issuerName}}", issuerName)
+            .replace("{{badgeLink}}", badgeLink);
+
+        try {
+            await this.sendEmail({
+                email,
+                subject: "Claim Your Badge!",
+                html,
+            });
+            console.log("Badge issued email sent successfully.");
+        } catch (error) {
+            console.error("Error sending badge issued email:", error);
+            throw error;
+        }
+    }
 }
 
-// Export the EmailService class instead of the instantiated object
 module.exports = EmailService;

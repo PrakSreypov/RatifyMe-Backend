@@ -29,12 +29,6 @@ const Institutions = sequelize.define(
         },
         institutionBio: {
             type: DataTypes.STRING,
-            validate: {
-                len: {
-                    args: [0, 500],
-                    msg: "Bio must be 500 characters or less.",
-                },
-            },
         },
         institutionEmail: {
             type: DataTypes.STRING,
@@ -68,7 +62,7 @@ const Institutions = sequelize.define(
         institutionWebsiteUrl: {
             type: DataTypes.STRING,
             allowNull: true,
-            defaultValue: null
+            defaultValue: null,
         },
         institutionProfileImage: {
             type: DataTypes.STRING,

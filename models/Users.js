@@ -122,12 +122,6 @@ const Users = sequelize.define(
         },
         bio: {
             type: DataTypes.STRING(500),
-            validate: {
-                len: {
-                    args: [0, 500],
-                    msg: "Bio must be 500 characters or less.",
-                },
-            },
         },
         isVerified: {
             type: DataTypes.BOOLEAN,
