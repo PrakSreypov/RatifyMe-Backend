@@ -33,18 +33,24 @@ const uploadToS3 = async (fileBuffer, fileName, mimetype) => {
 };
 
 exports.addBadgeClass = catchAsync(async (req, res, next) => {
-    // Check if file buffer exists
+    // Check if file exists before attempting to destructure it
+    if (!req.file) {
+        return next(new AppError("Please provide a badge image", 400));
+    }
+
+    // Destructure file properties after ensuring it exists
     const { buffer: badgeBuffer, originalname, mimetype } = req.file;
     if (!badgeBuffer || badgeBuffer.length === 0) {
-        return next(new AppError("There is no buffer", 405));
+        return next(new AppError("The provided image is empty", 400));
     }
 
     // Upload to S3
     const badgeImg = await uploadToS3(badgeBuffer, originalname, mimetype);
     if (!badgeImg) {
-        return next(new AppError("Upload badge image failed", 405));
+        return next(new AppError("Failed to upload the badge image", 500));
     }
 
+    // Continue with the rest of your logic
     const {
         name,
         description,
@@ -74,7 +80,7 @@ exports.addBadgeClass = catchAsync(async (req, res, next) => {
                 issuerId,
                 institutionId,
             },
-            { transaction },
+            { transaction }
         );
 
         // 2. Create Achievements (if applicable)
@@ -85,7 +91,7 @@ exports.addBadgeClass = catchAsync(async (req, res, next) => {
                         ...achievement,
                         badgeClassId: newBadgeClass.id,
                     },
-                    { transaction },
+                    { transaction }
                 );
 
                 if (achievement.achievementTypeId) {
@@ -113,7 +119,7 @@ exports.addBadgeClass = catchAsync(async (req, res, next) => {
                         ...criteria,
                         badgeClassId: newBadgeClass.id,
                     },
-                    { transaction },
+                    { transaction }
                 );
             }
         }
@@ -152,3 +158,4 @@ exports.addBadgeClass = catchAsync(async (req, res, next) => {
         return next(new AppError("Error creating BadgeClass", 500));
     }
 });
+
