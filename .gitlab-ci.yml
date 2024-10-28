@@ -4,7 +4,7 @@ stages:
 
 variables:
     NODE_VERSION: "21"
-    BRANCH: "develop"
+    BRANCH: "main"
 
 before_script:
     # This will run before each job in all stages
@@ -55,7 +55,7 @@ Build:
         paths:
             - key.pem
     only:
-        - develop
+        - main
 
 Deploy:
     stage: deploy
@@ -70,5 +70,5 @@ Deploy:
             npm run pm2:prod &&
             pm2 status"
     only:
-        - develop
+        - main
 # 1
