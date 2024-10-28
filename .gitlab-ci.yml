@@ -1,0 +1,74 @@
+stages:
+    - build
+    - deploy
+
+variables:
+    NODE_VERSION: "21"
+    BRANCH: "main"
+
+before_script:
+    # This will run before each job in all stages
+    - echo "Setting up environment"
+    - whoami
+
+Build:
+    stage: build
+    script:
+        - echo "Creating key.pem file from environment variable"
+        - echo "$AUTH_KEY" | base64 --decode > key.pem
+        - chmod 400 key.pem
+        - ssh -o StrictHostKeyChecking=no -i key.pem -A $INSTANCE@$INSTANCEADD "
+            echo 'Pull Project' &&
+            cd verifyme-backend/ &&
+            git checkout $BRANCH &&
+            git pull origin $BRANCH &&
+            git pull --rebase origin $BRANCH &&
+            echo 'Install node_module' &&
+            npm i &&
+            npm i -g pm2 &&
+            echo 'Create Environment File' &&
+            echo -e 'PORT=$PORT
+            \nNODE_ENV=$NODE_ENV
+            \nDB_NAME=$DB_NAME
+            \nDB_USER=$DB_USER
+            \nDB_PASSWORD=$DB_PASSWORD
+            \nDB_HOST=$DB_HOST
+            \nDB_DIALECT=$DB_DIALECT
+            \nJWT_SECRET=$JWT_SECRET
+            \nJWT_EXPIRES_IN=$JWT_EXPIRES_IN
+            \nJWT_COOKIE_EXPIRES_IN=$JWT_COOKIE_EXPIRES_IN
+            \nEMAIL_USERNAME=$EMAIL_USERNAME
+            \nEMAIL_PASSWORD=$EMAIL_PASSWORD
+            \nEMAIL_HOST=$EMAIL_HOST
+            \nEMAIL_PORT=$EMAIL_PORT
+            \nSENDER_NAME=$SENDER_NAME
+            \nSENDER_EMAIL_ADDRESS=$SENDER_EMAIL_ADDRESS
+            \nCLIENT_BASE_URL=$CLIENT_BASE_URL
+            \nSTRIPE_SECRET_KEY=$STRIPE_SECRET_KEY
+            \nSTRIPE_CLI_ACC=$STRIPE_CLI_ACC
+            \nSTRIPE_WEBHOOK_SECRET_KEY=$STRIPE_WEBHOOK_SECRET_KEY
+            \nAWS_BUCKET_NAME=$AWS_BUCKET_NAME
+            \nAWS_BUCKET_REGION=$AWS_BUCKET_REGION
+            \nAWS_ACCESS_KEY=$AWS_ACCESS_KEY
+            \nAWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY' | sudo tee .env > /dev/null"
+    artifacts:
+        paths:
+            - key.pem
+    only:
+        - main
+
+Deploy:
+    stage: deploy
+    needs:
+        - Build
+    dependencies:
+        - Build
+    script:
+        - ssh -o StrictHostKeyChecking=no -i key.pem -A $INSTANCE@$INSTANCEADD "
+            cd verifyme-backend/ &&
+            pm2 kill &&
+            npm run pm2:prod &&
+            pm2 status"
+    only:
+        - main
+# 1

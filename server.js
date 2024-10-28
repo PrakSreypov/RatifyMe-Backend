@@ -8,7 +8,7 @@ dotenv.config({ path: `${process.cwd()}/.env` });
 // Sync models with database
 const syncDb = async () => {
     try {
-        await sequelize.sync({ force: true, logging: false, alter: true });
+        await sequelize.sync({ force: false, logging: false, alter: true });
         console.log("Database synced successfully");
     } catch (err) {
         console.log("Database synced failed", err);
@@ -18,6 +18,6 @@ const syncDb = async () => {
 syncDb();
 
 const PORT = process.env.PORT || 8800;
-app.listen(8800, () => {
+app.listen(PORT, () => {
     console.log(`Server is running on PORT: ${PORT}`);
 });
