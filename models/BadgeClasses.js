@@ -46,13 +46,6 @@ const BadgeClasses = sequelize.define(
         },
         tags: {
             type: DataTypes.STRING,
-            allowNull: true,
-            validate: {
-                len: {
-                    args: [0, 255],
-                    msg: "Tags cannot exceed 255 characters",
-                },
-            },
         },
         startedDate: {
             type: DataTypes.DATE,
