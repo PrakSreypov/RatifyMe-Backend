@@ -63,7 +63,7 @@ const BadgeClasses = sequelize.define(
             type: DataTypes.DATE,
             get() {
                 const startDate = this.getDataValue("startedDate");
-                const endDate = this.getDataValue("expiredDate");
+                const endDate = this.getDataValue("endDate");
                 if (startDate && endDate) {
                     return endDate - startDate;
                 }

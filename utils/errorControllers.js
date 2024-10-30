@@ -73,10 +73,9 @@ const sendErrorProd = (err, req, res) => {
             });
         }
         // Programming or other unknown error
-        console.error("ERROR 💥", err);
         return res.status(500).json({
             status: "error",
-            message: "Something went very wrong!",
+            message: "Something went wrong!",
         });
     } else {
         // Rendered website responses
