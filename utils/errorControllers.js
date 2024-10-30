@@ -1,5 +1,6 @@
 const { Sequelize } = require("sequelize");
 const AppError = require("./appError");
+const multer = require("multer");
 
 // Error handling functions
 const handleForeignKeyConstraintError = (err) => {
@@ -33,6 +34,20 @@ const handleJWTError = () => new AppError("Invalid token. Please log in again", 
 
 // Handle JWT expire error
 const handleJWTExpiredError = () => new AppError("Your Token has expired! Please login again!!!", 401);
+
+// Handle Multer errors
+const handleMulterError = (err) => {
+    if (err instanceof multer.MulterError) {
+        switch (err.code) {
+            case "LIMIT_FILE_SIZE":
+                return new AppError("File is too large. Maximum size is 1MB.", 400);
+            default:
+                return new AppError("An unknown multer error occurred.", 400);
+        }
+    }
+    return null; // Return null if not a multer error
+};
+
 
 // ========== Start Development environment Error Handler ==========
 // Send error in development
@@ -125,6 +140,10 @@ module.exports = (err, req, res, next) => {
 
         if (error.name === "JsonWebTokenError") error = handleJWTError(error);
         if (error.name === "TokenExpiredError") error = handleJWTExpiredError(error);
+        if (error instanceof multer.MulterError) {
+            // Handle Multer errors
+            error = handleMulterError(error);
+        }
 
         sendErrorProd(error, req, res);
     }

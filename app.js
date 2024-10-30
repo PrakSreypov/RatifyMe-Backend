@@ -4,7 +4,10 @@ const helmet = require("helmet");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const multer = require("multer");
-exports.upload = multer({ storage: multer.memoryStorage() });
+exports.upload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 1 * 1024 * 1024 },
+});
 
 // Error handling
 const AppError = require("./utils/appError");
@@ -24,9 +27,9 @@ app.use(express.json());
 // Allow 2 domain option with subdomain and none-subdomain
 const allowedDomains = [
     process.env.CLIENT_BASE_URL,
-    'https://www.ratifyme.digital',
-    'https://ratifyme.digital',
-    'https://r.stripe.com'
+    "https://www.ratifyme.digital",
+    "https://ratifyme.digital",
+    "https://r.stripe.com",
 ];
 
 const corsOptions = {
@@ -36,26 +39,27 @@ const corsOptions = {
         if (allowedDomains.includes(origin)) {
             callback(null, true); // Allow the origin if it's in the allowedDomains list
         } else {
-            callback(new Error('Not allowed by CORS'));
+            callback(new Error("Not allowed by CORS"));
         }
     },
     credentials: true, // Allow credentials (cookies, HTTP authentication)
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'], // Allow specific methods
-    allowedHeaders: ['Content-Type', 'Authorization'], // Allow specific headers
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"], // Allow specific methods
+    allowedHeaders: ["Content-Type", "Authorization"], // Allow specific headers
 };
 
 app.use(cors(corsOptions));
 app.use(cookieParser());
 // Cors config helmet
-app.use(helmet({
-    contentSecurityPolicy: {
-        directives: {
-            defaultSrc: ["'self'", "https://www.ratifyme.digital"],
-            scriptSrc: ["'self'", "'unsafe-inline'"]
-        }
-    }
-}));
-
+app.use(
+    helmet({
+        contentSecurityPolicy: {
+            directives: {
+                defaultSrc: ["'self'", "https://www.ratifyme.digital"],
+                scriptSrc: ["'self'", "'unsafe-inline'"],
+            },
+        },
+    }),
+);
 
 if (process.env.NODE_ENV === "development") {
     app.use(morgan("dev"));

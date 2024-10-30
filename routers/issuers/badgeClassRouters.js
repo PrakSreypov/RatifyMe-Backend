@@ -9,10 +9,14 @@ const sendBadgeController = require("../../controllers/issuers/sendBadgeControll
 
 router.route("/").get(badgeClassesControllers.getAll).post(badgeClassesControllers.createOne);
 
-router.route("/addBadge").post(upload.single("badgeFile"), addBadgesControllers.addBadgeClass);
-router
-    .route("/editBadge/:badgeId")
-    .patch(upload.single("badgeFile"), editBadgesControllers.editBadgeClass);
+router.route("/addBadge").post(
+    upload.single("badgeFile"),
+    addBadgesControllers.addBadgeClass,
+);
+router.route("/editBadge/:badgeId").patch(
+    upload.single("badgeFile"),
+    editBadgesControllers.editBadgeClass,
+);
 
 router.route("/earner/:earnerId").get(badgeClassesControllers.getBadgeClassesByEarnerId);
 router.route("/claim/:earnerId").get(badgeClassesControllers.getBadgeClaimByEarner);
