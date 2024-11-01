@@ -27,7 +27,8 @@ const allowedDomains = [
     'https://www.ratifyme.digital',
     'https://ratifyme.digital',
     'https://r.stripe.com',
-    'http://54.255.242.241'
+    'http://54.255.242.241',
+    "https://tech-a.anbschool.org"
 ];
 
 const corsOptions = {
