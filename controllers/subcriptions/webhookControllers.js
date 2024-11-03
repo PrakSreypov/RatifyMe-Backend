@@ -17,7 +17,7 @@ const updateSubscription = catchAsync(async (subscriptionId, stripeSubscriptionI
         // Find the subscription record by its primary key or stripeSubscriptionId
         const subscription = await Subscriptions.findOne({
             where: { id: subscriptionId },
-            include: { model: ServicePlans, attributes: ["name", "duration"] },
+            include: { model: ServicePlans, attributes: ["id", "name", "duration"] },
             // Skip status check
             skipStatusCheck: true,
         });

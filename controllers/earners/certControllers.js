@@ -83,13 +83,13 @@ exports.uploadCerti = catchAsync(async (req, res, next) => {
     // Upload both the JPEG and PDF to S3
     const pdfUrl = await uploadToS3(
         pdfBuffer,
-        `${originalname.replace(".jpeg", "")}.pdf`,
+        `${originalname.replace(".jpg", "")}.pdf`,
         "application/pdf",
     );
     const jpegUrl = await uploadToS3(
         jpegBuffer,
-        `${originalname.replace(".jpeg", "")}.jpeg`,
-        "image/jpeg",
+        `${originalname.replace(".jpg", "")}.jpg`,
+        "image/jpg",
     );
 
 
