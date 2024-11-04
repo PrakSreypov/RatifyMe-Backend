@@ -47,6 +47,17 @@ class ApiFeature {
                     ]
                 });
             }
+
+            if (this.model.rawAttributes.subscriptionName) {
+                searchConditions.push({
+                    [Op.or]: [
+                        Sequelize.where(
+                            Sequelize.fn("replace", Sequelize.col("subscriptionName"), " ", ""),
+                            { [Op.like]: `%${cleanedSearch}%` }
+                        )
+                    ]
+                });
+            }
     
             if (this.model.rawAttributes.institutionName) {
                 searchConditions.push({
