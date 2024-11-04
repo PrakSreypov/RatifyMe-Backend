@@ -3,8 +3,12 @@ const router = express.Router();
 
 const earnerControllers = require("../../controllers/earners/earnerControllers");
 const earnerAchievementControllers = require("../../controllers/earners/earnerAchievementsController");
+const authMiddleware = require("../../middlewares/auth");
 
-router.route("/").get(earnerControllers.getAll).post(earnerControllers.createOne);
+router
+    .route("/")
+    .get(authMiddleware.protect, earnerControllers.getAll)
+    .post(authMiddleware.protect, earnerControllers.createOne);
 
 router.route("/achievement/:earnerId").patch(earnerControllers.updateAchievementStatus);
 router.route("/achievementById/:achievementId").get(earnerControllers.getOneAchievement);

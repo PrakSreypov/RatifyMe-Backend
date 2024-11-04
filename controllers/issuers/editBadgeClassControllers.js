@@ -10,7 +10,7 @@ const {
 const sequelize = require("../../configs/database");
 const catchAsync = require("../../utils/catchAsync");
 const AppError = require("../../utils/appError");
-const s3 = require("../../configs/s3")
+const s3 = require("../../configs/s3");
 
 // Function to upload to S3 (same as in the add controller)
 const uploadToS3 = async (fileBuffer, fileName, mimetype) => {
@@ -54,7 +54,7 @@ exports.editBadgeClass = catchAsync(async (req, res, next) => {
         description,
         tags,
         startedDate,
-        expiredDate,
+        endDate,
         issuerId,
         Issuer,
         Achievements,
@@ -72,7 +72,7 @@ exports.editBadgeClass = catchAsync(async (req, res, next) => {
                 imageUrl: badgeImg,
                 tags,
                 startedDate,
-                expiredDate,
+                endDate,
                 issuerId,
             },
             { transaction },

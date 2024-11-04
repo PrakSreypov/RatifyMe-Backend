@@ -4,6 +4,7 @@ const EarnerAchievements = require("../../models/EarnerAchievements");
 const Earners = require("../../models/Earners");
 const Issuers = require("../../models/Issuers");
 const Users = require("../../models/Users");
+const BadgeClasses = require("../../models/BadgeClasses");
 const EmailService = require("../../services/mailServices");
 const catchAsync = require("../../utils/catchAsync");
 
@@ -44,7 +45,7 @@ exports.assignBadgeToEarners = catchAsync(async (req, res) => {
         for (const achievement of achievements) {
             await achievement.addEarner(earner);
 
-            const badgeLink = `${process.env.CLIENT_BASE_URL}/dashboard/management/badges/badgeDetail/${achievement.id}`;
+            const badgeLink = `${process.env.CLIENT_BASE_URL}/dashboard/management/badges/badgeDetail/${achievement.badgeClassId}`;
 
             const earnerEmail = earner.User?.email || null;
             const issuerFullname = `${earner.Issuer?.User?.firstName || "Unknown"} ${
@@ -131,6 +132,14 @@ exports.updateIssuedOnForAchievements = catchAsync(async (req, res) => {
                     },
                 ],
             },
+            {
+                model: Achievements,
+                include: [
+                    {
+                        model: BadgeClasses,
+                    },
+                ],
+            },
         ],
     });
 
@@ -140,7 +149,7 @@ exports.updateIssuedOnForAchievements = catchAsync(async (req, res) => {
         const issuerFullName = `${record.Earner.Issuer.User?.firstName || "Unknown"} ${
             record.Earner.Issuer.User?.lastName || "Issuer"
         }`;
-        const badgeLink = `${process.env.CLIENT_BASE_URL}/dashboard/management/badges/badgeDetail/${record.achievementId}`;
+        const badgeLink = `${process.env.CLIENT_BASE_URL}/dashboard/management/badges/badgeDetail/${record.Achievement?.BadgeClass?.id}`;
 
         if (earnerEmail) {
             try {

@@ -17,7 +17,21 @@ const institutionControllers = new BaseControllers(
         {
             model: Issuers,
             include: [
-                { model: BadgeClasses, attributes: ["id", "name", "imageUrl"] },
+                {
+                    model: BadgeClasses,
+                    attributes: ["id", "name", "imageUrl", "institutionId", "issuerId", "description"],
+                    include: [
+                        {
+                            model: Issuers,
+                            attributes: ["userId"],
+                            include: [{ model: Users, attributes: ["firstName", "lastName"] }],
+                        },
+                        {
+                            model: Institutions,
+                            attributes: ["institutionName"]
+                        }
+                    ],
+                },
             ],
         },
     ],

@@ -1,4 +1,4 @@
-const { Op } = require("sequelize");
+const { Sequelize, Op } = require("sequelize");
 
 /**
  *
@@ -16,7 +16,7 @@ class ApiFeature {
         const queryObj = { ...this.queryString };
         const excludedFields = ["page", "sort", "limit", "page", "search"];
         excludedFields.forEach((el) => delete queryObj[el]);
-
+    
         const filters = {};
         Object.keys(queryObj).forEach((field) => {
             if (typeof queryObj[field] === "object") {
@@ -31,35 +31,65 @@ class ApiFeature {
                 filters[field] = queryObj[field];
             }
         });
-
+    
         // Apply search logic only if the search query is present and fields exist in the model
         if (this.queryString.search) {
             const searchConditions = [];
+            const cleanedSearch = this.queryString.search.replace(/\s+/g, "");
 
             if (this.model.rawAttributes.name) {
-                searchConditions.push({ name: { [Op.like]: `%${this.queryString.search}%` } });
+                searchConditions.push({
+                    [Op.or]: [
+                        Sequelize.where(
+                            Sequelize.fn("replace", Sequelize.col("name"), " ", ""),
+                            { [Op.like]: `%${cleanedSearch}%` }
+                        )
+                    ]
+                });
             }
 
+            if (this.model.rawAttributes.subscriptionName) {
+                searchConditions.push({
+                    [Op.or]: [
+                        Sequelize.where(
+                            Sequelize.fn("replace", Sequelize.col("subscriptionName"), " ", ""),
+                            { [Op.like]: `%${cleanedSearch}%` }
+                        )
+                    ]
+                });
+            }
+    
             if (this.model.rawAttributes.institutionName) {
                 searchConditions.push({
-                    institutionName: { [Op.like]: `%${this.queryString.search}%` },
+                    [Op.or]: [
+                        Sequelize.where(
+                            Sequelize.fn("replace", Sequelize.col("institutionName"), " ", ""),
+                            { [Op.like]: `%${cleanedSearch}%` }
+                        )
+                    ]
                 });
             }
-
+    
             if (this.model.rawAttributes.inviteEmail) {
                 searchConditions.push({
-                    inviteEmail: { [Op.like]: `%${this.queryString.search}%` },
+                    [Op.or]: [
+                        Sequelize.where(
+                            Sequelize.fn("replace", Sequelize.col("inviteEmail"), " ", ""),
+                            { [Op.like]: `%${cleanedSearch}%` }
+                        )
+                    ]
                 });
             }
-
+    
             if (searchConditions.length > 0) {
                 filters[Op.or] = searchConditions;
             }
         }
-
+    
         this.query.where = filters;
         return this;
     }
+    
 
     sorting(defaultSortField = 'id') {
         if (this.queryString.sort) {
@@ -75,12 +105,11 @@ class ApiFeature {
                     }
                     return null;
                 })
-                .filter(Boolean); // Remove any invalid fields
+                .filter(Boolean);
     
             // If no valid fields are provided, use the dynamic default sort field
             this.query.order = sortBy.length ? sortBy : [[defaultSortField, "DESC"]];
         } else {
-            // Default to dynamic sort field if none specified
             this.query.order = [[defaultSortField, "DESC"]];
         }
     

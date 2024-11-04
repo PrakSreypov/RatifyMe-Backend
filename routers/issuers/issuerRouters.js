@@ -4,8 +4,9 @@ const router = express.Router();
 
 const issuerControllers = require("../../controllers/issuers/issuerControllers");
 const sendBadgeControllers = require("../../controllers/issuers/sendBadgeControllers");
+const authMiddleware = require("../../middlewares/auth");
 
-router.route("/").get(issuerControllers.getAll).post(issuerControllers.createOne);
+router.route("/").get(authMiddleware.protect, issuerControllers.getAll).post(issuerControllers.createOne);
 
 router
     .route("/:id")

@@ -2,17 +2,18 @@ const express = require("express");
 const router = express.Router();
 
 const academicBackgroundControllers = require("../../controllers/earners/academicBackgroundControllers");
+const authMiddleware = require("../../middlewares/auth");
 
 router
     .route("/")
-    .get(academicBackgroundControllers.getAll)
-    .post(academicBackgroundControllers.createOne);
+    .get(authMiddleware.protect, academicBackgroundControllers.getAll)
+    .post(authMiddleware.protect, academicBackgroundControllers.createOne);
 
 router
     .route("/:id")
-    .get(academicBackgroundControllers.getOne)
-    .patch(academicBackgroundControllers.updateOne)
-    .delete(academicBackgroundControllers.deleteOne);
+    .get(authMiddleware.protect, academicBackgroundControllers.getOne)
+    .patch(authMiddleware.protect, academicBackgroundControllers.updateOne)
+    .delete(authMiddleware.protect, academicBackgroundControllers.deleteOne);
 
 router.route("/academicByUserId/:userId").get(academicBackgroundControllers.getAcademicByUserId);
 
