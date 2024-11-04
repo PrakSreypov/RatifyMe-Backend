@@ -12,7 +12,7 @@ const Subscriptions = sequelize.define(
             autoIncrement: true,
             primaryKey: true,
         },
-        name: {
+        subscriptionName: {
             type: DataTypes.STRING,
         },
         institutionId: {
@@ -132,7 +132,7 @@ Subscriptions.addHook("beforeCreate", async (subscriptions, options) => {
     }
 
     // Properly format the name by adding a space between firstName and lastName
-    subscriptions.name = institution.institutionName;
+    subscriptions.subscriptionName = institution.institutionName;
 });
 
 // After syncing the database, update all existing earners' names based on the Users model
@@ -148,9 +148,9 @@ Subscriptions.addHook("afterSync", async (options) => {
     for (const subscription of subscriptions) {
         if (
             subscription.Institution &&
-            subscription.name !== subscription.Institution.institutionName
+            subscription.subscriptionName !== subscription.Institution.institutionName
         ) {
-            subscription.name = subscription.Institution.institutionName;
+            subscription.subscriptionName = subscription.Institution.institutionName;
             await subscription.save();
         }
     }
