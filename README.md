@@ -32,7 +32,8 @@ Join **RatifyME** today and take your achievements from hidden to highlighted—
 ## Demo
 
 as our project is ready to be deploy this is the link to Demo our Project Showcase.
-[RatifyMe Digital - www.ratifyme.digital](www.ratifyme.digital)
+[RatifyMe Digital - www.ratifyme.digital](www.ratifyme.digital) 
+[RatifyMe Digital - tech-a.anbschool.org](tech-a.anbschool.org) 
 
 ## Tech Stack
 
