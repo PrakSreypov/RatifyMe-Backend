@@ -59,6 +59,7 @@ exports.editBadgeClass = catchAsync(async (req, res, next) => {
         Issuer,
         Achievements,
         Criterias,
+        expiredDate
     } = req.body;
 
     // Start transaction for the update operation
@@ -74,6 +75,7 @@ exports.editBadgeClass = catchAsync(async (req, res, next) => {
                 startedDate,
                 endDate,
                 issuerId,
+                expiredDate
             },
             { transaction },
         );

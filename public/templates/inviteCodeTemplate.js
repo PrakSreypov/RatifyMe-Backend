@@ -108,7 +108,7 @@ exports.inviteCodeTemplate = `
                         <p>To join, please use the following invitation code when signing up:</p>
                         <div class="code-block">[INVITE CODE]</div>
                         <p>Click the button below to get started and create your account.</p>
-                        <a href="[SIGNUP_LINK]" class="cta-button">Create Account</a>
+                        <a href="[SIGNUP_LINK]" target="_blank" class="cta-button">Create Account</a>
                         <p>If you have any questions or need assistance, feel free to contact us.</p>
                         <p>Best regards,<br /><b>The RatifyMe Team</b></p>
                     </div>
