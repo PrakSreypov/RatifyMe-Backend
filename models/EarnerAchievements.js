@@ -9,7 +9,7 @@ const EarnerAchievements = sequelize.define(
             autoIncrement: true,
             primaryKey: true,
         },
-        name: {
+        earnerName: {
             type: DataTypes.STRING
         },
         status: {
@@ -72,7 +72,7 @@ EarnerAchievements.addHook("beforeCreate", async (earnerAchievements, options) =
     }
 
     // Properly format the name by adding a space between firstName and lastName
-    earnerAchievements.name = earner.name
+    earnerAchievements.earnerName = earner.name
 });
 
 // After syncing the database, update all existing earners' names based on the Users model
@@ -87,7 +87,7 @@ EarnerAchievements.addHook("afterSync", async (options) => {
     // Iterate over each subscription and update the name field
     for (const earnerAchievement of earnerAchievements) {
         if (earnerAchievement.Earner && earnerAchievement.name !== earnerAchievement.Earner.name) {
-            earnerAchievement.name = earnerAchievement.Earner.name;
+            earnerAchievement.earnerName = earnerAchievement.Earner.name;
             await earnerAchievement.save();  
         }
     }
