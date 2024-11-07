@@ -4,6 +4,7 @@ const Roles = require("../../models/Roles");
 
 const BaseControllers = require("../../utils/baseControllers");
 const { Earners } = require("../../models");
+const EarnerAchievements = require("../../models/EarnerAchievements");
 
 class UserControllers extends BaseControllers {
     constructor() {
@@ -39,13 +40,23 @@ class UserControllers extends BaseControllers {
             individualHooks: true,
         });
 
-        // If firstName or lastName is updated, update the Earners table as well
+        // If firstName or lastName is updated, update Earners and EarnerAchievements tables
         if (req.body.firstName || req.body.lastName) {
             const updatedUser = await this.Model.findByPk(id);
             const newName = `${updatedUser.firstName} ${updatedUser.lastName}`;
 
             // Update the related Earners record with the new name
             await Earners.update({ name: newName }, { where: { userId: id } });
+
+            // Find the Earners record to get the earnerId for the user
+            const earnerRecord = await Earners.findOne({ where: { userId: id } });
+            if (earnerRecord) {
+                // Update the related EarnerAchievements records with the new name
+                await EarnerAchievements.update(
+                    { earnerName: newName },
+                    { where: { earnerId: earnerRecord.id } },
+                );
+            }
         }
 
         // Retrieve the updated record

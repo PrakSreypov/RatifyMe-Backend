@@ -1,6 +1,7 @@
 const sequelize = require("../configs/database");
 const { DataTypes } = require("sequelize");
-const Earners = require("./Earners")
+const Earners = require("./Earners");
+const Users = require("./Users");
 const EarnerAchievements = sequelize.define(
     "EarnerAchievements",
     {
@@ -81,13 +82,17 @@ EarnerAchievements.addHook("afterSync", async (options) => {
         include: {
             model: Earners,
             as: 'Earner', 
+            include : {
+                model: Users,
+                as: 'User',
+            }
         },
     });
 
     // Iterate over each subscription and update the name field
     for (const earnerAchievement of earnerAchievements) {
-        if (earnerAchievement.Earner && earnerAchievement.name !== earnerAchievement.Earner.name) {
-            earnerAchievement.earnerName = earnerAchievement.Earner.name;
+        if (earnerAchievement.Earner && earnerAchievement.earnerName !== `${earnerAchievement.Earner.User.firstName} ${earnerAchievement.Earner.User.lastName}`) {
+            earnerAchievement.earnerName = `${earnerAchievement.Earner.User.firstName} ${earnerAchievement.Earner.User.lastName}`;
             await earnerAchievement.save();  
         }
     }
