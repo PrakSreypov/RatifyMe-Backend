@@ -32,14 +32,13 @@ Join **RatifyME** today and take your achievements from hidden to highlighted—
 ## Demo
 
 as our project is ready to be deploy this is the link to Demo our Project Showcase.
-- [RatifyMe Digital - www.ratifyme.digital](https://www.ratifyme.digital) 
 - [RatifyMe Digital - tech-a.anbschool.org](https://tech-a.anbschool.org/) 
 
 ## Tech Stack
 
-**Client:** React, Node, MUi
+**Client:** React, MUI, Redux, Redux Toolkit
 
-**Server:** Node, Express, MySQL
+**Server:** Node, Express, MySQL, Sequelize
 
 ## Dependecies: 
 - **aws-sdk**: `^2.1691.0` - SDK for integrating with AWS services.
@@ -254,11 +253,11 @@ as our project goes we use AMAZON LINUX for easy and noncomplex installation.
 ```
 
 ## Contribution
--   1 Prak Sreypov
--   2 Phok Keomonnyratanak
--   3 Samon Rotha
--   4 Ly Diyamong
--   5 Khun Malen
--   6 Sreang Lyhour
--   7 Rorn Bunthong
--   8 Tep Chounan
+-   Prak Sreypov
+-   Phok Keomonnyratanak
+-   Samon Rotha
+-   Ly Diyamong
+-   Khun Malen
+-   Sreang Lyhour
+-   Rorn Bunthong
+-   Tep Chounan
