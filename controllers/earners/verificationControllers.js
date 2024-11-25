@@ -12,7 +12,7 @@ const AppError = require("../../utils/appError");
 // POST route to verify the credential data
 exports.verifyCredential = catchAsync(async (req, res, next) => {
     const { credId } = req.params;
-    const { earnerName, issuerName, issuedOn, claimedOn } = req.body;
+    const { earnerName, issuerName, issuedOn, claimedOn, currentDate } = req.body;
 
     // Convert the payload dates to ISO strings
     const payloadIssuedOn = new Date(issuedOn).toISOString();
@@ -54,6 +54,13 @@ exports.verifyCredential = catchAsync(async (req, res, next) => {
     const storedIssuedOn = new Date(achievement.issuedOn).toISOString();
     const storedClaimedOn = new Date(achievement.claimedOn).toISOString();
 
+    // Expired date convert
+    const currentDateObj = new Date(currentDate)
+    const expiredDateObj = new Date(achievement.Achievement.BadgeClass.expiredDate)
+
+    if (currentDateObj > expiredDateObj) {
+        return next(new AppError(`This credential has expired`, 401))
+    }
     // Compare each value and catch specific mismatches
     if (earnerName !== storedEarnerName) {
         return next(new AppError(`Earner does not match`, 400));

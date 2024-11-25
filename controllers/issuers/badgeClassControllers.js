@@ -31,7 +31,7 @@ const associated = [
         required: true,
     },
     { model: Criterias },
-    { model: Institutions, attributes: ["institutionName"] },
+    { model: Institutions, attributes: ["institutionName", "institutionProfileImage"] },
 ];
 
 class BadgeClassControllers extends BaseControllers {
@@ -134,7 +134,7 @@ badgeClassControllers.getBadgeClassesByEarnerId = catchAsync(async (req, res) =>
                 model: Issuers,
                 include: [{ model: Users, attributes: ["firstName", "lastName"] }],
             },
-            { model: Institutions, attributes: ["institutionName"] },
+            { model: Institutions, attributes: ["institutionName", "institutionProfileImage"] },
         ],
         ...apiFeature.query,
     });
@@ -202,7 +202,7 @@ badgeClassControllers.getBadgeClaimByEarner = catchAsync(async (req, res) => {
                 model: Issuers,
                 include: [{ model: Users, attributes: ["firstName", "lastName"] }],
             },
-            { model: Institutions, attributes: ["institutionName"] },
+            { model: Institutions, attributes: ["institutionName", "institutionProfileImage"] },
         ],
     };
 
