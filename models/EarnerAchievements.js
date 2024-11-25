@@ -1,6 +1,7 @@
 const sequelize = require("../configs/database");
 const { DataTypes } = require("sequelize");
-const Earners = require("./Earners")
+const Earners = require("./Earners");
+const Users = require("./Users");
 const EarnerAchievements = sequelize.define(
     "EarnerAchievements",
     {
@@ -9,7 +10,7 @@ const EarnerAchievements = sequelize.define(
             autoIncrement: true,
             primaryKey: true,
         },
-        name: {
+        earnerName: {
             type: DataTypes.STRING
         },
         status: {
@@ -72,7 +73,7 @@ EarnerAchievements.addHook("beforeCreate", async (earnerAchievements, options) =
     }
 
     // Properly format the name by adding a space between firstName and lastName
-    earnerAchievements.name = earner.name
+    earnerAchievements.earnerName = earner.name
 });
 
 // After syncing the database, update all existing earners' names based on the Users model
@@ -81,13 +82,17 @@ EarnerAchievements.addHook("afterSync", async (options) => {
         include: {
             model: Earners,
             as: 'Earner', 
+            include : {
+                model: Users,
+                as: 'User',
+            }
         },
     });
 
     // Iterate over each subscription and update the name field
     for (const earnerAchievement of earnerAchievements) {
-        if (earnerAchievement.Earner && earnerAchievement.name !== earnerAchievement.Earner.name) {
-            earnerAchievement.name = earnerAchievement.Earner.name;
+        if (earnerAchievement.Earner && earnerAchievement.earnerName !== `${earnerAchievement.Earner.User.firstName} ${earnerAchievement.Earner.User.lastName}`) {
+            earnerAchievement.earnerName = `${earnerAchievement.Earner.User.firstName} ${earnerAchievement.Earner.User.lastName}`;
             await earnerAchievement.save();  
         }
     }

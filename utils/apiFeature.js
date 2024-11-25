@@ -47,6 +47,16 @@ class ApiFeature {
                     ]
                 });
             }
+            if (this.model.rawAttributes.earnerName) {
+                searchConditions.push({
+                    [Op.or]: [
+                        Sequelize.where(
+                            Sequelize.fn("replace", Sequelize.col("earnerName"), " ", ""),
+                            { [Op.like]: `%${cleanedSearch}%` }
+                        )
+                    ]
+                });
+            }
 
             if (this.model.rawAttributes.subscriptionName) {
                 searchConditions.push({
